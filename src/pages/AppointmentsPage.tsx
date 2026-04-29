@@ -1,7 +1,9 @@
+import { Link } from 'react-router-dom'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import StatusBadge from '../components/ui/StatusBadge'
 import { appointmentsMock } from '../mocks/appointmentsMock'
+import { ROUTE_PATHS } from '../routes/routePaths'
 import { formatCurrency } from '../utils/currency'
 
 export default function AppointmentsPage() {
@@ -10,7 +12,11 @@ export default function AppointmentsPage() {
       <SectionHeader
         title="Agendamentos"
         description="Visualize e gerencie os compromissos do profissional."
-        action={<button className="primary-button">Novo</button>}
+        action={
+          <Link to={ROUTE_PATHS.createAppointment} className="primary-button">
+            Novo
+          </Link>
+        }
       />
 
       <PageCard className="table-card">
@@ -33,7 +39,9 @@ export default function AppointmentsPage() {
                   <td>{appointment.serviceName}</td>
                   <td>{appointment.date}</td>
                   <td>{appointment.time}</td>
-                  <td><StatusBadge status={appointment.status} /></td>
+                  <td>
+                    <StatusBadge status={appointment.status} />
+                  </td>
                   <td>{formatCurrency(appointment.price)}</td>
                 </tr>
               ))}

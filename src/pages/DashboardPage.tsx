@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { appointmentsMock } from '../mocks/appointmentsMock'
 import { clientsMock } from '../mocks/clientsMock'
 import { servicesMock } from '../mocks/servicesMock'
@@ -5,6 +6,7 @@ import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import StatusBadge from '../components/ui/StatusBadge'
 import { formatCurrency } from '../utils/currency'
+import { ROUTE_PATHS } from '../routes/routePaths'
 
 export default function DashboardPage() {
   const todayAppointments = appointmentsMock.filter((item) => item.date === '2026-04-29')
@@ -15,7 +17,11 @@ export default function DashboardPage() {
       <SectionHeader
         title="Resumo do dia"
         description="Acompanhe sua agenda, clientes e serviços em um só lugar."
-        action={<button className="primary-button">Novo agendamento</button>}
+        action={
+          <Link to={ROUTE_PATHS.createAppointment} className="primary-button">
+            Novo agendamento
+          </Link>
+        }
       />
 
       <div className="stats-grid">

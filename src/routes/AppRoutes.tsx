@@ -9,6 +9,7 @@ import ProfilePage from '../pages/ProfilePage'
 import ServicesPage from '../pages/ServicesPage'
 import SettingsPage from '../pages/SettingsPage'
 import { ROUTE_PATHS } from './routePaths'
+import CreateAppointmentPage from '../pages/CreateAppointmentPage'
 
 export default function AppRoutes() {
   return (
@@ -17,6 +18,7 @@ export default function AppRoutes() {
         <Route path={ROUTE_PATHS.root} element={<Navigate to={ROUTE_PATHS.dashboard} replace />} />
         <Route path={ROUTE_PATHS.dashboard} element={<DashboardPage />} />
         <Route path={ROUTE_PATHS.appointments} element={<AppointmentsPage />} />
+        <Route path={ROUTE_PATHS.createAppointment} element={<CreateAppointmentPage />} />
         <Route path={ROUTE_PATHS.clients} element={<ClientsPage />} />
         <Route path={ROUTE_PATHS.services} element={<ServicesPage />} />
         <Route path={ROUTE_PATHS.availability} element={<AvailabilityPage />} />
