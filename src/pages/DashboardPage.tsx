@@ -1,16 +1,57 @@
 import { Link } from 'react-router-dom'
-import { appointmentsMock } from '../mocks/appointmentsMock'
-import { clientsMock } from '../mocks/clientsMock'
-import { servicesMock } from '../mocks/servicesMock'
+import { useEffect, useState } from 'react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import StatusBadge from '../components/ui/StatusBadge'
-import { formatCurrency } from '../utils/currency'
 import { ROUTE_PATHS } from '../routes/routePaths'
+import { getCurrentUserId } from '../utils/auth'
+import { api } from '../utils/api'
+import type { DashboardSummary } from '../types/dashboard.types'
 
 export default function DashboardPage() {
-  const todayAppointments = appointmentsMock.filter((item) => item.date === '2026-04-29')
-  const revenue = todayAppointments.reduce((sum, item) => sum + item.price, 0)
+  const [data, setData] = useState<DashboardSummary | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadDashboard() {
+      try {
+        setIsLoading(true)
+        const response = await api.get<DashboardSummary>(`/api/dashboard/summary?userId=${getCurrentUserId()}`)
+        if (isMounted) {
+          setData(response)
+          setErrorMessage('')
+        }
+      } catch (error) {
+        if (isMounted) {
+          setErrorMessage(error instanceof Error ? error.message : 'Não foi possível carregar o dashboard.')
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadDashboard()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  if (isLoading) {
+    return <div className="feedback-card">Carregando dashboard...</div>
+  }
+
+  if (errorMessage) {
+    return <div className="feedback-card error-box">{errorMessage}</div>
+  }
+
+  if (!data) {
+    return <div className="feedback-card">Nenhum dado encontrado.</div>
+  }
 
   return (
     <div className="page-stack">
@@ -27,19 +68,19 @@ export default function DashboardPage() {
       <div className="stats-grid">
         <PageCard>
           <p className="muted-text">Agendamentos hoje</p>
-          <h3 className="stat-number">{todayAppointments.length}</h3>
+          <h3 className="stat-number">{data.appointmentsToday}</h3>
         </PageCard>
         <PageCard>
           <p className="muted-text">Clientes</p>
-          <h3 className="stat-number">{clientsMock.length}</h3>
+          <h3 className="stat-number">{data.clients}</h3>
         </PageCard>
         <PageCard>
           <p className="muted-text">Serviços</p>
-          <h3 className="stat-number">{servicesMock.length}</h3>
+          <h3 className="stat-number">{data.services}</h3>
         </PageCard>
         <PageCard>
           <p className="muted-text">Receita prevista</p>
-          <h3 className="stat-number">{formatCurrency(revenue)}</h3>
+          <h3 className="stat-number">{data.expectedRevenueFormatted}</h3>
         </PageCard>
       </div>
 
@@ -53,23 +94,27 @@ export default function DashboardPage() {
           </div>
 
           <div className="list-stack">
-            {appointmentsMock.map((appointment) => (
-              <div key={appointment.id} className="list-item split-row">
-                <div>
-                  <div className="inline-row wrap-gap">
-                    <strong>{appointment.clientName}</strong>
-                    <StatusBadge status={appointment.status} />
+            {data.upcomingAppointments.length === 0 ? (
+              <div className="empty-state">Nenhum agendamento encontrado.</div>
+            ) : (
+              data.upcomingAppointments.map((appointment) => (
+                <div key={appointment.id} className="list-item split-row">
+                  <div>
+                    <div className="inline-row wrap-gap">
+                      <strong>{appointment.clientName}</strong>
+                      <StatusBadge status={appointment.status} />
+                    </div>
+                    <p className="muted-text">{appointment.serviceName}</p>
                   </div>
-                  <p className="muted-text">{appointment.serviceName}</p>
-                </div>
 
-                <div className="pill-group">
-                  <span className="soft-pill">{appointment.date}</span>
-                  <span className="soft-pill">{appointment.time}</span>
-                  <span className="soft-pill">{formatCurrency(appointment.price)}</span>
+                  <div className="pill-group">
+                    <span className="soft-pill">{appointment.date}</span>
+                    <span className="soft-pill">{appointment.time}</span>
+                    <span className="soft-pill">{appointment.priceFormatted}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </PageCard>
 
@@ -78,20 +123,24 @@ export default function DashboardPage() {
             <div className="card-heading">
               <div>
                 <h3>Clientes recentes</h3>
-                <p>Contatos ativos do MVP.</p>
+                <p>Contatos ativos do sistema.</p>
               </div>
             </div>
 
             <div className="list-stack">
-              {clientsMock.map((client) => (
-                <div key={client.id} className="list-item split-row light">
-                  <div>
-                    <strong>{client.name}</strong>
-                    <p className="muted-text">{client.phone}</p>
+              {data.recentClients.length === 0 ? (
+                <div className="empty-state">Nenhum cliente encontrado.</div>
+              ) : (
+                data.recentClients.map((client) => (
+                  <div key={client.id} className="list-item split-row light">
+                    <div>
+                      <strong>{client.name}</strong>
+                      <p className="muted-text">{client.phone}</p>
+                    </div>
+                    <span className="secondary-button small-button">Ativo</span>
                   </div>
-                  <button className="secondary-button">Ver</button>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </PageCard>
 
@@ -99,22 +148,26 @@ export default function DashboardPage() {
             <div className="card-heading">
               <div>
                 <h3>Serviços mais usados</h3>
-                <p>Base inicial de serviços do projeto.</p>
+                <p>Base inicial integrada com a API.</p>
               </div>
             </div>
 
             <div className="list-stack">
-              {servicesMock.map((service) => (
-                <div key={service.id} className="list-item">
-                  <div className="split-row">
-                    <div>
-                      <strong>{service.name}</strong>
-                      <p className="muted-text">Duração: {service.duration}</p>
+              {data.topServices.length === 0 ? (
+                <div className="empty-state">Nenhum serviço encontrado.</div>
+              ) : (
+                data.topServices.map((service) => (
+                  <div key={service.id} className="list-item">
+                    <div className="split-row">
+                      <div>
+                        <strong>{service.name}</strong>
+                        <p className="muted-text">Duração: {service.duration}</p>
+                      </div>
+                      <span className="soft-pill">{service.priceFormatted}</span>
                     </div>
-                    <span className="soft-pill">{service.price}</span>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </PageCard>
         </div>

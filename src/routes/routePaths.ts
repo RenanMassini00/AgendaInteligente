@@ -5,8 +5,11 @@ export const ROUTE_PATHS = {
   appointments: '/appointments',
   createAppointment: '/appointments/new',
   clients: '/clients',
+  createClient: '/clients/new',
   services: '/services',
+  createService: '/services/new',
   availability: '/availability',
+  createAvailability: '/availability/new',
   profile: '/profile',
   settings: '/settings',
 } as const

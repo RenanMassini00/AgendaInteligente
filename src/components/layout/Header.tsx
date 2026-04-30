@@ -1,4 +1,5 @@
 import { Menu } from 'lucide-react'
+import { getCurrentUser } from '../../utils/auth'
 
 type HeaderProps = {
   title: string
@@ -6,6 +7,11 @@ type HeaderProps = {
 }
 
 export default function Header({ title, onOpenSidebar }: HeaderProps) {
+  const user = getCurrentUser()
+  const displayName = user?.businessName || user?.fullName || 'Scheduler'
+  const subtitle = user?.specialty || 'Agenda profissional'
+  const initial = displayName.charAt(0).toUpperCase()
+
   return (
     <header className="app-header">
       <div className="header-left">
@@ -20,10 +26,10 @@ export default function Header({ title, onOpenSidebar }: HeaderProps) {
 
       <div className="header-profile">
         <div>
-          <strong>Renan Studio</strong>
-          <span>Agenda profissional</span>
+          <strong>{displayName}</strong>
+          <span>{subtitle}</span>
         </div>
-        <div className="avatar">R</div>
+        <div className="avatar">{initial || 'S'}</div>
       </div>
     </header>
   )

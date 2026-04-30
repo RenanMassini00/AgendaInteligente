@@ -2,7 +2,7 @@ import { LogOut, X } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { navigationItems } from '../../config/navigation'
 import { ROUTE_PATHS } from '../../routes/routePaths'
-import { signOut } from '../../utils/auth'
+import { getCurrentUser, signOut } from '../../utils/auth'
 
 type SidebarProps = {
   onNavigate?: () => void
@@ -12,6 +12,8 @@ type SidebarProps = {
 
 export default function Sidebar({ onNavigate, onClose, mobile = false }: SidebarProps) {
   const navigate = useNavigate()
+  const user = getCurrentUser()
+  const title = user?.businessName || 'Agenda Pro'
 
   function handleLogout() {
     signOut()
@@ -25,9 +27,8 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
       <div className="sidebar-brand">
         <div>
           <p>Agenda Pro</p>
-          <h2>Scheduler</h2>
+          <h2>{title}</h2>
         </div>
-
         {mobile && (
           <button type="button" className="icon-button only-mobile" onClick={onClose} aria-label="Fechar menu">
             <X size={18} />

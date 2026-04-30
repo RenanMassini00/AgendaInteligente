@@ -1,11 +1,18 @@
-const AUTH_STORAGE_KEY = 'scheduler_auth'
+import type { AuthUser, LoginResponse } from '../types/auth.types'
 
-type Session = {
-  email: string
+const AUTH_STORAGE_KEY = 'scheduler_session'
+
+export type Session = {
+  token: string
+  user: AuthUser
 }
 
-export function signIn(email: string) {
-  const session: Session = { email }
+export function signIn(data: LoginResponse) {
+  const session: Session = {
+    token: data.token,
+    user: data.user,
+  }
+
   localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session))
 }
 
@@ -26,6 +33,18 @@ export function getSession(): Session | null {
     localStorage.removeItem(AUTH_STORAGE_KEY)
     return null
   }
+}
+
+export function getCurrentUser() {
+  return getSession()?.user ?? null
+}
+
+export function getCurrentUserId() {
+  return getSession()?.user.id ?? 0
+}
+
+export function getAuthToken() {
+  return getSession()?.token ?? ''
 }
 
 export function isAuthenticated() {
