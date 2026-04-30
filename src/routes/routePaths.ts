@@ -1,5 +1,6 @@
 export const ROUTE_PATHS = {
   root: '/',
+  login: '/login',
   dashboard: '/dashboard',
   appointments: '/appointments',
   createAppointment: '/appointments/new',

@@ -630,4 +630,186 @@ tbody tr:hover {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
+
+  .auth-shell {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 1.25rem;
+    background:
+      radial-gradient(circle at top left, rgba(148, 163, 184, 0.18), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.08), transparent 24%),
+      #f8fafc;
+  }
+
+  .auth-panel {
+    width: 100%;
+    max-width: 1120px;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .auth-brand,
+  .auth-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 28px;
+    background: #ffffff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+  }
+
+  .auth-brand {
+    padding: 1.5rem;
+  }
+
+  .auth-kicker,
+  .auth-card-kicker {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+
+  .auth-brand h1,
+  .auth-card h2 {
+    margin-top: 0.4rem;
+    font-size: 2rem;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    font-weight: 800;
+  }
+
+  .auth-description,
+  .auth-card-header span,
+  .auth-footer span,
+  .auth-footer p {
+    color: #64748b;
+  }
+
+  .auth-description {
+    margin-top: 0.8rem;
+    max-width: 38rem;
+  }
+
+  .auth-preview-card {
+    margin-top: 1.5rem;
+    border-radius: 24px;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+  }
+
+  .auth-preview-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .auth-preview-row span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.38rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .auth-preview-list {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1rem;
+  }
+
+  .auth-preview-item {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    padding: 0.9rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .auth-preview-item strong {
+    display: block;
+  }
+
+  .auth-preview-item p {
+    margin-top: 0.2rem;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.92rem;
+  }
+
+  .preview-time {
+    min-width: 64px;
+    padding: 0.5rem 0.65rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.12);
+    text-align: center;
+    font-size: 0.88rem;
+    font-weight: 800;
+  }
+
+  .auth-card {
+    padding: 1.5rem;
+    max-width: 520px;
+    width: 100%;
+    justify-self: center;
+  }
+
+  .auth-card-header {
+    margin-bottom: 1.2rem;
+  }
+
+  .auth-form {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .auth-error {
+    border: 1px solid #fecdd3;
+    background: #fff1f2;
+    color: #be123c;
+    border-radius: 18px;
+    padding: 0.9rem 1rem;
+    font-size: 0.94rem;
+    font-weight: 600;
+  }
+
+  .auth-submit {
+    width: 100%;
+  }
+
+  .auth-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .auth-footer {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0.2rem;
+    font-size: 0.92rem;
+  }
+
+  @media (min-width: 980px) {
+    .auth-panel {
+      grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.8fr);
+      align-items: center;
+    }
+
+    .auth-brand {
+      min-height: 620px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .auth-card {
+      padding: 2rem;
+    }
+  }
 }
