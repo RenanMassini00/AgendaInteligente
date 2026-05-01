@@ -8,10 +8,35 @@ import { getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
 import type { DashboardSummary } from '../types/dashboard.types'
 
+type DashboardPeriod = 'day' | 'month' | '3months' | '6months'
+
+const periodLabels: Record<DashboardPeriod, string> = {
+  day: 'Hoje',
+  month: 'Mensal',
+  '3months': '3 meses',
+  '6months': '6 meses',
+}
+
+const appointmentCardLabels: Record<DashboardPeriod, string> = {
+  day: 'Agendamentos hoje',
+  month: 'Agendamentos no mês',
+  '3months': 'Agendamentos em 3 meses',
+  '6months': 'Agendamentos em 6 meses',
+}
+
+function getCurrentMonthValue() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}`
+}
+
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const [period, setPeriod] = useState<DashboardPeriod>('day')
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthValue())
 
   useEffect(() => {
     let isMounted = true
@@ -19,14 +44,26 @@ export default function DashboardPage() {
     async function loadDashboard() {
       try {
         setIsLoading(true)
-        const response = await api.get<DashboardSummary>(`/api/dashboard/summary?userId=${getCurrentUserId()}`)
+
+        let url = `/api/dashboard/summary?userId=${getCurrentUserId()}&period=${period}`
+
+        if (period !== 'day') {
+          url += `&month=${selectedMonth}`
+        }
+
+        const response = await api.get<DashboardSummary>(url)
+
         if (isMounted) {
           setData(response)
           setErrorMessage('')
         }
       } catch (error) {
         if (isMounted) {
-          setErrorMessage(error instanceof Error ? error.message : 'Não foi possível carregar o dashboard.')
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : 'Não foi possível carregar o dashboard.'
+          )
         }
       } finally {
         if (isMounted) {
@@ -36,10 +73,11 @@ export default function DashboardPage() {
     }
 
     loadDashboard()
+
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [period, selectedMonth])
 
   if (isLoading) {
     return <div className="feedback-card">Carregando dashboard...</div>
@@ -59,27 +97,52 @@ export default function DashboardPage() {
         title="Resumo do dia"
         description="Acompanhe sua agenda, clientes e serviços em um só lugar."
         action={
-          <Link to={ROUTE_PATHS.createAppointment} className="primary-button">
-            Novo agendamento
-          </Link>
+          <div className="dashboard-actions">
+            <select
+              className="dashboard-filter-select"
+              value={period}
+              onChange={(event) => setPeriod(event.target.value as DashboardPeriod)}
+            >
+              <option value="day">{periodLabels.day}</option>
+              <option value="month">{periodLabels.month}</option>
+              <option value="3months">{periodLabels['3months']}</option>
+              <option value="6months">{periodLabels['6months']}</option>
+            </select>
+
+            {period !== 'day' && (
+              <input
+                type="month"
+                className="dashboard-filter-select"
+                value={selectedMonth}
+                onChange={(event) => setSelectedMonth(event.target.value)}
+              />
+            )}
+
+            <Link to={ROUTE_PATHS.createAppointment} className="primary-button">
+              Novo agendamento
+            </Link>
+          </div>
         }
       />
 
       <div className="stats-grid">
         <PageCard>
-          <p className="muted-text">Agendamentos hoje</p>
+          <p className="muted-text">{appointmentCardLabels[period]}</p>
           <h3 className="stat-number">{data.appointmentsToday}</h3>
         </PageCard>
+
         <PageCard>
           <p className="muted-text">Clientes</p>
           <h3 className="stat-number">{data.clients}</h3>
         </PageCard>
+
         <PageCard>
           <p className="muted-text">Serviços</p>
           <h3 className="stat-number">{data.services}</h3>
         </PageCard>
+
         <PageCard>
-          <p className="muted-text">Receita prevista</p>
+          <p className="muted-text">Receita do período</p>
           <h3 className="stat-number">{data.expectedRevenueFormatted}</h3>
         </PageCard>
       </div>
@@ -89,7 +152,7 @@ export default function DashboardPage() {
           <div className="card-heading">
             <div>
               <h3>Próximos agendamentos</h3>
-              <p>Sua agenda para hoje e amanhã.</p>
+              <p>Lista baseada no período selecionado.</p>
             </div>
           </div>
 
@@ -148,7 +211,7 @@ export default function DashboardPage() {
             <div className="card-heading">
               <div>
                 <h3>Serviços mais usados</h3>
-                <p>Base inicial integrada com a API.</p>
+                <p>Base integrada ao período selecionado.</p>
               </div>
             </div>
 

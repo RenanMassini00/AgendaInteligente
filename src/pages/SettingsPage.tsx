@@ -1,150 +1,145 @@
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useMemo, useState } from 'react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
-import { getCurrentUserId } from '../utils/auth'
-import { api } from '../utils/api'
-import type { Settings } from '../types/settings.types'
+import { getBranding, saveBranding } from '../utils/branding'
+import { AppTheme, getStoredTheme, setStoredTheme } from '../utils/theme'
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState<Settings | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
+  const initialBranding = useMemo(() => getBranding(), [])
+  const initialTheme = useMemo(() => getStoredTheme(), [])
+
+  const [theme, setTheme] = useState<AppTheme>(initialTheme)
+  const [companyName, setCompanyName] = useState(initialBranding.companyName)
+  const [subtitle, setSubtitle] = useState(initialBranding.subtitle)
+  const [logoUrl, setLogoUrl] = useState(initialBranding.logoUrl)
   const [successMessage, setSuccessMessage] = useState('')
 
-  useEffect(() => {
-    let isMounted = true
-
-    async function loadSettings() {
-      try {
-        setIsLoading(true)
-        const response = await api.get<Settings>(`/api/settings?userId=${getCurrentUserId()}`)
-        if (isMounted) {
-          setSettings(response)
-          setErrorMessage('')
-        }
-      } catch (error) {
-        if (isMounted) {
-          setErrorMessage(error instanceof Error ? error.message : 'Não foi possível carregar as configurações.')
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    loadSettings()
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  function updateField<K extends keyof Settings>(field: K, value: Settings[K]) {
-    setSettings((current) => (current ? { ...current, [field]: value } : current))
+  function handleThemeChange(event: ChangeEvent<HTMLSelectElement>) {
+    const selectedTheme = event.target.value as AppTheme
+    setTheme(selectedTheme)
+    setStoredTheme(selectedTheme)
   }
 
-  async function handleSave() {
-    if (!settings) return
+  function handleLogoChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
 
-    try {
-      setIsSaving(true)
-      setErrorMessage('')
-      setSuccessMessage('')
-
-      const response = await api.put<Settings>(`/api/settings?userId=${getCurrentUserId()}`, {
-        theme: settings.theme,
-        languageCode: settings.languageCode,
-        reminderMinutes: Number(settings.reminderMinutes),
-        emailNotifications: settings.emailNotifications,
-        whatsappNotifications: settings.whatsappNotifications,
-      })
-
-      setSettings(response)
-      setSuccessMessage('Configurações salvas com sucesso.')
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível salvar as configurações.')
-    } finally {
-      setIsSaving(false)
+    if (!file) {
+      return
     }
+
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : ''
+      setLogoUrl(result)
+    }
+
+    reader.readAsDataURL(file)
   }
 
-  if (isLoading && !settings) {
-    return <div className="feedback-card">Carregando configurações...</div>
+  function handleSave() {
+    saveBranding({
+      companyName,
+      subtitle,
+      logoUrl,
+    })
+
+    setSuccessMessage('Configurações salvas com sucesso.')
+    window.dispatchEvent(new Event('storage'))
   }
 
-  if (!settings) {
-    return <div className="feedback-card error-box">{errorMessage || 'Configurações não encontradas.'}</div>
+  function handleRemoveLogo() {
+    setLogoUrl('')
   }
 
   return (
     <div className="page-stack">
       <SectionHeader
         title="Configurações"
-        description="Preferências gerais do sistema."
-        action={
-          <button className="primary-button" type="button" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Salvando...' : 'Salvar'}
-          </button>
-        }
+        description="Personalize a aparência do sistema e a identidade da empresa."
       />
 
-      {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
-      {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
-
-      <div className="cards-grid two-cols">
+      <div className="settings-grid">
         <PageCard>
-          <h3>Preferências</h3>
-          <div className="form-stack top-gap">
-            <div>
-              <label className="label">Tema</label>
-              <select className="text-input" value={settings.theme} onChange={(event) => updateField('theme', event.target.value)}>
+          <div className="settings-section">
+            <h3>Aparência</h3>
+            <p className="muted-text">Escolha o tema visual da aplicação.</p>
+
+            <div className="form-field">
+              <label htmlFor="theme">Tema</label>
+              <select
+                id="theme"
+                value={theme}
+                onChange={handleThemeChange}
+                className="form-input"
+              >
                 <option value="light">Claro</option>
                 <option value="dark">Escuro</option>
               </select>
-            </div>
-
-            <div>
-              <label className="label">Idioma</label>
-              <select className="text-input" value={settings.languageCode} onChange={(event) => updateField('languageCode', event.target.value)}>
-                <option value="pt-BR">Português (Brasil)</option>
-                <option value="en-US">English</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="label">Lembrete padrão (min)</label>
-              <input
-                className="text-input"
-                type="number"
-                min={0}
-                value={settings.reminderMinutes}
-                onChange={(event) => updateField('reminderMinutes', Number(event.target.value))}
-              />
             </div>
           </div>
         </PageCard>
 
         <PageCard>
-          <h3>Notificações</h3>
-          <div className="toggle-list top-gap">
-            <label className="toggle-row">
-              <span>Receber e-mail</span>
-              <input
-                type="checkbox"
-                checked={settings.emailNotifications}
-                onChange={(event) => updateField('emailNotifications', event.target.checked)}
-              />
-            </label>
+          <div className="settings-section">
+            <h3>Identidade da empresa</h3>
+            <p className="muted-text">
+              Defina nome, subtítulo e logo que serão exibidos no sistema.
+            </p>
 
-            <label className="toggle-row">
-              <span>Receber WhatsApp</span>
+            <div className="form-field">
+              <label htmlFor="companyName">Nome da empresa</label>
               <input
-                type="checkbox"
-                checked={settings.whatsappNotifications}
-                onChange={(event) => updateField('whatsappNotifications', event.target.checked)}
+                id="companyName"
+                className="form-input"
+                value={companyName}
+                onChange={(event) => setCompanyName(event.target.value)}
+                placeholder="Ex.: Studio Bella"
               />
-            </label>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="subtitle">Subtítulo</label>
+              <input
+                id="subtitle"
+                className="form-input"
+                value={subtitle}
+                onChange={(event) => setSubtitle(event.target.value)}
+                placeholder="Ex.: Estética e Bem-estar"
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="logo">Logo da empresa</label>
+              <input
+                id="logo"
+                type="file"
+                accept="image/*"
+                className="form-input"
+                onChange={handleLogoChange}
+              />
+            </div>
+
+            {logoUrl && (
+              <div className="logo-preview-card">
+                <img src={logoUrl} alt="Logo da empresa" className="logo-preview-image" />
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={handleRemoveLogo}
+                >
+                  Remover logo
+                </button>
+              </div>
+            )}
+
+            <div className="form-actions">
+              <button type="button" className="primary-button" onClick={handleSave}>
+                Salvar configurações
+              </button>
+            </div>
+
+            {successMessage && <div className="success-box">{successMessage}</div>}
           </div>
         </PageCard>
       </div>
