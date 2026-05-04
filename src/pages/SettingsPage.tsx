@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
 import type { Settings } from '../types/settings.types'
+import { clearCompanyLogo, getCompanyLogo, setCompanyLogo } from '../utils/branding'
+import { setStoredTheme, type AppTheme } from '../utils/theme'
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings | null>(null)
@@ -11,6 +13,7 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [logoPreview, setLogoPreview] = useState('')
 
   useEffect(() => {
     let isMounted = true
@@ -21,6 +24,8 @@ export default function SettingsPage() {
         const response = await api.get<Settings>(`/api/settings?userId=${getCurrentUserId()}`)
         if (isMounted) {
           setSettings(response)
+          setLogoPreview(getCompanyLogo())
+          setStoredTheme((response.theme === 'dark' ? 'dark' : 'light') as AppTheme)
           setErrorMessage('')
         }
       } catch (error) {
@@ -41,7 +46,33 @@ export default function SettingsPage() {
   }, [])
 
   function updateField<K extends keyof Settings>(field: K, value: Settings[K]) {
-    setSettings((current) => (current ? { ...current, [field]: value } : current))
+    setSettings((current) => {
+      if (!current) return current
+      const updated = { ...current, [field]: value }
+
+      if (field === 'theme') {
+        setStoredTheme((value === 'dark' ? 'dark' : 'light') as AppTheme)
+      }
+
+      return updated
+    })
+  }
+
+  function handleLogoChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+
+    if (!file) {
+      return
+    }
+
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : ''
+      setLogoPreview(result)
+    }
+
+    reader.readAsDataURL(file)
   }
 
   async function handleSave() {
@@ -61,6 +92,14 @@ export default function SettingsPage() {
       })
 
       setSettings(response)
+      setStoredTheme((response.theme === 'dark' ? 'dark' : 'light') as AppTheme)
+
+      if (logoPreview) {
+        setCompanyLogo(logoPreview)
+      } else {
+        clearCompanyLogo()
+      }
+
       setSuccessMessage('Configurações salvas com sucesso.')
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Não foi possível salvar as configurações.')
@@ -81,7 +120,7 @@ export default function SettingsPage() {
     <div className="page-stack">
       <SectionHeader
         title="Configurações"
-        description="Preferências gerais do sistema."
+        description="Personalize a aparência e a identidade visual do sistema."
         action={
           <button className="primary-button" type="button" onClick={handleSave} disabled={isSaving}>
             {isSaving ? 'Salvando...' : 'Salvar'}
@@ -94,14 +133,26 @@ export default function SettingsPage() {
 
       <div className="cards-grid two-cols">
         <PageCard>
-          <h3>Preferências</h3>
+          <h3>Aparência</h3>
           <div className="form-stack top-gap">
             <div>
               <label className="label">Tema</label>
-              <select className="text-input" value={settings.theme} onChange={(event) => updateField('theme', event.target.value)}>
-                <option value="light">Claro</option>
-                <option value="dark">Escuro</option>
-              </select>
+              <div className="theme-switcher">
+                <button
+                  type="button"
+                  className={`theme-option ${settings.theme === 'light' ? 'active' : ''}`.trim()}
+                  onClick={() => updateField('theme', 'light')}
+                >
+                  Claro
+                </button>
+                <button
+                  type="button"
+                  className={`theme-option ${settings.theme === 'dark' ? 'active' : ''}`.trim()}
+                  onClick={() => updateField('theme', 'dark')}
+                >
+                  Escuro
+                </button>
+              </div>
             </div>
 
             <div>
@@ -129,7 +180,10 @@ export default function SettingsPage() {
           <h3>Notificações</h3>
           <div className="toggle-list top-gap">
             <label className="toggle-row">
-              <span>Receber e-mail</span>
+              <div>
+                <strong>E-mail</strong>
+                <p className="small-text">Receba atualizações importantes por e-mail.</p>
+              </div>
               <input
                 type="checkbox"
                 checked={settings.emailNotifications}
@@ -138,13 +192,41 @@ export default function SettingsPage() {
             </label>
 
             <label className="toggle-row">
-              <span>Receber WhatsApp</span>
+              <div>
+                <strong>WhatsApp</strong>
+                <p className="small-text">Use lembretes rápidos para confirmar atendimentos.</p>
+              </div>
               <input
                 type="checkbox"
                 checked={settings.whatsappNotifications}
                 onChange={(event) => updateField('whatsappNotifications', event.target.checked)}
               />
             </label>
+          </div>
+        </PageCard>
+
+        <PageCard className="branding-card two-column-grid">
+          <div className="branding-preview">
+            <div className="branding-preview-card">
+              {logoPreview ? <img src={logoPreview} alt="Logo da empresa" className="branding-logo-preview" /> : <div className="branding-logo-placeholder">Logo</div>}
+              <div>
+                <strong>Pré-visualização</strong>
+                <p className="small-text">Sua logo aparecerá no menu lateral e no topo.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-stack">
+            <div>
+              <label className="label">Logo da empresa</label>
+              <input className="text-input" type="file" accept="image/*" onChange={handleLogoChange} />
+            </div>
+
+            <div className="section-actions">
+              <button type="button" className="secondary-button" onClick={() => setLogoPreview('')}>
+                Remover logo
+              </button>
+            </div>
           </div>
         </PageCard>
       </div>

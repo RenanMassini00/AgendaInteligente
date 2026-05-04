@@ -2,6 +2,8 @@ import { FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../utils/api'
 import { signIn } from '../utils/auth'
+import { setStoredTheme, type AppTheme } from '../utils/theme'
+import type { Settings } from '../types/settings.types'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import type { LoginResponse } from '../types/auth.types'
 
@@ -36,12 +38,19 @@ export default function LoginPage() {
       const data = await api.post<LoginResponse>('/api/auth/login', { email, password })
       signIn(data)
 
-      if (data.user.role === 'client') {
-        navigate(ROUTE_PATHS.clientHome)
+      if (data.user.role === 'professional') {
+        try {
+          const settings = await api.get<Settings>(`/api/settings?userId=${data.user.id}`)
+          setStoredTheme((settings.theme === 'dark' ? 'dark' : 'light') as AppTheme)
+        } catch {
+          // mantém o tema atual caso as configurações ainda não estejam disponíveis
+        }
+
+        navigate(ROUTE_PATHS.dashboard)
         return
       }
 
-      navigate(ROUTE_PATHS.dashboard)
+      navigate(ROUTE_PATHS.clientHome)
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Não foi possível fazer login.')
     } finally {

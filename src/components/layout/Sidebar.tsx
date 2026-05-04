@@ -1,8 +1,10 @@
 import { LogOut, X } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { navigationItems } from '../../config/navigation'
 import { ROUTE_PATHS } from '../../routes/routePaths'
 import { getCurrentUser, signOut } from '../../utils/auth'
+import { getBrandingEventName, getCompanyLogo } from '../../utils/branding'
 
 type SidebarProps = {
   onNavigate?: () => void
@@ -14,6 +16,23 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
   const navigate = useNavigate()
   const user = getCurrentUser()
   const title = user?.businessName || 'Agenda Pro'
+  const subtitle = user?.specialty || (user?.role === 'client' ? 'Portal do cliente' : 'Agenda profissional')
+  const initial = title.charAt(0).toUpperCase()
+  const [logoUrl, setLogoUrl] = useState(getCompanyLogo())
+
+  useEffect(() => {
+    function syncBranding() {
+      setLogoUrl(getCompanyLogo())
+    }
+
+    window.addEventListener(getBrandingEventName(), syncBranding)
+    window.addEventListener('storage', syncBranding)
+
+    return () => {
+      window.removeEventListener(getBrandingEventName(), syncBranding)
+      window.removeEventListener('storage', syncBranding)
+    }
+  }, [])
 
   function handleLogout() {
     signOut()
@@ -25,9 +44,15 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
   return (
     <div className="sidebar-shell">
       <div className="sidebar-brand">
-        <div>
-          <p>Agenda Pro</p>
-          <h2>{title}</h2>
+        <div className="sidebar-branding-wrap">
+          <div className="sidebar-brand-mark">
+            {logoUrl ? <img src={logoUrl} alt={title} className="brand-logo brand-logo--sidebar" /> : <span>{initial || 'A'}</span>}
+          </div>
+          <div>
+            <p>Agenda Pro</p>
+            <h2>{title}</h2>
+            <small>{subtitle}</small>
+          </div>
         </div>
         {mobile && (
           <button type="button" className="icon-button only-mobile" onClick={onClose} aria-label="Fechar menu">
@@ -47,7 +72,9 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
               onClick={onNavigate}
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`.trim()}
             >
-              <Icon size={18} />
+              <span className="sidebar-link-icon">
+                <Icon size={18} />
+              </span>
               <span>{item.label}</span>
             </NavLink>
           )
@@ -56,7 +83,9 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
 
       <div className="sidebar-footer">
         <button type="button" className="sidebar-link logout-button" onClick={handleLogout}>
-          <LogOut size={18} />
+          <span className="sidebar-link-icon">
+            <LogOut size={18} />
+          </span>
           <span>Sair</span>
         </button>
       </div>
