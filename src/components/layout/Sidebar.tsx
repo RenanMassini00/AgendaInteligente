@@ -2,8 +2,7 @@ import { LogOut, X } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { navigationItems } from '../../config/navigation'
 import { ROUTE_PATHS } from '../../routes/routePaths'
-import { signOut } from '../../utils/auth'
-import { getBranding } from '../../utils/branding'
+import { getCurrentUser, signOut } from '../../utils/auth'
 
 type SidebarProps = {
   onNavigate?: () => void
@@ -13,7 +12,8 @@ type SidebarProps = {
 
 export default function Sidebar({ onNavigate, onClose, mobile = false }: SidebarProps) {
   const navigate = useNavigate()
-  const branding = getBranding()
+  const user = getCurrentUser()
+  const title = user?.businessName || 'Agenda Pro'
 
   function handleLogout() {
     signOut()
@@ -24,20 +24,13 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
 
   return (
     <div className="sidebar-shell">
-      <div className="sidebar-brand modern-brand">
-        <div className="brand-block">
+      <div className="sidebar-brand">
+        <div>
           <p>Agenda Pro</p>
-          <h2>{branding.companyName}</h2>
-          <span>{branding.subtitle}</span>
+          <h2>{title}</h2>
         </div>
-
         {mobile && (
-          <button
-            type="button"
-            className="icon-button only-mobile"
-            onClick={onClose}
-            aria-label="Fechar menu"
-          >
+          <button type="button" className="icon-button only-mobile" onClick={onClose} aria-label="Fechar menu">
             <X size={18} />
           </button>
         )}
@@ -62,11 +55,7 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
       </nav>
 
       <div className="sidebar-footer">
-        <button
-          type="button"
-          className="sidebar-link logout-button"
-          onClick={handleLogout}
-        >
+        <button type="button" className="sidebar-link logout-button" onClick={handleLogout}>
           <LogOut size={18} />
           <span>Sair</span>
         </button>

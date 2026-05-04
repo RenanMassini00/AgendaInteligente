@@ -1,3 +1,5 @@
+export type UserRole = 'professional' | 'client'
+
 export type AuthUser = {
   id: number
   fullName: string
@@ -6,6 +8,10 @@ export type AuthUser = {
   phone?: string | null
   specialty?: string | null
   timezone: string
+  role: UserRole
+  professionalUserId?: number | null
+  clientId?: number | null
+  publicSlug?: string | null
 }
 
 export type LoginResponse = {

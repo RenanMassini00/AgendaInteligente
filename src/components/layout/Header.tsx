@@ -1,5 +1,5 @@
 import { Menu } from 'lucide-react'
-import { getBranding, getInitials } from '../../utils/branding'
+import { getCurrentUser } from '../../utils/auth'
 
 type HeaderProps = {
   title: string
@@ -7,44 +7,29 @@ type HeaderProps = {
 }
 
 export default function Header({ title, onOpenSidebar }: HeaderProps) {
-  const branding = getBranding()
+  const user = getCurrentUser()
+  const displayName = user?.businessName || user?.fullName || 'Scheduler'
+  const subtitle = user?.specialty || 'Agenda profissional'
+  const initial = displayName.charAt(0).toUpperCase()
 
   return (
     <header className="app-header">
-      <div className="app-header-inner">
-        <div className="header-left">
-          <button
-            type="button"
-            onClick={onOpenSidebar}
-            className="icon-button only-mobile"
-          >
-            <Menu size={20} />
-          </button>
-
-          <div>
-            <p className="header-kicker">Bem-vindo de volta</p>
-            <h1 className="header-title">{title}</h1>
-          </div>
+      <div className="header-left">
+        <button type="button" className="icon-button only-mobile" onClick={onOpenSidebar} aria-label="Abrir menu">
+          <Menu size={20} />
+        </button>
+        <div>
+          <span className="header-caption">Bem-vindo de volta</span>
+          <h1>{title}</h1>
         </div>
+      </div>
 
-        <div className="profile-chip">
-          {branding.logoUrl ? (
-            <img
-              src={branding.logoUrl}
-              alt={branding.companyName}
-              className="profile-logo"
-            />
-          ) : (
-            <div className="profile-avatar">
-              {getInitials(branding.companyName)}
-            </div>
-          )}
-
-          <div className="profile-text">
-            <strong>{branding.companyName}</strong>
-            <span>{branding.subtitle}</span>
-          </div>
+      <div className="header-profile">
+        <div>
+          <strong>{displayName}</strong>
+          <span>{subtitle}</span>
         </div>
+        <div className="avatar">{initial || 'S'}</div>
       </div>
     </header>
   )

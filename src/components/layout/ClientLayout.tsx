@@ -1,0 +1,80 @@
+import type { ReactNode } from 'react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { CalendarDays, Home, LogOut } from 'lucide-react'
+import { ROUTE_PATHS } from '../../routes/routePaths'
+import { getCurrentUser, signOut } from '../../utils/auth'
+
+type ClientLayoutProps = {
+  children: ReactNode
+}
+
+const navigation = [
+  { label: 'Início', path: ROUTE_PATHS.clientHome, icon: Home },
+  { label: 'Agendar', path: ROUTE_PATHS.clientBook, icon: CalendarDays },
+  { label: 'Meus horários', path: ROUTE_PATHS.clientAppointments, icon: CalendarDays },
+]
+
+export default function ClientLayout({ children }: ClientLayoutProps) {
+  const navigate = useNavigate()
+  const user = getCurrentUser()
+
+  function handleLogout() {
+    signOut()
+    navigate(ROUTE_PATHS.login)
+  }
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar desktop-sidebar client-sidebar-visible">
+        <div className="sidebar-shell">
+          <div className="sidebar-brand">
+            <div>
+              <p>Portal do cliente</p>
+              <h2>{user?.fullName || 'Cliente'}</h2>
+            </div>
+          </div>
+
+          <nav className="sidebar-nav">
+            {navigation.map((item) => {
+              const Icon = item.icon
+              return (
+                <NavLink key={item.path} to={item.path} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`.trim()}>
+                  <Icon size={18} />
+                  <span>{item.label}</span>
+                </NavLink>
+              )
+            })}
+          </nav>
+
+          <div className="sidebar-footer">
+            <button type="button" className="sidebar-link logout-button" onClick={handleLogout}>
+              <LogOut size={18} />
+              <span>Sair</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <div className="content-shell">
+        <header className="app-header">
+          <div className="header-left">
+            <div>
+              <span className="header-caption">Portal do cliente</span>
+              <h1>Minha agenda</h1>
+            </div>
+          </div>
+
+          <div className="header-profile">
+            <div>
+              <strong>{user?.fullName || 'Cliente'}</strong>
+              <span>{user?.email || 'Conta do cliente'}</span>
+            </div>
+            <div className="avatar light">{(user?.fullName || 'C').charAt(0).toUpperCase()}</div>
+          </div>
+        </header>
+
+        <main className="page-content">{children}</main>
+      </div>
+    </div>
+  )
+}

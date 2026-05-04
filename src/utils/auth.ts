@@ -1,4 +1,4 @@
-import type { AuthUser, LoginResponse } from '../types/auth.types'
+import type { AuthUser, LoginResponse, UserRole } from '../types/auth.types'
 
 const AUTH_STORAGE_KEY = 'scheduler_session'
 
@@ -41,6 +41,20 @@ export function getCurrentUser() {
 
 export function getCurrentUserId() {
   return getSession()?.user.id ?? 0
+}
+
+export function getCurrentRole(): UserRole | '' {
+  return getSession()?.user.role ?? ''
+}
+
+export function getCurrentProfessionalUserId() {
+  const user = getCurrentUser()
+  if (!user) return 0
+  return user.role === 'professional' ? user.id : user.professionalUserId ?? 0
+}
+
+export function getCurrentClientId() {
+  return getSession()?.user.clientId ?? 0
 }
 
 export function getAuthToken() {
