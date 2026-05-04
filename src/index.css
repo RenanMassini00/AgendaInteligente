@@ -895,3 +895,144 @@ tbody tr:hover {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.availability-builder-grid,
+.availability-summary-grid {
+  gap: 1rem;
+}
+
+.availability-section {
+  display: grid;
+  gap: 1rem;
+}
+
+.availability-section h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.availability-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.weekday-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.weekday-chip {
+  border: 1px solid var(--border, #e2e8f0);
+  background: var(--surface, #ffffff);
+  color: var(--text, #0f172a);
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  transition: all 0.18s ease;
+}
+
+.weekday-chip:hover {
+  background: var(--surface-soft, #f8fafc);
+}
+
+.weekday-chip.selected {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.selected-days-preview {
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: var(--surface-soft, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  color: var(--text, #0f172a);
+}
+
+.availability-summary-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.availability-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 18px;
+  background: var(--surface-soft, #f8fafc);
+}
+
+@media (max-width: 900px) {
+  .availability-summary-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.time-block,
+.date-block {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 20px;
+  background: var(--surface-soft, #f8fafc);
+}
+
+.time-block-header,
+.date-block-header {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.time-block-header h4,
+.date-block-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text, #0f172a);
+}
+
+.time-range-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.large-input {
+  min-height: 52px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.form-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text, #0f172a);
+}
+
+.availability-section {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.selected-days-preview {
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .time-range-grid {
+    grid-template-columns: 1fr;
+  }
+}
