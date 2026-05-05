@@ -1,44 +1,60 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
-import type { ServiceItem } from '../types/service.types'
+import type { Service } from '../types/service.types'
 
 export default function ServicesPage() {
-  const [services, setServices] = useState<ServiceItem[]>([])
+  const navigate = useNavigate()
+
+  const [services, setServices] = useState<Service[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
-    let isMounted = true
-
-    async function loadServices() {
-      try {
-        setIsLoading(true)
-        const response = await api.get<ServiceItem[]>(`/api/services?userId=${getCurrentUserId()}`)
-        if (isMounted) {
-          setServices(response)
-          setErrorMessage('')
-        }
-      } catch (error) {
-        if (isMounted) {
-          setErrorMessage(error instanceof Error ? error.message : 'Não foi possível carregar os serviços.')
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      }
-    }
-
     loadServices()
-    return () => {
-      isMounted = false
-    }
   }, [])
+
+  async function loadServices() {
+    try {
+      setIsLoading(true)
+      const response = await api.get<Service[]>(`/api/services?userId=${getCurrentUserId()}`)
+      setServices(response)
+      setErrorMessage('')
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Não foi possível carregar os serviços.'
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function handleDeleteService(id: number) {
+    const confirmed = window.confirm('Deseja realmente excluir este serviço?')
+    if (!confirmed) return
+
+    try {
+      setErrorMessage('')
+      setSuccessMessage('')
+
+      await api.delete(`/api/services/${id}`)
+      setSuccessMessage('Serviço excluído com sucesso.')
+      await loadServices()
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Não foi possível excluir o serviço.'
+      )
+    }
+  }
+
+  function handleEditService(id: number) {
+    navigate(`/services/${id}/edit`)
+  }
 
   return (
     <div className="page-stack">
@@ -53,8 +69,9 @@ export default function ServicesPage() {
       />
 
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
+      {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
 
-      <div className="cards-grid three-cols">
+      <div className="cards-grid two-cols">
         {isLoading ? (
           <div className="feedback-card">Carregando serviços...</div>
         ) : services.length === 0 ? (
@@ -62,10 +79,37 @@ export default function ServicesPage() {
         ) : (
           services.map((service) => (
             <PageCard key={service.id}>
-              <h3>{service.name}</h3>
-              <p className="muted-text">Duração: {service.duration}</p>
-              <p className="muted-text small-text">{service.description || 'Sem descrição cadastrada.'}</p>
-              <span className="soft-pill top-gap">{service.priceFormatted}</span>
+              <div className="entity-card">
+                <div className="card-stack">
+                  <div>
+                    <h3>{service.name}</h3>
+                    <p className="muted-text">Duração: {service.duration}</p>
+                    <p className="muted-text small-text">
+                      {service.description || 'Sem descrição cadastrada.'}
+                    </p>
+                  </div>
+
+                  <div className="soft-pill">{service.priceFormatted}</div>
+                </div>
+
+                <div className="entity-card-actions">
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => handleEditService(service.id)}
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    className="danger-button"
+                    onClick={() => handleDeleteService(service.id)}
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </div>
             </PageCard>
           ))
         )}

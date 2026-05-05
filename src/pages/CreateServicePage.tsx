@@ -1,70 +1,97 @@
-import { FormEvent, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { FormEvent, useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
+import type { Service } from '../types/service.types'
 
 export default function CreateServicePage() {
   const navigate = useNavigate()
+  const { id } = useParams()
+
+  const isEditMode = Boolean(id)
+
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [durationMinutes, setDurationMinutes] = useState('60')
   const [price, setPrice] = useState('0')
-  const [colorHex, setColorHex] = useState('#0f172a')
-  const [errorMessage, setErrorMessage] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+  const [colorHex, setColorHex] = useState('#1f3b7a')
+
+  const [isLoading, setIsLoading] = useState(isEditMode)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    if (!isEditMode) return
+    loadService()
+  }, [id])
+
+  async function loadService() {
+    try {
+      setIsLoading(true)
+      const response = await api.get<Service>(`/api/services/${id}`)
+      setName(response.name || '')
+      setDescription(response.description || '')
+      setDurationMinutes(String(response.durationMinutes || 60))
+      setPrice(String(response.price || 0))
+      setColorHex(response.colorHex || '#1f3b7a')
+      setErrorMessage('')
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Não foi possível carregar o serviço.'
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setErrorMessage('')
-    setSuccessMessage('')
-
-    const duration = Number(durationMinutes)
-    const servicePrice = Number(price)
-
-    if (!name.trim()) {
-      setErrorMessage('Informe o nome do serviço.')
-      return
-    }
-
-    if (!Number.isFinite(duration) || duration <= 0) {
-      setErrorMessage('A duração precisa ser maior que zero.')
-      return
-    }
-
-    if (!Number.isFinite(servicePrice) || servicePrice < 0) {
-      setErrorMessage('O valor precisa ser zero ou maior.')
-      return
-    }
 
     try {
       setIsSubmitting(true)
-      await api.post('/api/services', {
-        userId: getCurrentUserId(),
-        name: name.trim(),
-        description: description.trim() || null,
-        durationMinutes: duration,
-        price: servicePrice,
-        colorHex: colorHex.trim() || null,
-      })
+      setErrorMessage('')
 
-      setSuccessMessage('Serviço cadastrado com sucesso.')
-      setTimeout(() => navigate(ROUTE_PATHS.services), 700)
+      const payload = {
+        userId: getCurrentUserId(),
+        name,
+        description: description || null,
+        durationMinutes: Number(durationMinutes),
+        price: Number(price),
+        colorHex: colorHex || null,
+      }
+
+      if (isEditMode) {
+        await api.put(`/api/services/${id}`, payload)
+      } else {
+        await api.post('/api/services', payload)
+      }
+
+      navigate(ROUTE_PATHS.services)
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível cadastrar o serviço.')
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Não foi possível salvar o serviço.'
+      )
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  if (isLoading) {
+    return <div className="feedback-card">Carregando serviço...</div>
+  }
+
   return (
     <div className="page-stack">
       <SectionHeader
-        title="Novo serviço"
-        description="Cadastre um serviço que poderá ser usado nos agendamentos."
+        title={isEditMode ? 'Editar serviço' : 'Novo serviço'}
+        description={
+          isEditMode
+            ? 'Atualize os dados do serviço.'
+            : 'Cadastre um novo serviço para agendamento.'
+        }
         action={
           <Link to={ROUTE_PATHS.services} className="secondary-button">
             Voltar
@@ -72,47 +99,76 @@ export default function CreateServicePage() {
         }
       />
 
+      {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
+
       <PageCard>
-        <form className="form-stack" onSubmit={handleSubmit}>
-          <div className="form-grid two-columns">
-            <div>
-              <label className="label" htmlFor="service-name">Nome do serviço</label>
-              <input id="service-name" className="text-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Corte feminino" />
-            </div>
-
-            <div>
-              <label className="label" htmlFor="service-duration">Duração (minutos)</label>
-              <input id="service-duration" type="number" min="1" className="text-input" value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)} />
-            </div>
+        <form onSubmit={handleSubmit} className="form-grid">
+          <div className="form-field">
+            <label htmlFor="name">Nome do serviço</label>
+            <input
+              id="name"
+              className="form-input"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
           </div>
 
-          <div className="form-grid two-columns">
-            <div>
-              <label className="label" htmlFor="service-price">Preço</label>
-              <input id="service-price" type="number" min="0" step="0.01" className="text-input" value={price} onChange={(e) => setPrice(e.target.value)} />
-            </div>
-
-            <div>
-              <label className="label" htmlFor="service-color">Cor</label>
-              <div className="color-field-wrap">
-                <input id="service-color" type="color" className="color-input" value={colorHex} onChange={(e) => setColorHex(e.target.value)} />
-                <input className="text-input" value={colorHex} onChange={(e) => setColorHex(e.target.value)} placeholder="#0f172a" />
-              </div>
-            </div>
+          <div className="form-field">
+            <label htmlFor="durationMinutes">Duração em minutos</label>
+            <input
+              id="durationMinutes"
+              type="number"
+              className="form-input"
+              value={durationMinutes}
+              onChange={(event) => setDurationMinutes(event.target.value)}
+            />
           </div>
 
-          <div>
-            <label className="label" htmlFor="service-description">Descrição</label>
-            <textarea id="service-description" className="text-input textarea-input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descreva o serviço" />
+          <div className="form-field">
+            <label htmlFor="price">Preço</label>
+            <input
+              id="price"
+              type="number"
+              step="0.01"
+              className="form-input"
+              value={price}
+              onChange={(event) => setPrice(event.target.value)}
+            />
           </div>
 
-          {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
-          {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
+          <div className="form-field">
+            <label htmlFor="colorHex">Cor</label>
+            <input
+              id="colorHex"
+              type="color"
+              className="form-input"
+              value={colorHex}
+              onChange={(event) => setColorHex(event.target.value)}
+            />
+          </div>
 
-          <div className="section-actions">
-            <Link to={ROUTE_PATHS.services} className="secondary-button">Cancelar</Link>
+          <div className="form-field full-width">
+            <label htmlFor="description">Descrição</label>
+            <textarea
+              id="description"
+              className="form-input"
+              rows={4}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+            />
+          </div>
+
+          <div className="actions-row full-width">
+            <Link to={ROUTE_PATHS.services} className="secondary-button">
+              Cancelar
+            </Link>
+
             <button type="submit" className="primary-button" disabled={isSubmitting}>
-              {isSubmitting ? 'Salvando...' : 'Salvar serviço'}
+              {isSubmitting
+                ? 'Salvando...'
+                : isEditMode
+                  ? 'Atualizar serviço'
+                  : 'Salvar serviço'}
             </button>
           </div>
         </form>

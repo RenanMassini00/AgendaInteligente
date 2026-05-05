@@ -16,7 +16,7 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
   const navigate = useNavigate()
   const user = getCurrentUser()
   const title = user?.businessName || 'Agenda Pro'
-  const subtitle = user?.specialty || (user?.role === 'client' ? 'Portal do cliente' : 'Agenda profissional')
+  const subtitle = user?.specialty || 'Agenda profissional'
   const initial = title.charAt(0).toUpperCase()
   const [logoUrl, setLogoUrl] = useState(getCompanyLogo())
 
@@ -46,16 +46,27 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
       <div className="sidebar-brand">
         <div className="sidebar-branding-wrap">
           <div className="sidebar-brand-mark">
-            {logoUrl ? <img src={logoUrl} alt={title} className="brand-logo brand-logo--sidebar" /> : <span>{initial || 'A'}</span>}
+            {logoUrl ? (
+              <img src={logoUrl} alt={title} className="brand-logo brand-logo--sidebar" />
+            ) : (
+              <span>{initial || 'A'}</span>
+            )}
           </div>
+
           <div>
             <p>Agenda Pro</p>
             <h2>{title}</h2>
             <small>{subtitle}</small>
           </div>
         </div>
+
         {mobile && (
-          <button type="button" className="icon-button only-mobile" onClick={onClose} aria-label="Fechar menu">
+          <button
+            type="button"
+            className="icon-button only-mobile"
+            onClick={onClose}
+            aria-label="Fechar menu"
+          >
             <X size={18} />
           </button>
         )}

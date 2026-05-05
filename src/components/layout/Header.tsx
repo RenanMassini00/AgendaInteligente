@@ -11,7 +11,7 @@ type HeaderProps = {
 export default function Header({ title, onOpenSidebar }: HeaderProps) {
   const user = getCurrentUser()
   const displayName = user?.businessName || user?.fullName || 'Scheduler'
-  const subtitle = user?.specialty || (user?.role === 'client' ? 'Cliente' : 'Agenda profissional')
+  const subtitle = user?.specialty || 'Agenda profissional'
   const initial = displayName.charAt(0).toUpperCase()
   const [logoUrl, setLogoUrl] = useState(getCompanyLogo())
 
@@ -32,9 +32,15 @@ export default function Header({ title, onOpenSidebar }: HeaderProps) {
   return (
     <header className="app-header">
       <div className="header-left">
-        <button type="button" className="icon-button only-mobile" onClick={onOpenSidebar} aria-label="Abrir menu">
+        <button
+          type="button"
+          className="icon-button only-mobile"
+          onClick={onOpenSidebar}
+          aria-label="Abrir menu"
+        >
           <Menu size={20} />
         </button>
+
         <div>
           <span className="header-caption">Bem-vindo de volta</span>
           <h1>{title}</h1>

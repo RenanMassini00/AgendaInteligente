@@ -1,120 +1,151 @@
 import { FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { ROUTE_PATHS } from '../routes/routePaths'
 import { api } from '../utils/api'
 import { signIn } from '../utils/auth'
-import { setStoredTheme, type AppTheme } from '../utils/theme'
-import type { Settings } from '../types/settings.types'
-import { ROUTE_PATHS } from '../routes/routePaths'
-import type { LoginResponse } from '../types/auth.types'
 
-type LoginMode = 'professional' | 'client'
+type LoginResponse = {
+  token: string
+  user: {
+    id: number
+    fullName: string
+    email: string
+    businessName?: string | null
+    specialty?: string | null
+    role: 'professional'
+    phone?: string | null
+    publicSlug?: string | null
+    timezone?: string | null
+    clientId?: number | null
+    professionalUserId?: number | null
+  }
+}
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const [mode, setMode] = useState<LoginMode>('professional')
-  const [email, setEmail] = useState(mode === 'professional' ? 'renan@email.com' : 'cliente@email.com')
-  const [password, setPassword] = useState('123456')
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function changeMode(nextMode: LoginMode) {
-    setMode(nextMode)
-    setEmail(nextMode === 'professional' ? 'renan@email.com' : 'cliente@email.com')
-    setPassword('123456')
-    setErrorMessage('')
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setErrorMessage('')
-
-    if (!email.trim() || !password.trim()) {
-      setErrorMessage('Preencha e-mail e senha.')
-      return
-    }
 
     try {
       setIsSubmitting(true)
-      const data = await api.post<LoginResponse>('/api/auth/login', { email, password })
-      signIn(data)
+      setErrorMessage('')
 
-      if (data.user.role === 'professional') {
-        try {
-          const settings = await api.get<Settings>(`/api/settings?userId=${data.user.id}`)
-          setStoredTheme((settings.theme === 'dark' ? 'dark' : 'light') as AppTheme)
-        } catch {
-          // mantém o tema atual caso as configurações ainda não estejam disponíveis
-        }
+      const response = await api.post<LoginResponse>('/api/auth/login', {
+        email,
+        password,
+        role: 'professional',
+      })
 
-        navigate(ROUTE_PATHS.dashboard)
-        return
-      }
+      console.log('LOGIN RESPONSE', response)
 
-      navigate(ROUTE_PATHS.clientHome)
+      signIn({
+        token: response.token,
+        userId: response.user.id,
+        fullName: response.user.fullName,
+        email: response.user.email,
+        businessName: response.user.businessName ?? undefined,
+        specialty: response.user.specialty ?? undefined,
+      })
+
+      navigate(ROUTE_PATHS.dashboard, { replace: true })
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível fazer login.')
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível realizar o login.'
+      )
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="auth-shell">
-      <div className="auth-panel">
-        <section className="auth-brand-card">
-          <p className="auth-eyebrow">Agenda Pro</p>
-          <h1>Uma entrada para profissionais e clientes.</h1>
-          <p className="auth-copy">
-            Profissionais gerenciam agenda e clientes. Clientes conseguem visualizar horários disponíveis e marcar um atendimento.
+    <div className="login-modern-shell">
+      <div className="login-modern-grid">
+        <div className="login-modern-hero">
+          <div className="login-modern-badge">Agenda Pro</div>
+
+          <h1 className="login-modern-title">
+            Seu sistema de agendamento,
+            <span> bonito, rápido e profissional.</span>
+          </h1>
+
+          <p className="login-modern-description">
+            Organize clientes, serviços, horários e agendamentos em uma experiência
+            moderna e simples de usar.
           </p>
 
-          <div className="auth-highlight-box">
-            <strong>Credenciais de teste</strong>
-            <span>Profissional: renan@email.com / 123456</span>
-            <span>Cliente: cliente@email.com / 123456</span>
-          </div>
-        </section>
-
-        <section className="auth-form-card">
-          <div className="auth-tabs">
-            <button type="button" className={`auth-tab ${mode === 'professional' ? 'active' : ''}`.trim()} onClick={() => changeMode('professional')}>
-              Profissional
-            </button>
-            <button type="button" className={`auth-tab ${mode === 'client' ? 'active' : ''}`.trim()} onClick={() => changeMode('client')}>
-              Cliente
-            </button>
-          </div>
-
-          <div className="card-heading auth-heading">
-            <div>
-              <h3>{mode === 'professional' ? 'Entrar como profissional' : 'Entrar como cliente'}</h3>
-              <p>{mode === 'professional' ? 'Acesse o painel administrativo da agenda.' : 'Acesse seu portal para agendar e acompanhar horários.'}</p>
-            </div>
-          </div>
-
-          <form className="page-stack" onSubmit={handleSubmit}>
-            <div>
-              <label className="label">E-mail</label>
-              <input className="text-input" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Digite seu e-mail" />
+          <div className="login-modern-highlights">
+            <div className="login-highlight-card">
+              <strong>Clientes</strong>
+              <span>Cadastro rápido e histórico centralizado.</span>
             </div>
 
-            <div>
-              <label className="label">Senha</label>
-              <input className="text-input" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Digite sua senha" />
+            <div className="login-highlight-card">
+              <strong>Agendamentos</strong>
+              <span>Visualização clara da agenda e horários livres.</span>
             </div>
 
-            {errorMessage ? <div className="error-box">{errorMessage}</div> : null}
+            <div className="login-highlight-card">
+              <strong>Disponibilidade</strong>
+              <span>Recorrência semanal e datas específicas.</span>
+            </div>
+          </div>
+        </div>
 
-            <button className="primary-button auth-submit-button" type="submit" disabled={isSubmitting}>
+        <div className="login-modern-card">
+          <div className="login-modern-card-header">
+            <p className="login-modern-kicker">Entrar</p>
+            <h2>Login profissional</h2>
+            <span>Acesse seu painel administrativo.</span>
+          </div>
+
+          <form onSubmit={handleSubmit} className="login-modern-form">
+            <div className="form-field">
+              <label htmlFor="email">E-mail</label>
+              <input
+                id="email"
+                type="email"
+                className="form-input"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="seuemail@empresa.com"
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="password">Senha</label>
+              <input
+                id="password"
+                type="password"
+                className="form-input"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Digite sua senha"
+              />
+            </div>
+
+            {errorMessage ? <div className="auth-error">{errorMessage}</div> : null}
+
+            <button
+              type="submit"
+              className="primary-button login-modern-submit"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
 
-          <div className="auth-links-stack">
-            <Link to={ROUTE_PATHS.register}>{mode === 'professional' ? 'Criar conta profissional' : 'Criar conta profissional'}</Link>
-            <Link to={ROUTE_PATHS.clientRegister}>Criar conta de cliente</Link>
+          <div className="login-modern-footer">
+            <Link to={ROUTE_PATHS.register}>Criar conta profissional</Link>
           </div>
-        </section>
+        </div>
       </div>
     </div>
   )

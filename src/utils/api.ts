@@ -1,4 +1,4 @@
-import { getAuthToken } from './auth'
+import { getAuthToken, redirectToLogin, signOut } from './auth'
 import type { ApiMessage } from '../types/api.types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5080'
@@ -7,7 +7,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getAuthToken()
   const headers = new Headers(init?.headers)
 
-  if (!headers.has('Content-Type') && init?.body) {
+  if (!headers.has('Content-Type') && init?.body && !(init.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json')
   }
 
@@ -19,6 +19,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     headers,
   })
+
+  if (response.status === 401 && token) {
+    signOut()
+    redirectToLogin()
+    throw new Error('Sua sessão expirou. Faça login novamente.')
+  }
 
   if (!response.ok) {
     let message = 'Não foi possível concluir a operação.'
@@ -47,12 +53,12 @@ export const api = {
   post: <T>(path: string, body?: unknown) =>
     request<T>(path, {
       method: 'POST',
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
     }),
   put: <T>(path: string, body?: unknown) =>
     request<T>(path, {
       method: 'PUT',
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
     }),
   delete: <T>(path: string) =>
     request<T>(path, {

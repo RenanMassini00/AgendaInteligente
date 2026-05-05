@@ -1,4 +1,4 @@
-export type ServiceItem = {
+export type Service = {
   id: number
   name: string
   description?: string | null

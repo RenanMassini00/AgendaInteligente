@@ -1,6 +1,6 @@
 export type Client = {
   id: number
-  name: string
+  fullName: string
   email?: string | null
   phone: string
   birthDate?: string | null
