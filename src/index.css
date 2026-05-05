@@ -464,8 +464,7 @@ p {
 .danger-button,
 .theme-option,
 .slot-button,
-.weekday-chip,
-.auth-tab {
+.weekday-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -499,8 +498,7 @@ p {
 .secondary-button:hover,
 .theme-option:hover,
 .weekday-chip:hover,
-.slot-button:hover,
-.auth-tab:hover {
+.slot-button:hover {
   transform: translateY(-1px);
   border-color: var(--border-strong);
 }
@@ -523,7 +521,6 @@ p {
 
 .card,
 .feedback-card,
-.auth-brand-card,
 .auth-form-card,
 .auth-wide-card,
 .auth-single-panel,
@@ -539,22 +536,17 @@ p {
   padding: 1.2rem;
 }
 
-.stats-grid,
 .cards-grid,
-.dashboard-grid,
 .two-column-grid,
 .three-columns,
 .form-grid,
 .dashboard-highlight-grid,
 .dashboard-main-grid,
-.dashboard-footer-grid,
-.availability-builder-grid,
-.availability-summary-grid {
+.dashboard-footer-grid {
   display: grid;
   gap: 1rem;
 }
 
-.stat-number,
 .dashboard-highlight-number,
 .dashboard-compact-metric {
   margin-top: 0.55rem;
@@ -577,8 +569,6 @@ p {
   color: var(--text);
 }
 
-.list-stack,
-.availability-summary-list,
 .dashboard-appointments-list,
 .dashboard-clients-list,
 .dashboard-mini-list,
@@ -589,7 +579,6 @@ p {
   gap: 0.95rem;
 }
 
-.list-item,
 .table-feedback,
 .toggle-row,
 .field-box,
@@ -598,56 +587,27 @@ p {
 .dashboard-appointment-item,
 .dashboard-client-item,
 .dashboard-mini-list-item,
-.availability-summary-item,
-.time-block,
-.date-block,
-.branding-preview-card,
-.auth-highlight-box {
+.branding-preview-card {
   border: 1px solid var(--border);
   border-radius: 20px;
   background: color-mix(in srgb, var(--surface-soft) 82%, transparent);
 }
 
-.list-item,
 .dashboard-appointment-item,
 .dashboard-client-item,
 .dashboard-mini-list-item,
-.availability-summary-item,
 .toggle-row,
 .soft-panel,
 .field-box,
-.time-block,
-.date-block,
 .table-feedback,
-.branding-preview-card,
-.auth-highlight-box {
+.branding-preview-card {
   padding: 1rem;
-}
-
-.list-item.light {
-  background: color-mix(in srgb, var(--surface-soft) 92%, transparent);
 }
 
 .split-row {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-}
-
-.inline-row {
-  display: flex;
-  align-items: center;
-}
-
-.wrap-gap {
-  gap: 0.55rem;
-  flex-wrap: wrap;
-}
-
-.pill-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
 }
 
 .soft-pill {
@@ -838,20 +798,14 @@ input[type='checkbox'] {
 }
 
 .section-actions,
-.form-actions,
-.logo-preview-actions,
-.availability-item-actions,
-.dashboard-top-actions,
-.availability-quick-actions {
+.dashboard-top-actions {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
   align-items: center;
 }
 
-.section-actions,
-.form-actions,
-.logo-preview-actions {
+.section-actions {
   justify-content: flex-end;
 }
 
@@ -885,69 +839,12 @@ input[type='checkbox'] {
   gap: 1rem;
 }
 
-.auth-brand-card,
 .auth-form-card {
   padding: 1.6rem;
 }
 
-.auth-eyebrow {
-  font-size: 0.78rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  font-weight: 800;
-  color: var(--text-soft);
-}
-
-.auth-brand-card h1 {
-  margin-top: 0.5rem;
-  font-size: clamp(2.25rem, 4vw, 3.4rem);
-  line-height: 0.98;
-  letter-spacing: -0.06em;
-  color: var(--text);
-}
-
-.auth-copy {
-  margin-top: 0.95rem;
-  color: var(--text-soft);
-  max-width: 38rem;
-  font-size: 1.02rem;
-}
-
-.auth-highlight-box {
-  margin-top: 1.5rem;
-  display: grid;
-  gap: 0.42rem;
-  background: linear-gradient(135deg, #0f172a 0%, #1d2e4a 100%);
-  color: white;
-  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.24);
-}
-
-.auth-highlight-box span {
-  color: rgba(255, 255, 255, 0.84);
-}
-
 .auth-heading {
   margin-bottom: 1rem;
-}
-
-.auth-tabs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.6rem;
-  margin-bottom: 1rem;
-}
-
-.auth-tab {
-  background: color-mix(in srgb, var(--surface-soft) 90%, transparent);
-  color: var(--text-soft);
-  border-color: var(--border);
-}
-
-.auth-tab.active {
-  background: linear-gradient(135deg, #0f172a 0%, #1d2e4a 100%);
-  color: #ffffff;
-  border-color: transparent;
-  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.18);
 }
 
 .auth-submit-button {
@@ -1000,35 +897,6 @@ input[type='checkbox'] {
   background: linear-gradient(135deg, #0f172a 0%, #1d2e4a 100%);
   color: white;
   border-color: transparent;
-}
-
-.color-field-wrap {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.color-input {
-  width: 64px;
-  height: 48px;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--surface-solid) 90%, transparent);
-  padding: 0.3rem;
-}
-
-.checkbox-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  color: var(--text);
-  font-weight: 600;
-}
-
-.checkbox-row input {
-  width: 1.1rem;
-  height: 1.1rem;
 }
 
 .theme-switcher {
@@ -1103,9 +971,7 @@ input[type='checkbox'] {
 .dashboard-highlight-head,
 .dashboard-compact-header,
 .dashboard-section-header,
-.card-heading,
-.time-block-header,
-.date-block-header {
+.card-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -1149,8 +1015,7 @@ input[type='checkbox'] {
 
 .dashboard-appointment-item,
 .dashboard-client-item,
-.dashboard-mini-list-item,
-.availability-summary-item {
+.dashboard-mini-list-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1179,21 +1044,6 @@ input[type='checkbox'] {
 
 .dashboard-footer-grid {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-}
-
-.availability-section {
-  display: grid;
-  gap: 1.15rem;
-}
-
-.availability-section h3 {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: var(--text);
-}
-
-.selected-days-preview {
-  line-height: 1.55;
 }
 
 .weekday-chip-list {
@@ -1237,53 +1087,14 @@ input[type='checkbox'] {
   border-color: transparent;
 }
 
-.time-block,
-.date-block {
-  display: grid;
-  gap: 1rem;
-}
-
-.time-block-header,
-.date-block-header {
-  display: grid;
-  gap: 0.3rem;
-}
-
-.time-block-header h4,
-.date-block-header h4 {
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--text);
-}
-
-.time-range-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.large-input {
-  min-height: 52px;
-  font-size: 1rem;
-}
-
 .form-field {
   display: grid;
   gap: 0.5rem;
 }
 
-.branding-preview,
-.logo-preview-box {
+.branding-preview {
   display: grid;
   gap: 1rem;
-}
-
-.logo-preview-image {
-  width: 140px;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 22px;
-  border: 1px solid var(--border);
 }
 
 .small-button {
@@ -1302,10 +1113,6 @@ input[type='checkbox'] {
   .page-content {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .cards-grid.two-cols,
@@ -1340,13 +1147,6 @@ input[type='checkbox'] {
     grid-template-columns: minmax(0, 1.12fr) minmax(420px, 0.88fr);
     align-items: stretch;
   }
-
-  .auth-brand-card {
-    min-height: 620px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
 }
 
 @media (min-width: 1100px) {
@@ -1369,13 +1169,6 @@ input[type='checkbox'] {
     padding-right: 2rem;
   }
 
-  .stats-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .dashboard-grid {
-    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
-  }
 }
 
 @media (max-width: 1100px) {
@@ -1389,16 +1182,11 @@ input[type='checkbox'] {
 
 @media (max-width: 900px) {
 
-  .time-range-grid,
   .cards-grid.two-cols,
-  .two-column-grid,
-  .availability-builder-grid,
-  .availability-summary-grid {
+  .two-column-grid {
     grid-template-columns: 1fr;
   }
 
-  .availability-summary-item,
-  .availability-item-actions,
   .dashboard-client-item,
   .dashboard-mini-list-item {
     align-items: flex-start;
@@ -1411,7 +1199,6 @@ input[type='checkbox'] {
   .dashboard-appointment-item,
   .dashboard-client-item,
   .dashboard-mini-list-item,
-  .availability-summary-item,
   .toggle-row,
   .split-row {
     flex-direction: column;
@@ -1419,15 +1206,12 @@ input[type='checkbox'] {
   }
 
   .dashboard-appointment-right,
-  .availability-item-actions,
-  .form-actions,
   .section-actions {
     justify-content: flex-start;
   }
 
   .dashboard-highlight-number,
-  .dashboard-compact-metric,
-  .stat-number {
+  .dashboard-compact-metric {
     font-size: 1.75rem;
   }
 
@@ -1759,12 +1543,6 @@ input[type='checkbox'] {
   gap: 0.75rem;
 }
 
-.weekday-chip-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
 .weekday-chip {
   min-width: 56px;
   padding: 0.85rem 1rem;
@@ -1794,10 +1572,6 @@ input[type='checkbox'] {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-.form-grid.three-columns {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .checkbox-field {
@@ -1842,28 +1616,8 @@ input[type='checkbox'] {
   gap: 0.75rem;
 }
 
-.danger-button {
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  background: rgba(239, 68, 68, 0.12);
-  color: #fecaca;
-  padding: 0.85rem 1rem;
-  border-radius: 14px;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.success-box {
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  background: rgba(34, 197, 94, 0.12);
-  color: #bbf7d0;
-}
-
 @media (max-width: 1024px) {
   .availability-editor-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-grid.three-columns {
     grid-template-columns: 1fr;
   }
 
@@ -1886,18 +1640,8 @@ input[type='checkbox'] {
   justify-content: flex-end;
 }
 
-.danger-button {
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  background: rgba(239, 68, 68, 0.12);
-  color: #fecaca;
-  padding: 0.85rem 1rem;
-  border-radius: 14px;
-  cursor: pointer;
-  font-weight: 700;
-}
-
 .danger-button:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: color-mix(in srgb, var(--danger-bg) 82%, var(--danger-text));
 }
 
 .full-width {
