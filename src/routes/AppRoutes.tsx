@@ -8,6 +8,7 @@ import CreateAvailabilityPage from '../pages/CreateAvailabilityPage'
 import CreateClientPage from '../pages/CreateClientPage'
 import CreateServicePage from '../pages/CreateServicePage'
 import DashboardPage from '../pages/DashboardPage'
+import FinancePage from '../pages/FinancePage'
 import LoginPage from '../pages/LoginPage'
 import NotFoundPage from '../pages/NotFoundPage'
 import ProfilePage from '../pages/ProfilePage'
@@ -15,12 +16,17 @@ import PublicBookingPage from '../pages/PublicBookingPage'
 import RegisterPage from '../pages/RegisterPage'
 import ServicesPage from '../pages/ServicesPage'
 import SettingsPage from '../pages/SettingsPage'
-import { isAuthenticated } from '../utils/auth'
+import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
+import { getCurrentRole, isAuthenticated } from '../utils/auth'
 import { ROUTE_PATHS } from './routePaths'
+import AdminBillingPage from '../pages/admin/AdminBillingPage'
+import AdminCompaniesPage from '../pages/admin/AdminCompaniesPage'
+import AdminUsersPage from '../pages/admin/AdminUsersPage'
 
 export default function AppRoutes() {
   const location = useLocation()
   const authenticated = isAuthenticated()
+  const role = getCurrentRole()
 
   const isPublicBookingPath = location.pathname.startsWith('/agendar/')
   const publicPaths: string[] = [ROUTE_PATHS.login, ROUTE_PATHS.register]
@@ -40,6 +46,10 @@ export default function AppRoutes() {
   }
 
   if (authenticated && isPublicPath) {
+    if (role === 'master_admin') {
+      return <Navigate to={ROUTE_PATHS.adminDashboard} replace />
+    }
+
     return <Navigate to={ROUTE_PATHS.dashboard} replace />
   }
 
@@ -50,6 +60,21 @@ export default function AppRoutes() {
         <Route path={ROUTE_PATHS.register} element={<RegisterPage />} />
         <Route path="*" element={<Navigate to={ROUTE_PATHS.login} replace />} />
       </Routes>
+    )
+  }
+
+  if (role === 'master_admin') {
+    return (
+      <AppLayout>
+        <Routes>
+          <Route path={ROUTE_PATHS.adminDashboard} element={<AdminDashboardPage />} />
+          <Route path={ROUTE_PATHS.adminCompanies} element={<AdminCompaniesPage />} />
+          <Route path={ROUTE_PATHS.adminUsers} element={<AdminUsersPage />} />
+          <Route path={ROUTE_PATHS.adminBilling} element={<AdminBillingPage />} />
+          <Route path={ROUTE_PATHS.settings} element={<SettingsPage />} />
+          <Route path="*" element={<Navigate to={ROUTE_PATHS.adminDashboard} replace />} />
+        </Routes>
+      </AppLayout>
     )
   }
 
@@ -64,15 +89,14 @@ export default function AppRoutes() {
 
         <Route path={ROUTE_PATHS.clients} element={<ClientsPage />} />
         <Route path={ROUTE_PATHS.createClient} element={<CreateClientPage />} />
-        <Route path={ROUTE_PATHS.editClient} element={<CreateClientPage />} />
 
         <Route path={ROUTE_PATHS.services} element={<ServicesPage />} />
         <Route path={ROUTE_PATHS.createService} element={<CreateServicePage />} />
-        <Route path={ROUTE_PATHS.editService} element={<CreateServicePage />} />
 
         <Route path={ROUTE_PATHS.availability} element={<AvailabilityPage />} />
         <Route path={ROUTE_PATHS.createAvailability} element={<CreateAvailabilityPage />} />
 
+        <Route path={ROUTE_PATHS.finance} element={<FinancePage />} />
         <Route path={ROUTE_PATHS.profile} element={<ProfilePage />} />
         <Route path={ROUTE_PATHS.settings} element={<SettingsPage />} />
 

@@ -12,12 +12,13 @@ type LoginResponse = {
     email: string
     businessName?: string | null
     specialty?: string | null
-    role: 'professional'
+    role: 'professional' | 'master_admin'
     phone?: string | null
     publicSlug?: string | null
     timezone?: string | null
     clientId?: number | null
     professionalUserId?: number | null
+    companyId?: number | null
   }
 }
 
@@ -39,7 +40,6 @@ export default function LoginPage() {
       const response = await api.post<LoginResponse>('/api/auth/login', {
         email,
         password,
-        role: 'professional',
       })
 
       console.log('LOGIN RESPONSE', response)
@@ -49,11 +49,17 @@ export default function LoginPage() {
         userId: response.user.id,
         fullName: response.user.fullName,
         email: response.user.email,
+        role: response.user.role,
         businessName: response.user.businessName ?? undefined,
         specialty: response.user.specialty ?? undefined,
+        companyId: response.user.companyId ?? undefined,
       })
 
-      navigate(ROUTE_PATHS.dashboard, { replace: true })
+      if (response.user.role === 'master_admin') {
+        navigate(ROUTE_PATHS.adminDashboard, { replace: true })
+      } else {
+        navigate(ROUTE_PATHS.dashboard, { replace: true })
+      }
     } catch (error) {
       setErrorMessage(
         error instanceof Error

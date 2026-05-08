@@ -1,7 +1,7 @@
 import { LogOut, X } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { navigationItems } from '../../config/navigation'
+import { useEffect, useMemo, useState } from 'react'
+import { adminNavigationItems, professionalNavigationItems } from '../../config/navigation'
 import { ROUTE_PATHS } from '../../routes/routePaths'
 import { getCurrentUser, signOut } from '../../utils/auth'
 import { getBrandingEventName, getCompanyLogo } from '../../utils/branding'
@@ -15,8 +15,22 @@ type SidebarProps = {
 export default function Sidebar({ onNavigate, onClose, mobile = false }: SidebarProps) {
   const navigate = useNavigate()
   const user = getCurrentUser()
-  const title = user?.businessName || 'Agenda Pro'
-  const subtitle = user?.specialty || 'Agenda profissional'
+  const role = user?.role
+
+  const navigationItems = useMemo(() => {
+    return role === 'master_admin' ? adminNavigationItems : professionalNavigationItems
+  }, [role])
+
+  const title =
+    role === 'master_admin'
+      ? 'Admin Master'
+      : user?.businessName || user?.fullName || 'Agenda Pro'
+
+  const subtitle =
+    role === 'master_admin'
+      ? 'Dono do sistema'
+      : user?.specialty || 'Agenda profissional'
+
   const initial = title.charAt(0).toUpperCase()
   const [logoUrl, setLogoUrl] = useState(getCompanyLogo())
 
@@ -46,27 +60,21 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
       <div className="sidebar-brand">
         <div className="sidebar-branding-wrap">
           <div className="sidebar-brand-mark">
-            {logoUrl ? (
+            {logoUrl && role !== 'master_admin' ? (
               <img src={logoUrl} alt={title} className="brand-logo brand-logo--sidebar" />
             ) : (
               <span>{initial || 'A'}</span>
             )}
           </div>
-
           <div>
-            <p>Agenda Pro</p>
+            <p>{role === 'master_admin' ? 'Sistema SaaS' : 'Agenda Pro'}</p>
             <h2>{title}</h2>
             <small>{subtitle}</small>
           </div>
         </div>
 
         {mobile && (
-          <button
-            type="button"
-            className="icon-button only-mobile"
-            onClick={onClose}
-            aria-label="Fechar menu"
-          >
+          <button type="button" className="icon-button only-mobile" onClick={onClose} aria-label="Fechar menu">
             <X size={18} />
           </button>
         )}

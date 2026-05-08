@@ -2,15 +2,18 @@ const AUTH_STORAGE_KEY = 'scheduler_auth'
 const AUTH_CHANGED_EVENT = 'auth:changed'
 const SESSION_DURATION_MS = 60 * 60 * 1000
 
+export type SessionRole = 'master_admin' | 'professional'
+
 export type Session = {
   token: string
   userId: number
-  role: 'professional'
+  role: SessionRole
   fullName: string
   email: string
   expiresAt: number
   businessName?: string
   specialty?: string
+  companyId?: number | null
 }
 
 type SaveSessionInput = Omit<Session, 'expiresAt'> | Session
@@ -20,8 +23,10 @@ type SignInInput = {
   userId: number
   fullName: string
   email: string
+  role: SessionRole
   businessName?: string
   specialty?: string
+  companyId?: number | null
 }
 
 function dispatchAuthChanged() {
@@ -45,12 +50,13 @@ export function saveSession(session: SaveSessionInput) {
   const normalized: Session = {
     token: session.token,
     userId: session.userId,
-    role: 'professional',
+    role: session.role,
     fullName: session.fullName,
     email: session.email,
     expiresAt,
     businessName: session.businessName,
     specialty: session.specialty,
+    companyId: session.companyId ?? null,
   }
 
   localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(normalized))
@@ -61,11 +67,12 @@ export function signIn(data: SignInInput) {
   saveSession({
     token: data.token,
     userId: data.userId,
-    role: 'professional',
+    role: data.role,
     fullName: data.fullName,
     email: data.email,
     businessName: data.businessName,
     specialty: data.specialty,
+    companyId: data.companyId ?? null,
   })
 }
 
@@ -89,6 +96,9 @@ export function getSession(): Session | null {
       return null
     }
 
+    const role: SessionRole =
+      parsed.role === 'master_admin' ? 'master_admin' : 'professional'
+
     if (parsed.expiresAt <= Date.now()) {
       clearStoredSession()
       dispatchAuthChanged()
@@ -98,12 +108,13 @@ export function getSession(): Session | null {
     return {
       token: parsed.token,
       userId: parsed.userId,
-      role: 'professional',
+      role,
       fullName: parsed.fullName,
       email: parsed.email,
       expiresAt: parsed.expiresAt,
       businessName: parsed.businessName,
       specialty: parsed.specialty,
+      companyId: parsed.companyId ?? null,
     }
   } catch {
     clearStoredSession()

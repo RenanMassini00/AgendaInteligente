@@ -1,39 +1,58 @@
-import { useState, type ReactNode } from 'react'
+import { type ReactNode, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Header from './Header'
 import Sidebar from './Sidebar'
-import { navigationItems } from '../../config/navigation'
-import { ROUTE_PATHS } from '../../routes/routePaths'
+import { adminNavigationItems, professionalNavigationItems } from '../../config/navigation'
+import { getCurrentRole } from '../../utils/auth'
 
 type AppLayoutProps = {
   children: ReactNode
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const role = getCurrentRole()
 
-  const currentPageLabel =
-    location.pathname === ROUTE_PATHS.createAppointment
-      ? 'Novo agendamento'
-      : navigationItems.find((item) => item.path === location.pathname)?.label ?? 'Painel'
+  const navigationItems = useMemo(() => {
+    return role === 'master_admin' ? adminNavigationItems : professionalNavigationItems
+  }, [role])
+
+  const currentItem = navigationItems.find((item) => {
+    if (location.pathname === item.path) return true
+    return location.pathname.startsWith(item.path)
+  })
+
+  const title =
+    currentItem?.label ??
+    (role === 'master_admin' ? 'Painel Administrativo' : 'Painel')
 
   return (
     <div className="app-shell">
-      <aside className="sidebar desktop-sidebar">
+      <aside className="app-sidebar desktop-only">
         <Sidebar />
       </aside>
 
-      {mobileOpen ? <button type="button" className="mobile-overlay" onClick={() => setMobileOpen(false)} aria-label="Fechar menu" /> : null}
-
-      <aside className={`sidebar mobile-sidebar ${mobileOpen ? 'open' : ''}`.trim()}>
-        <Sidebar mobile onNavigate={() => setMobileOpen(false)} onClose={() => setMobileOpen(false)} />
-      </aside>
-
-      <div className="content-shell">
-        <Header title={currentPageLabel} onOpenSidebar={() => setMobileOpen(true)} />
-        <main className="page-content">{children}</main>
+      <div className="app-main">
+        <Header title={title} onOpenSidebar={() => setIsSidebarOpen(true)} />
+        <main className="app-content">{children}</main>
       </div>
+
+      {isSidebarOpen ? (
+        <div className="mobile-sidebar-wrapper">
+          <div
+            className="mobile-sidebar-backdrop"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+          <aside className="mobile-sidebar-panel">
+            <Sidebar
+              mobile
+              onClose={() => setIsSidebarOpen(false)}
+              onNavigate={() => setIsSidebarOpen(false)}
+            />
+          </aside>
+        </div>
+      ) : null}
     </div>
   )
 }

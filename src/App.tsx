@@ -1,4 +1,3 @@
-import { BrowserRouter } from 'react-router-dom'
 import { useEffect } from 'react'
 import AppRoutes from './routes/AppRoutes'
 import { api } from './utils/api'
@@ -28,9 +27,5 @@ export default function App() {
     loadTheme()
   }, [])
 
-  return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
-  )
+  return <AppRoutes />
 }

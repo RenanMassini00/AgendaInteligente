@@ -4,23 +4,22 @@ export const ROUTE_PATHS = {
   register: '/register',
 
   dashboard: '/dashboard',
-
   appointments: '/appointments',
   createAppointment: '/appointments/new',
-
   clients: '/clients',
   createClient: '/clients/new',
-  editClient: '/clients/:id/edit',
-
   services: '/services',
   createService: '/services/new',
-  editService: '/services/:id/edit',
-
   availability: '/availability',
   createAvailability: '/availability/new',
-
+  finance: '/finance',
   profile: '/profile',
   settings: '/settings',
+
+  adminDashboard: '/admin/dashboard',
+  adminCompanies: '/admin/companies',
+  adminUsers: '/admin/users',
+  adminBilling: '/admin/billing',
 
   publicBooking: '/agendar/:slug',
 } as const

@@ -1,5 +1,3 @@
-export type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
-
 export type Appointment = {
   id: number
   clientId: number
@@ -10,18 +8,17 @@ export type Appointment = {
   time: string
   startTime: string
   endTime: string
-  status: AppointmentStatus
-  price: number
+  status: string
+  priceAtBooking: number
   priceFormatted: string
   notes?: string | null
 }
 
-export type AppointmentCreateRequest = {
+export type AppointmentFormPayload = {
   userId: number
   clientId: number
   serviceId: number
-  date: string
-  time: string
-  status: AppointmentStatus
-  notes?: string
+  appointmentDate: string
+  startTime: string
+  notes?: string | null
 }

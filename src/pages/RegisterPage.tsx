@@ -6,11 +6,15 @@ import { signIn } from '../utils/auth'
 
 type RegisterResponse = {
   token: string
-  userId: number
-  fullName: string
-  email: string
-  businessName?: string
-  specialty?: string
+  user: {
+    id: number
+    fullName: string
+    email: string
+    businessName?: string | null
+    specialty?: string | null
+    role: 'professional' | 'master_admin'
+    companyId?: number | null
+  }
 }
 
 export default function RegisterPage() {
@@ -53,11 +57,13 @@ export default function RegisterPage() {
 
       signIn({
         token: response.token,
-        userId: response.userId,
-        fullName: response.fullName,
-        email: response.email,
-        businessName: response.businessName,
-        specialty: response.specialty,
+        userId: response.user.id,
+        fullName: response.user.fullName,
+        email: response.user.email,
+        role: response.user.role ?? 'professional',
+        businessName: response.user.businessName ?? undefined,
+        specialty: response.user.specialty ?? undefined,
+        companyId: response.user.companyId ?? undefined,
       })
 
       navigate(ROUTE_PATHS.dashboard)
