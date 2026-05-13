@@ -6,14 +6,22 @@ export const ROUTE_PATHS = {
   dashboard: '/dashboard',
   appointments: '/appointments',
   createAppointment: '/appointments/new',
+
   clients: '/clients',
   createClient: '/clients/new',
   editClient: '/clients/:id/edit',
+
   services: '/services',
   createService: '/services/new',
   editService: '/services/:id/edit',
+
+  catalog: '/catalog',
+  createProduct: '/catalog/new',
+  editProduct: '/catalog/:id/edit',
+
   availability: '/availability',
   createAvailability: '/availability/new',
+
   finance: '/finance',
   profile: '/profile',
   settings: '/settings',
@@ -24,4 +32,6 @@ export const ROUTE_PATHS = {
   adminBilling: '/admin/billing',
 
   publicBooking: '/agendar/:slug',
+  catalogAccess: '/catalogo',
+  publicCatalog: '/catalogo/:slug',
 } as const

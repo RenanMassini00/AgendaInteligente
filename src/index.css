@@ -2876,7 +2876,7 @@ html[data-theme='dark'][data-accent='pink'] {
   gap: 0.9rem;
 }
 
-.header-left > div {
+.header-left>div {
   min-width: 0;
 }
 
@@ -3021,6 +3021,7 @@ table {
    <= 900px
    ========================================================= */
 @media (max-width: 900px) {
+
   .cards-grid.two-cols,
   .cards-grid.three-cols,
   .two-column-grid,
@@ -3076,9 +3077,9 @@ table {
     width: 100%;
   }
 
-  .weekly-calendar-nav > *,
-  .dashboard-top-actions > *,
-  .section-actions > * {
+  .weekly-calendar-nav>*,
+  .dashboard-top-actions>*,
+  .section-actions>* {
     max-width: 100%;
   }
 
@@ -3157,11 +3158,11 @@ table {
     width: 100%;
   }
 
-  .dashboard-appointment-right > *,
-  .finance-appointment-actions > *,
-  .entity-card-actions > *,
-  .item-actions > *,
-  .actions-row > * {
+  .dashboard-appointment-right>*,
+  .finance-appointment-actions>*,
+  .entity-card-actions>*,
+  .item-actions>*,
+  .actions-row>* {
     flex: 1 1 100%;
   }
 
@@ -3192,6 +3193,7 @@ table {
    <= 640px
    ========================================================= */
 @media (max-width: 640px) {
+
   .app-content,
   .page-content {
     padding: 0.85rem;
@@ -3246,6 +3248,7 @@ table {
    <= 480px
    ========================================================= */
 @media (max-width: 480px) {
+
   .app-header,
   .app-content,
   .page-content {
@@ -3279,4 +3282,746 @@ table {
   .finance-card-value {
     font-size: 1.55rem;
   }
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* =========================
+   TOUCH / MOBILE BASE
+   ========================= */
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+button,
+.primary-button,
+.secondary-button,
+.danger-button,
+.inline-button,
+.slot-button,
+.public-slot-button,
+.weekday-chip,
+.calendar-nav-button,
+.icon-button {
+  min-height: 44px;
+}
+
+input,
+select,
+textarea,
+.form-input,
+.text-input {
+  min-height: 48px;
+  font-size: 16px;
+}
+
+/* =========================
+   LAYOUT
+   ========================= */
+.app-shell {
+  min-height: 100vh;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+
+.app-sidebar {
+  min-width: 0;
+  width: 100%;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow: hidden;
+}
+
+.app-main {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  padding: 1.25rem;
+}
+
+.page-stack,
+.page-card,
+.card,
+.table-card,
+.feedback-card,
+.soft-panel,
+.auth-form-card,
+.auth-wide-card,
+.auth-single-panel {
+  width: 100%;
+  min-width: 0;
+}
+
+.desktop-only {
+  display: block;
+}
+
+.only-mobile {
+  display: none;
+}
+
+.mobile-sidebar-wrapper {
+  display: none;
+}
+
+.mobile-sidebar-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.56);
+}
+
+.mobile-sidebar-panel {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: min(320px, 88vw);
+  height: 100%;
+  box-shadow: var(--shadow-floating);
+}
+
+/* =========================
+   HEADER
+   ========================= */
+.app-header {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.header-left {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.header-left>div {
+  min-width: 0;
+}
+
+.header-profile {
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
+.header-profile strong,
+.header-profile span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================
+   SECTION / ACTIONS
+   ========================= */
+.section-header {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-actions,
+.dashboard-top-actions,
+.actions-row,
+.item-actions,
+.entity-card-actions,
+.finance-appointment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* =========================
+   GRIDS
+   ========================= */
+.cards-grid,
+.form-grid,
+.two-column-grid,
+.three-columns,
+.dashboard-highlight-grid,
+.dashboard-main-grid,
+.dashboard-footer-grid,
+.dashboard-board-grid,
+.finance-executive-grid,
+.finance-main-grid,
+.finance-status-grid,
+.public-booking-grid,
+.login-modern-grid,
+.availability-editor-grid,
+.theme-options-grid {
+  width: 100%;
+  min-width: 0;
+}
+
+.cards-grid.two-cols,
+.two-column-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cards-grid.three-cols,
+.three-columns {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-highlight-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dashboard-main-grid,
+.dashboard-footer-grid,
+.finance-main-grid {
+  grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.85fr);
+}
+
+.dashboard-board-grid {
+  grid-template-columns: 360px minmax(0, 1fr);
+}
+
+.finance-executive-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.finance-status-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.public-booking-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
+}
+
+.login-modern-grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.9fr);
+}
+
+.availability-editor-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* =========================
+   TABLES
+   ========================= */
+.table-card {
+  overflow: hidden;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-wrapper table,
+table {
+  width: 100%;
+  min-width: 760px;
+}
+
+th,
+td {
+  white-space: nowrap;
+}
+
+/* =========================
+   CARDS / LISTS
+   ========================= */
+.dashboard-client-item,
+.dashboard-appointment-item,
+.dashboard-mini-list-item,
+.finance-daily-item,
+.finance-service-item,
+.finance-appointment-item,
+.availability-list-item,
+.split-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dashboard-appointment-right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+/* =========================
+   WEEKLY CALENDAR
+   ========================= */
+.weekly-calendar-desktop {
+  display: block;
+}
+
+.weekly-calendar-mobile {
+  display: none;
+}
+
+.weekly-calendar-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  justify-content: flex-end;
+}
+
+.weekly-calendar-shell {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.weekly-calendar-grid {
+  min-width: 1120px;
+}
+
+/* =========================
+   <= 1100px
+   ========================= */
+@media (max-width: 1100px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .desktop-only,
+  .app-sidebar {
+    display: none;
+  }
+
+  .only-mobile {
+    display: inline-flex;
+  }
+
+  .mobile-sidebar-wrapper {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+  }
+
+  .app-content,
+  .app-header {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .dashboard-main-grid,
+  .dashboard-footer-grid,
+  .dashboard-highlight-grid,
+  .dashboard-board-grid,
+  .finance-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .finance-executive-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================
+   <= 900px
+   ========================= */
+@media (max-width: 900px) {
+
+  .cards-grid.two-cols,
+  .cards-grid.three-cols,
+  .two-column-grid,
+  .three-columns,
+  .public-booking-grid,
+  .availability-editor-grid,
+  .finance-status-grid,
+  .login-modern-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-actions,
+  .dashboard-top-actions,
+  .actions-row,
+  .item-actions,
+  .entity-card-actions,
+  .finance-appointment-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .section-actions>*,
+  .dashboard-top-actions>*,
+  .actions-row>*,
+  .item-actions>*,
+  .entity-card-actions>*,
+  .finance-appointment-actions>* {
+    flex: 1 1 calc(50% - 0.4rem);
+    min-width: 0;
+  }
+
+  .dashboard-client-item,
+  .dashboard-appointment-item,
+  .dashboard-mini-list-item,
+  .finance-daily-item,
+  .finance-service-item,
+  .finance-appointment-item,
+  .availability-list-item,
+  .split-row {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .dashboard-appointment-right {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .finance-executive-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .weekly-calendar-desktop {
+    display: none;
+  }
+
+  .weekly-calendar-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .weekly-calendar-nav {
+    width: 100%;
+    justify-content: stretch;
+    gap: 0.75rem;
+  }
+
+  .weekly-calendar-nav>* {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .weekly-mobile-day-card {
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface-soft) 82%, transparent);
+    border-radius: 20px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .weekly-mobile-day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .weekly-mobile-appointments {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .weekly-mobile-appointment-card {
+    border-radius: 18px;
+    padding: 0.95rem;
+    background: var(--calendar-event-bg);
+    border: 1px solid var(--calendar-event-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .weekly-mobile-appointment-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .weekly-mobile-appointment-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .weekly-mobile-appointment-meta span {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* =========================
+   <= 760px
+   ========================= */
+@media (max-width: 760px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-profile {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .header-profile strong,
+  .header-profile span {
+    white-space: normal;
+  }
+
+  .section-actions>*,
+  .dashboard-top-actions>*,
+  .actions-row>*,
+  .item-actions>*,
+  .entity-card-actions>*,
+  .finance-appointment-actions>* {
+    flex: 1 1 100%;
+  }
+
+  .table-wrapper table,
+  table {
+    min-width: 680px;
+  }
+}
+
+/* =========================
+   <= 640px
+   ========================= */
+@media (max-width: 640px) {
+
+  .app-content,
+  .app-header {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .danger-button,
+  .inline-button,
+  .dashboard-filter-select,
+  input[type='month'],
+  input[type='date'],
+  input[type='time'] {
+    width: 100%;
+  }
+
+  .slot-grid,
+  .public-booking-slot-grid {
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  }
+
+  .day-board-row {
+    grid-template-columns: 1fr;
+  }
+
+  .day-board-time {
+    padding-top: 0;
+  }
+}
+
+/* =========================
+   <= 480px
+   ========================= */
+@media (max-width: 480px) {
+
+  .app-content,
+  .app-header {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .sidebar-shell {
+    padding: 0.85rem;
+  }
+
+  .login-modern-title,
+  .public-booking-hero h1 {
+    font-size: 1.7rem;
+  }
+}
+
+/* =========================
+   CATALOGO - PROFISSIONAL
+   ========================= */
+.catalog-product-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.catalog-product-image-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-soft) 86%, transparent);
+}
+
+.catalog-product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.catalog-product-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--text-soft);
+  font-weight: 700;
+}
+
+.catalog-product-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* =========================
+   CATALOGO PUBLICO
+   ========================= */
+.public-catalog-shell {
+  min-height: 100vh;
+  width: 100%;
+  background: var(--bg);
+  padding: 1.5rem;
+}
+
+.public-catalog-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.public-catalog-hero {
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--card-bg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.public-catalog-kicker {
+  display: inline-flex;
+  margin-bottom: 0.5rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  color: var(--text-soft);
+}
+
+.public-catalog-hero h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+  margin-bottom: 0.35rem;
+}
+
+.public-catalog-hero p {
+  color: var(--text-soft);
+}
+
+.public-catalog-card {
+  width: 100%;
+  min-width: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 1rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.public-catalog-image-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-soft) 86%, transparent);
+}
+
+.public-catalog-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.public-catalog-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--text-soft);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .public-catalog-shell {
+    padding: 1rem;
+  }
+
+  .cards-grid.three-cols {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.login-modern-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.link-button {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.link-button:hover {
+  opacity: 0.8;
 }

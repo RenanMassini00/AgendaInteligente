@@ -2,10 +2,13 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import AppLayout from '../components/layout/AppLayout'
 import AvailabilityPage from '../pages/AvailabilityPage'
 import AppointmentsPage from '../pages/AppointmentsPage'
+import CatalogAccessPage from '../pages/CatalogAccessPage'
+import CatalogPage from '../pages/CatalogPage'
 import ClientsPage from '../pages/ClientsPage'
 import CreateAppointmentPage from '../pages/CreateAppointmentPage'
 import CreateAvailabilityPage from '../pages/CreateAvailabilityPage'
 import CreateClientPage from '../pages/CreateClientPage'
+import CreateProductPage from '../pages/CreateProductPage'
 import CreateServicePage from '../pages/CreateServicePage'
 import DashboardPage from '../pages/DashboardPage'
 import FinancePage from '../pages/FinancePage'
@@ -13,29 +16,50 @@ import LoginPage from '../pages/LoginPage'
 import NotFoundPage from '../pages/NotFoundPage'
 import ProfilePage from '../pages/ProfilePage'
 import PublicBookingPage from '../pages/PublicBookingPage'
+import PublicCatalogPage from '../pages/PublicCatalogPage'
 import RegisterPage from '../pages/RegisterPage'
 import ServicesPage from '../pages/ServicesPage'
 import SettingsPage from '../pages/SettingsPage'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
-import { getCurrentRole, isAuthenticated } from '../utils/auth'
-import { ROUTE_PATHS } from './routePaths'
 import AdminBillingPage from '../pages/admin/AdminBillingPage'
 import AdminCompaniesPage from '../pages/admin/AdminCompaniesPage'
 import AdminUsersPage from '../pages/admin/AdminUsersPage'
+import { getCurrentRole, isAuthenticated } from '../utils/auth'
+import { ROUTE_PATHS } from './routePaths'
 
 export default function AppRoutes() {
   const location = useLocation()
   const authenticated = isAuthenticated()
   const role = getCurrentRole()
 
-  const isPublicBookingPath = location.pathname.startsWith('/agendar/')
-  const publicPaths: string[] = [ROUTE_PATHS.login, ROUTE_PATHS.register]
-  const isPublicPath = publicPaths.includes(location.pathname)
+  const pathname = location.pathname
+
+  const isPublicBookingPath = pathname.startsWith('/agendar/')
+  const isCatalogAccessPath = pathname === '/catalogo' || pathname === '/catalogo/'
+  const isPublicCatalogPath = pathname.startsWith('/catalogo/')
+
+  const publicPaths: string[] = [
+    ROUTE_PATHS.login,
+    ROUTE_PATHS.register,
+    ROUTE_PATHS.catalogAccess,
+  ]
+
+  const isPublicPath = publicPaths.includes(pathname)
 
   if (isPublicBookingPath) {
     return (
       <Routes>
         <Route path={ROUTE_PATHS.publicBooking} element={<PublicBookingPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    )
+  }
+
+  if (isCatalogAccessPath || isPublicCatalogPath) {
+    return (
+      <Routes>
+        <Route path={ROUTE_PATHS.catalogAccess} element={<CatalogAccessPage />} />
+        <Route path={ROUTE_PATHS.publicCatalog} element={<PublicCatalogPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     )
@@ -94,6 +118,10 @@ export default function AppRoutes() {
         <Route path={ROUTE_PATHS.services} element={<ServicesPage />} />
         <Route path={ROUTE_PATHS.createService} element={<CreateServicePage />} />
         <Route path={ROUTE_PATHS.editService} element={<CreateServicePage />} />
+
+        <Route path={ROUTE_PATHS.catalog} element={<CatalogPage />} />
+        <Route path={ROUTE_PATHS.createProduct} element={<CreateProductPage />} />
+        <Route path={ROUTE_PATHS.editProduct} element={<CreateProductPage />} />
 
         <Route path={ROUTE_PATHS.availability} element={<AvailabilityPage />} />
         <Route path={ROUTE_PATHS.createAvailability} element={<CreateAvailabilityPage />} />

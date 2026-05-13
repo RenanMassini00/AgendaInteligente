@@ -8,6 +8,7 @@ import {
   Scissors,
   Settings,
   Shield,
+  ShoppingBag,
   UserCircle2,
   Users,
 } from 'lucide-react'
@@ -21,6 +22,7 @@ export const professionalNavigationItems = [
   { label: 'Disponibilidade', path: ROUTE_PATHS.availability, icon: Clock3 },
   { label: 'Financeiro', path: ROUTE_PATHS.finance, icon: DollarSign },
   { label: 'Perfil', path: ROUTE_PATHS.profile, icon: UserCircle2 },
+  { label: 'Catálogo', path: ROUTE_PATHS.catalog, icon: ShoppingBag },
   { label: 'Configurações', path: ROUTE_PATHS.settings, icon: Settings },
 ]
 

@@ -149,7 +149,21 @@ export default function LoginPage() {
           </form>
 
           <div className="login-modern-footer">
-            <Link to={ROUTE_PATHS.register}>Criar conta profissional</Link>
+            <button
+              type="button"
+              className="link-button"
+              onClick={() => navigate(ROUTE_PATHS.register)}
+            >
+              Criar conta profissional
+            </button>
+
+            <button
+              type="button"
+              className="link-button"
+              onClick={() => navigate(ROUTE_PATHS.catalogAccess)}
+            >
+              Acessar catálogo público
+            </button>
           </div>
         </div>
       </div>
