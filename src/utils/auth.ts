@@ -13,7 +13,9 @@ export type Session = {
   expiresAt: number
   businessName?: string
   specialty?: string
-  companyId?: number | null
+  companyId?: number | null,
+  hasAppointmentsModule: boolean
+  hasCatalogModule: boolean
 }
 
 type SaveSessionInput = Omit<Session, 'expiresAt'> | Session
@@ -27,6 +29,8 @@ type SignInInput = {
   businessName?: string
   specialty?: string
   companyId?: number | null
+  hasAppointmentsModule: boolean
+  hasCatalogModule: boolean
 }
 
 function dispatchAuthChanged() {
@@ -57,6 +61,8 @@ export function saveSession(session: SaveSessionInput) {
     businessName: session.businessName,
     specialty: session.specialty,
     companyId: session.companyId ?? null,
+    hasAppointmentsModule: session.hasAppointmentsModule,
+    hasCatalogModule: session.hasCatalogModule,
   }
 
   localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(normalized))
@@ -73,6 +79,8 @@ export function signIn(data: SignInInput) {
     businessName: data.businessName,
     specialty: data.specialty,
     companyId: data.companyId ?? null,
+    hasAppointmentsModule: data.hasAppointmentsModule,
+    hasCatalogModule: data.hasCatalogModule,
   })
 }
 
@@ -115,6 +123,8 @@ export function getSession(): Session | null {
       businessName: parsed.businessName,
       specialty: parsed.specialty,
       companyId: parsed.companyId ?? null,
+      hasAppointmentsModule: parsed.hasAppointmentsModule ?? true,
+      hasCatalogModule: parsed.hasCatalogModule ?? false,
     }
   } catch {
     clearStoredSession()

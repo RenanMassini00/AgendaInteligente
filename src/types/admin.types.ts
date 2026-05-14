@@ -66,4 +66,6 @@ export type AdminUser = {
   createdAt: string
   publicSlug?: string | null
   timezone?: string | null
+  hasAppointmentsModule: boolean
+  hasCatalogModule: boolean
 }

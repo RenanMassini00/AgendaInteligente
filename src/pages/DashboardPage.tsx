@@ -6,6 +6,8 @@ import StatusBadge from '../components/ui/StatusBadge'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
+import { getCurrentUser } from '../utils/auth'
+import CatalogDashboard from '../components/appointments/CatalogDashboard'
 
 type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'cancelled'
 
@@ -205,6 +207,13 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [anchorDate, setAnchorDate] = useState(today)
+  
+  const currentUser = getCurrentUser()
+  const isCatalogOnly = !!currentUser?.hasCatalogModule && !currentUser?.hasAppointmentsModule
+
+  if (isCatalogOnly) {
+    return <CatalogDashboard />
+  }
 
   useEffect(() => {
     loadDashboard()

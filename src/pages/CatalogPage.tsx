@@ -75,12 +75,16 @@ export default function CatalogPage() {
       await api.put(`/api/products/${product.id}`, {
         userId: getCurrentUserId(),
         name: product.name,
+        category: product.category ?? null,
         description: product.description ?? null,
         price: product.price,
+        originalPrice: product.originalPrice ?? null,
+        promotionalPrice: product.promotionalPrice ?? null,
         imageUrl: product.imageUrl ?? null,
         stockQuantity: product.stockQuantity,
         isActive: product.isActive,
         isSold: true,
+        isFeatured: product.isFeatured,
         whatsAppMessage: product.whatsAppMessage ?? null,
       } as never)
 
@@ -100,6 +104,24 @@ export default function CatalogPage() {
     } catch {
       setSuccessMessage(`Link do catálogo: ${publicCatalogUrl}`)
     }
+  }
+
+  function renderPrice(product: Product) {
+    const showOldPrice =
+      product.originalPriceFormatted ||
+      (product.promotionalPrice ? product.priceFormatted : null)
+
+    return (
+      <div className="catalog-price-block">
+        {showOldPrice ? (
+          <span className="catalog-old-price">
+            {product.originalPriceFormatted || product.priceFormatted}
+          </span>
+        ) : null}
+
+        <strong className="catalog-current-price">{product.effectivePriceFormatted}</strong>
+      </div>
+    )
   }
 
   return (
@@ -152,63 +174,73 @@ export default function CatalogPage() {
         </PageCard>
       ) : null}
 
-      <div className="cards-grid three-cols">
+      <div className="public-catalog-grid premium">
         {isLoading ? (
           <div className="feedback-card full-width">Carregando produtos...</div>
         ) : products.length === 0 ? (
           <div className="feedback-card full-width">Nenhum produto cadastrado.</div>
         ) : (
           products.map((product) => (
-            <PageCard key={product.id}>
-              <div className="catalog-product-card">
-                <div className="catalog-product-image-wrap">
-                  {product.imageUrl ? (
-                    <img src={product.imageUrl} alt={product.name} className="catalog-product-image" />
-                  ) : (
-                    <div className="catalog-product-image-placeholder">Sem imagem</div>
-                  )}
+            <article key={product.id} className="public-catalog-card premium">
+              <div className="public-catalog-image-wrap premium">
+                {product.imageUrl ? (
+                  <img src={product.imageUrl} alt={product.name} className="public-catalog-image" />
+                ) : (
+                  <div className="public-catalog-image-placeholder">Sem imagem</div>
+                )}
+              </div>
+
+              <div className="public-catalog-card-body premium">
+                <div className="public-catalog-card-badges">
+                  {product.isFeatured ? <span className="catalog-badge badge-new">Destaque</span> : null}
+                  {product.stockQuantity > 0 && product.stockQuantity <= 3 ? (
+                    <span className="catalog-badge badge-warning">Últimas unidades</span>
+                  ) : null}
+                  {product.category ? <span className="soft-pill">{product.category}</span> : null}
                 </div>
 
-                <div className="card-stack">
-                  <div>
-                    <h3>{product.name}</h3>
-                    <p className="muted-text">{product.description || 'Sem descrição cadastrada.'}</p>
-                  </div>
+                <div className="public-catalog-card-head premium">
+                  <h3>{product.name}</h3>
+                  {renderPrice(product)}
+                </div>
 
-                  <div className="catalog-product-meta">
-                    <span className="soft-pill">{product.priceFormatted}</span>
-                    <span className="soft-pill">Estoque: {product.stockQuantity}</span>
-                    <span className="soft-pill">{product.isActive ? 'Ativo' : 'Inativo'}</span>
-                    <span className="soft-pill">{product.isSold ? 'Vendido' : 'Disponível'}</span>
-                    <span className="soft-pill">{product.isAvailablePublic ? 'Visível no catálogo' : 'Oculto do catálogo'}</span>
-                  </div>
+                <p className="public-catalog-description">
+                  {product.description || 'Sem descrição cadastrada.'}
+                </p>
 
-                  <div className="item-actions">
-                    <Link to={`/catalog/${product.id}/edit`} className="secondary-button small-button">
-                      Editar
-                    </Link>
+                <div className="public-catalog-meta-row premium">
+                  <span className="soft-pill">Estoque: {product.stockQuantity}</span>
+                  <span className={`soft-pill ${product.isAvailablePublic ? 'public-catalog-pill-success' : 'public-catalog-pill-warning'}`}>
+                    {product.isAvailablePublic ? 'No catálogo' : 'Oculto'}
+                  </span>
+                  <span className="soft-pill">{product.isSold ? 'Vendido' : 'Disponível'}</span>
+                </div>
 
-                    {!product.isSold ? (
-                      <button
-                        type="button"
-                        className="secondary-button small-button"
-                        onClick={() => handleMarkSold(product)}
-                      >
-                        Marcar vendido
-                      </button>
-                    ) : null}
+                <div className="item-actions">
+                  <Link to={`/catalog/${product.id}/edit`} className="secondary-button small-button">
+                    Editar
+                  </Link>
 
+                  {!product.isSold ? (
                     <button
                       type="button"
-                      className="danger-button small-button"
-                      onClick={() => handleDelete(product.id)}
+                      className="secondary-button small-button"
+                      onClick={() => handleMarkSold(product)}
                     >
-                      Excluir
+                      Marcar vendido
                     </button>
-                  </div>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    className="danger-button small-button"
+                    onClick={() => handleDelete(product.id)}
+                  >
+                    Excluir
+                  </button>
                 </div>
               </div>
-            </PageCard>
+            </article>
           ))
         )}
       </div>

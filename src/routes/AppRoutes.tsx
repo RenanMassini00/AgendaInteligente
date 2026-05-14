@@ -24,13 +24,14 @@ import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
 import AdminBillingPage from '../pages/admin/AdminBillingPage'
 import AdminCompaniesPage from '../pages/admin/AdminCompaniesPage'
 import AdminUsersPage from '../pages/admin/AdminUsersPage'
-import { getCurrentRole, isAuthenticated } from '../utils/auth'
+import { getCurrentRole, getCurrentUser, isAuthenticated } from '../utils/auth'
 import { ROUTE_PATHS } from './routePaths'
 
 export default function AppRoutes() {
   const location = useLocation()
   const authenticated = isAuthenticated()
   const role = getCurrentRole()
+  const user = getCurrentUser()
 
   const pathname = location.pathname
 
@@ -108,25 +109,34 @@ export default function AppRoutes() {
         <Route path={ROUTE_PATHS.root} element={<Navigate to={ROUTE_PATHS.dashboard} replace />} />
         <Route path={ROUTE_PATHS.dashboard} element={<DashboardPage />} />
 
-        <Route path={ROUTE_PATHS.appointments} element={<AppointmentsPage />} />
-        <Route path={ROUTE_PATHS.createAppointment} element={<CreateAppointmentPage />} />
+        {user?.hasAppointmentsModule ? (
+          <>
+            <Route path={ROUTE_PATHS.appointments} element={<AppointmentsPage />} />
+            <Route path={ROUTE_PATHS.createAppointment} element={<CreateAppointmentPage />} />
 
-        <Route path={ROUTE_PATHS.clients} element={<ClientsPage />} />
-        <Route path={ROUTE_PATHS.createClient} element={<CreateClientPage />} />
-        <Route path={ROUTE_PATHS.editClient} element={<CreateClientPage />} />
+            <Route path={ROUTE_PATHS.clients} element={<ClientsPage />} />
+            <Route path={ROUTE_PATHS.createClient} element={<CreateClientPage />} />
+            <Route path={ROUTE_PATHS.editClient} element={<CreateClientPage />} />
 
-        <Route path={ROUTE_PATHS.services} element={<ServicesPage />} />
-        <Route path={ROUTE_PATHS.createService} element={<CreateServicePage />} />
-        <Route path={ROUTE_PATHS.editService} element={<CreateServicePage />} />
+            <Route path={ROUTE_PATHS.services} element={<ServicesPage />} />
+            <Route path={ROUTE_PATHS.createService} element={<CreateServicePage />} />
+            <Route path={ROUTE_PATHS.editService} element={<CreateServicePage />} />
 
-        <Route path={ROUTE_PATHS.catalog} element={<CatalogPage />} />
-        <Route path={ROUTE_PATHS.createProduct} element={<CreateProductPage />} />
-        <Route path={ROUTE_PATHS.editProduct} element={<CreateProductPage />} />
+            <Route path={ROUTE_PATHS.availability} element={<AvailabilityPage />} />
+            <Route path={ROUTE_PATHS.createAvailability} element={<CreateAvailabilityPage />} />
 
-        <Route path={ROUTE_PATHS.availability} element={<AvailabilityPage />} />
-        <Route path={ROUTE_PATHS.createAvailability} element={<CreateAvailabilityPage />} />
+            <Route path={ROUTE_PATHS.finance} element={<FinancePage />} />
+          </>
+        ) : null}
 
-        <Route path={ROUTE_PATHS.finance} element={<FinancePage />} />
+        {user?.hasCatalogModule ? (
+          <>
+            <Route path={ROUTE_PATHS.catalog} element={<CatalogPage />} />
+            <Route path={ROUTE_PATHS.createProduct} element={<CreateProductPage />} />
+            <Route path={ROUTE_PATHS.editProduct} element={<CreateProductPage />} />
+          </>
+        ) : null}
+
         <Route path={ROUTE_PATHS.profile} element={<ProfilePage />} />
         <Route path={ROUTE_PATHS.settings} element={<SettingsPage />} />
 

@@ -7,19 +7,34 @@ import { getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
 import type { Product } from '../types/product.types'
 
+const commonCategories = [
+  'Roupas',
+  'Acessórios',
+  'Calçados',
+  'Beleza',
+  'Cosméticos',
+  'Presentes',
+  'Artesanato',
+  'Joias',
+]
+
 export default function CreateProductPage() {
   const navigate = useNavigate()
   const { id } = useParams()
   const isEditMode = Boolean(id)
 
   const [name, setName] = useState('')
+  const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
+  const [originalPrice, setOriginalPrice] = useState('')
+  const [promotionalPrice, setPromotionalPrice] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [stockQuantity, setStockQuantity] = useState('0')
   const [whatsAppMessage, setWhatsAppMessage] = useState('')
   const [isActive, setIsActive] = useState(true)
   const [isSold, setIsSold] = useState(false)
+  const [isFeatured, setIsFeatured] = useState(false)
 
   const [isLoading, setIsLoading] = useState(isEditMode)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -36,13 +51,17 @@ export default function CreateProductPage() {
         const response = await api.get<Product>(`/api/products/${id}?userId=${getCurrentUserId()}`)
 
         setName(response.name)
+        setCategory(response.category ?? '')
         setDescription(response.description ?? '')
         setPrice(String(response.price))
+        setOriginalPrice(response.originalPrice != null ? String(response.originalPrice) : '')
+        setPromotionalPrice(response.promotionalPrice != null ? String(response.promotionalPrice) : '')
         setImageUrl(response.imageUrl ?? '')
         setStockQuantity(String(response.stockQuantity))
         setWhatsAppMessage(response.whatsAppMessage ?? '')
         setIsActive(response.isActive)
         setIsSold(response.isSold)
+        setIsFeatured(response.isFeatured)
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : 'Não foi possível carregar o produto.')
       } finally {
@@ -63,12 +82,16 @@ export default function CreateProductPage() {
       const payload = {
         userId: getCurrentUserId(),
         name,
+        category: category || null,
         description: description || null,
         price: Number(price),
+        originalPrice: originalPrice ? Number(originalPrice) : null,
+        promotionalPrice: promotionalPrice ? Number(promotionalPrice) : null,
         imageUrl: imageUrl || null,
         stockQuantity: Number(stockQuantity),
         isActive,
         isSold,
+        isFeatured,
         whatsAppMessage: whatsAppMessage || null,
       }
 
@@ -125,7 +148,24 @@ export default function CreateProductPage() {
             </div>
 
             <div className="form-field">
-              <label className="label" htmlFor="price">Preço</label>
+              <label className="label" htmlFor="category">Categoria</label>
+              <input
+                id="category"
+                className="form-input"
+                list="product-categories"
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+                placeholder="Selecione ou digite"
+              />
+              <datalist id="product-categories">
+                {commonCategories.map((item) => (
+                  <option key={item} value={item} />
+                ))}
+              </datalist>
+            </div>
+
+            <div className="form-field">
+              <label className="label" htmlFor="price">Preço base</label>
               <input
                 id="price"
                 type="number"
@@ -134,6 +174,32 @@ export default function CreateProductPage() {
                 value={price}
                 onChange={(event) => setPrice(event.target.value)}
                 placeholder="0.00"
+              />
+            </div>
+
+            <div className="form-field">
+              <label className="label" htmlFor="originalPrice">Preço original</label>
+              <input
+                id="originalPrice"
+                type="number"
+                step="0.01"
+                className="form-input"
+                value={originalPrice}
+                onChange={(event) => setOriginalPrice(event.target.value)}
+                placeholder="Ex: 199.90"
+              />
+            </div>
+
+            <div className="form-field">
+              <label className="label" htmlFor="promotionalPrice">Preço promocional</label>
+              <input
+                id="promotionalPrice"
+                type="number"
+                step="0.01"
+                className="form-input"
+                value={promotionalPrice}
+                onChange={(event) => setPromotionalPrice(event.target.value)}
+                placeholder="Ex: 149.90"
               />
             </div>
 
@@ -149,7 +215,7 @@ export default function CreateProductPage() {
               />
             </div>
 
-            <div className="form-field">
+            <div className="form-field full-width">
               <label className="label" htmlFor="imageUrl">URL da imagem</label>
               <input
                 id="imageUrl"
@@ -182,32 +248,42 @@ export default function CreateProductPage() {
               />
             </div>
 
-            {isEditMode ? (
-              <>
-                <div className="toggle-row">
-                  <div>
-                    <strong>Produto ativo</strong>
-                    <p className="muted-text">Se desativar, ele não aparece no catálogo.</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={isActive}
-                    onChange={(event) => setIsActive(event.target.checked)}
-                  />
-                </div>
+            <div className="toggle-row">
+              <div>
+                <strong>Produto em destaque</strong>
+                <p className="muted-text">Aparece com prioridade no catálogo.</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={isFeatured}
+                onChange={(event) => setIsFeatured(event.target.checked)}
+              />
+            </div>
 
-                <div className="toggle-row">
-                  <div>
-                    <strong>Produto vendido</strong>
-                    <p className="muted-text">Produto vendido sai do catálogo público.</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={isSold}
-                    onChange={(event) => setIsSold(event.target.checked)}
-                  />
+            <div className="toggle-row">
+              <div>
+                <strong>Produto ativo</strong>
+                <p className="muted-text">Se desativar, ele não aparece no catálogo.</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={isActive}
+                onChange={(event) => setIsActive(event.target.checked)}
+              />
+            </div>
+
+            {isEditMode ? (
+              <div className="toggle-row">
+                <div>
+                  <strong>Produto vendido</strong>
+                  <p className="muted-text">Produto vendido sai do catálogo público.</p>
                 </div>
-              </>
+                <input
+                  type="checkbox"
+                  checked={isSold}
+                  onChange={(event) => setIsSold(event.target.checked)}
+                />
+              </div>
             ) : null}
 
             <div className="actions-row full-width">

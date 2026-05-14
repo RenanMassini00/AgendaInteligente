@@ -14,6 +14,8 @@ type AdminUserForm = {
   publicSlug?: string
   timezone?: string
   isActive: boolean
+  hasAppointmentsModule: boolean
+  hasCatalogModule: boolean
 }
 
 const initialForm: AdminUserForm = {
@@ -26,6 +28,8 @@ const initialForm: AdminUserForm = {
   publicSlug: '',
   timezone: 'America/Sao_Paulo',
   isActive: true,
+  hasAppointmentsModule: true,
+  hasCatalogModule: false,
 }
 
 export default function AdminUsersPage() {
@@ -84,6 +88,8 @@ export default function AdminUsersPage() {
       publicSlug: user.publicSlug ?? '',
       timezone: user.timezone ?? 'America/Sao_Paulo',
       isActive: user.status === 'active',
+      hasAppointmentsModule: user.hasAppointmentsModule,
+      hasCatalogModule: user.hasCatalogModule,
     })
 
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -133,6 +139,8 @@ export default function AdminUsersPage() {
           publicSlug: form.publicSlug || null,
           timezone: form.timezone || 'America/Sao_Paulo',
           isActive: form.isActive,
+          hasAppointmentsModule: form.hasAppointmentsModule,
+          hasCatalogModule: form.hasCatalogModule,
         } as never)
 
         setSuccessMessage('Usuário atualizado com sucesso.')
@@ -146,6 +154,8 @@ export default function AdminUsersPage() {
           password: form.password,
           publicSlug: form.publicSlug || null,
           timezone: form.timezone || 'America/Sao_Paulo',
+          hasAppointmentsModule: form.hasAppointmentsModule,
+          hasCatalogModule: form.hasCatalogModule,
         } as never)
 
         setSuccessMessage('Usuário cadastrado com sucesso.')
@@ -291,6 +301,31 @@ export default function AdminUsersPage() {
                   />
                 </div>
               ) : null}
+              <div className="toggle-row">
+                <div>
+                  <strong>Módulo de agendamentos</strong>
+                  <p className="muted-text">Libera agenda, clientes, serviços e disponibilidade.</p>
+                </div>
+
+                <input
+                  type="checkbox"
+                  checked={form.hasAppointmentsModule}
+                  onChange={(event) => updateField('hasAppointmentsModule', event.target.checked)}
+                />
+              </div>
+
+              <div className="toggle-row">
+                <div>
+                  <strong>Módulo de catálogo</strong>
+                  <p className="muted-text">Libera cadastro de produtos e catálogo público.</p>
+                </div>
+
+                <input
+                  type="checkbox"
+                  checked={form.hasCatalogModule}
+                  onChange={(event) => updateField('hasCatalogModule', event.target.checked)}
+                />
+              </div>
 
               <div className="full-width actions-row">
                 <button

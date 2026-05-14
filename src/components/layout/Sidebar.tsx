@@ -17,9 +17,20 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
   const user = getCurrentUser()
   const role = user?.role
 
-  const navigationItems = useMemo(() => {
-    return role === 'master_admin' ? adminNavigationItems : professionalNavigationItems
-  }, [role])
+  const navigationItems =
+    user?.role === 'master_admin'
+      ? adminNavigationItems
+      : professionalNavigationItems.filter((item) => {
+        if (item.key === 'catalog') {
+          return user?.hasCatalogModule
+        }
+
+        if (['appointments', 'clients', 'services', 'availability', 'finance'].includes(item.key)) {
+          return user?.hasAppointmentsModule
+        }
+
+        return true
+      })
 
   const title =
     role === 'master_admin'

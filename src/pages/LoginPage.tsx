@@ -18,7 +18,9 @@ type LoginResponse = {
     timezone?: string | null
     clientId?: number | null
     professionalUserId?: number | null
-    companyId?: number | null
+    companyId?: number | null,
+    hasAppointmentsModule: boolean,
+    hasCatalogModule: boolean
   }
 }
 
@@ -53,6 +55,8 @@ export default function LoginPage() {
         businessName: response.user.businessName ?? undefined,
         specialty: response.user.specialty ?? undefined,
         companyId: response.user.companyId ?? undefined,
+        hasAppointmentsModule: response.user.hasAppointmentsModule,
+        hasCatalogModule: response.user.hasCatalogModule,
       })
 
       if (response.user.role === 'master_admin') {
