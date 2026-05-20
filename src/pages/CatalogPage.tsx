@@ -124,6 +124,27 @@ export default function CatalogPage() {
     )
   }
 
+  async function handleRegisterSale(product: Product) {
+    try {
+      setErrorMessage('')
+      setSuccessMessage('')
+
+      await api.post(
+        `/api/products/${product.id}/register-sale?userId=${getCurrentUserId()}`,
+        { quantity: 1 }
+      )
+
+      setSuccessMessage('Venda registrada com sucesso.')
+      await loadPage()
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível registrar a venda.'
+      )
+    }
+  }
+
   return (
     <div className="page-stack">
       <SectionHeader
@@ -210,10 +231,16 @@ export default function CatalogPage() {
 
                 <div className="public-catalog-meta-row premium">
                   <span className="soft-pill">Estoque: {product.stockQuantity}</span>
-                  <span className={`soft-pill ${product.isAvailablePublic ? 'public-catalog-pill-success' : 'public-catalog-pill-warning'}`}>
-                    {product.isAvailablePublic ? 'No catálogo' : 'Oculto'}
+                  <span className="soft-pill">Vendidos: {product.soldQuantity}</span>
+
+                  <span
+                    className={`soft-pill ${product.stockQuantity > 0
+                        ? 'public-catalog-pill-success'
+                        : 'public-catalog-pill-warning'
+                      }`}
+                  >
+                    {product.stockQuantity > 0 ? 'Disponível no catálogo' : 'Sem estoque'}
                   </span>
-                  <span className="soft-pill">{product.isSold ? 'Vendido' : 'Disponível'}</span>
                 </div>
 
                 <div className="item-actions">
@@ -225,9 +252,10 @@ export default function CatalogPage() {
                     <button
                       type="button"
                       className="secondary-button small-button"
-                      onClick={() => handleMarkSold(product)}
+                      onClick={() => handleRegisterSale(product)}
+                      disabled={product.stockQuantity <= 0}
                     >
-                      Marcar vendido
+                      Registrar venda
                     </button>
                   ) : null}
 

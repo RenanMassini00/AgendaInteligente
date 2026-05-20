@@ -28,14 +28,16 @@ export default function AppLayout({ children }: AppLayoutProps) {
     (role === 'master_admin' ? 'Painel Administrativo' : 'Painel')
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${role === 'master_admin' ? 'app-shell--admin' : 'app-shell--professional'}`}>
       <aside className="app-sidebar desktop-only">
         <Sidebar />
       </aside>
 
       <div className="app-main">
         <Header title={title} onOpenSidebar={() => setIsSidebarOpen(true)} />
-        <main className="app-content">{children}</main>
+        <main className="app-content">
+          <div className="app-content-inner">{children}</div>
+        </main>
       </div>
 
       {isSidebarOpen ? (

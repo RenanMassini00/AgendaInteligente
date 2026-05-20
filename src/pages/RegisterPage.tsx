@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import {
   CalendarDays,
   CheckCircle2,
-  Package2,
   ShieldCheck,
   Store,
 } from 'lucide-react'
+import MassiniBrand from '../components/branding/MassiniBrand'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { api } from '../utils/api'
 import { signIn } from '../utils/auth'
@@ -114,18 +114,20 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="register-shell">
+    <div className="register-shell massini-auth-shell">
       <div className="register-backdrop" />
 
       <div className="register-layout">
         <section className="register-hero">
-          <div className="register-hero-badge">Agenda Pro</div>
+          <div className="auth-brand-block">
+            <MassiniBrand className="massini-brand--hero" />
+          </div>
 
           <div className="register-hero-copy">
             <h1>Crie sua conta profissional</h1>
             <p>
               Escolha o formato ideal para o seu negócio e comece com uma experiência
-              bonita, simples e profissional.
+              tecnológica, bonita e preparada para crescer.
             </p>
           </div>
 
@@ -174,7 +176,7 @@ export default function RegisterPage() {
               </span>
 
               <span className={`register-selected-chip ${hasCatalogModule ? 'active' : ''}`}>
-                <Package2 size={14} />
+                <Store size={14} />
                 Marketplace
               </span>
             </div>
@@ -182,7 +184,7 @@ export default function RegisterPage() {
         </section>
 
         <section className="register-form-panel">
-          <div className="register-form-card">
+          <div className="register-form-card massini-auth-card">
             <div className="register-form-header">
               <span className="register-form-kicker">Cadastro</span>
               <h2>Novo acesso profissional</h2>

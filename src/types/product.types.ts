@@ -13,6 +13,7 @@ export type Product = {
   effectivePriceFormatted: string
   imageUrl?: string | null
   stockQuantity: number
+  soldQuantity: number
   isActive: boolean
   isSold: boolean
   isFeatured: boolean

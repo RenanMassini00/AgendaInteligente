@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import MassiniBrand from '../components/branding/MassiniBrand'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { api } from '../utils/api'
 import { signIn } from '../utils/auth'
@@ -18,10 +19,16 @@ type LoginResponse = {
     timezone?: string | null
     clientId?: number | null
     professionalUserId?: number | null
-    companyId?: number | null,
-    hasAppointmentsModule: boolean,
+    hasAppointmentsModule: boolean
     hasCatalogModule: boolean
   }
+}
+
+function normalizeRole(role?: string | null) {
+  const normalized = (role ?? '').trim().toLowerCase()
+  return normalized === 'master_admin' || normalized === 'master admin'
+    ? 'master_admin'
+    : 'professional'
 }
 
 export default function LoginPage() {
@@ -42,24 +49,24 @@ export default function LoginPage() {
       const response = await api.post<LoginResponse>('/api/auth/login', {
         email,
         password,
+        role: 'professional',
       })
 
-      console.log('LOGIN RESPONSE', response)
+      const normalizedRole = normalizeRole(response.user.role)
 
       signIn({
         token: response.token,
         userId: response.user.id,
+        role: normalizedRole,
         fullName: response.user.fullName,
         email: response.user.email,
-        role: response.user.role,
         businessName: response.user.businessName ?? undefined,
         specialty: response.user.specialty ?? undefined,
-        companyId: response.user.companyId ?? undefined,
         hasAppointmentsModule: response.user.hasAppointmentsModule,
         hasCatalogModule: response.user.hasCatalogModule,
       })
 
-      if (response.user.role === 'master_admin') {
+      if (normalizedRole === 'master_admin') {
         navigate(ROUTE_PATHS.adminDashboard, { replace: true })
       } else {
         navigate(ROUTE_PATHS.dashboard, { replace: true })
@@ -76,40 +83,42 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="login-modern-shell">
+    <div className="login-modern-shell massini-auth-shell">
       <div className="login-modern-grid">
         <div className="login-modern-hero">
-          <div className="login-modern-badge">Agenda Pro</div>
+          <div className="auth-brand-block">
+            <MassiniBrand className="massini-brand--hero" />
+          </div>
 
           <h1 className="login-modern-title">
-            Seu sistema de agendamento,
-            <span> bonito, rápido e profissional.</span>
+            Soluções digitais para
+            <span> agendamento, catálogo e gestão.</span>
           </h1>
 
           <p className="login-modern-description">
-            Organize clientes, serviços, horários e agendamentos em uma experiência
-            moderna e simples de usar.
+            Tecnologia que simplifica processos e prepara sua operação para crescer
+            dentro do ecossistema Massini Labs.
           </p>
 
           <div className="login-modern-highlights">
             <div className="login-highlight-card">
-              <strong>Clientes</strong>
-              <span>Cadastro rápido e histórico centralizado.</span>
-            </div>
-
-            <div className="login-highlight-card">
               <strong>Agendamentos</strong>
-              <span>Visualização clara da agenda e horários livres.</span>
+              <span>Organize clientes, serviços, disponibilidade e compromissos.</span>
             </div>
 
             <div className="login-highlight-card">
-              <strong>Disponibilidade</strong>
-              <span>Recorrência semanal e datas específicas.</span>
+              <strong>Catálogo</strong>
+              <span>Venda produtos com visual moderno e direcionamento para WhatsApp.</span>
+            </div>
+
+            <div className="login-highlight-card">
+              <strong>Expansão</strong>
+              <span>Novos serviços poderão ser adicionados no mesmo ecossistema.</span>
             </div>
           </div>
         </div>
 
-        <div className="login-modern-card">
+        <div className="login-modern-card massini-auth-card">
           <div className="login-modern-card-header">
             <p className="login-modern-kicker">Entrar</p>
             <h2>Login profissional</h2>
@@ -153,21 +162,13 @@ export default function LoginPage() {
           </form>
 
           <div className="login-modern-footer">
-            <button
-              type="button"
-              className="link-button"
-              onClick={() => navigate(ROUTE_PATHS.register)}
-            >
+            <Link to={ROUTE_PATHS.register} className="login-modern-footer-link">
               Criar conta profissional
-            </button>
+            </Link>
 
-            <button
-              type="button"
-              className="link-button"
-              onClick={() => navigate(ROUTE_PATHS.catalogAccess)}
-            >
+            <Link to={ROUTE_PATHS.catalogAccess} className="login-modern-footer-link">
               Acessar catálogo público
-            </button>
+            </Link>
           </div>
         </div>
       </div>

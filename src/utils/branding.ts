@@ -1,25 +1,29 @@
-const LOGO_STORAGE_KEY = 'scheduler_brand_logo'
-const BRANDING_EVENT = 'scheduler-branding-updated'
+const COMPANY_LOGO_STORAGE_KEY = 'scheduler_company_logo'
+const BRANDING_CHANGED_EVENT = 'branding:changed'
 
-export function getCompanyLogo() {
-  return localStorage.getItem(LOGO_STORAGE_KEY) ?? ''
+function dispatchBrandingChanged() {
+  window.dispatchEvent(new Event(BRANDING_CHANGED_EVENT))
 }
 
-export function setCompanyLogo(logoUrl: string) {
-  if (logoUrl) {
-    localStorage.setItem(LOGO_STORAGE_KEY, logoUrl)
+export function setCompanyLogo(logoUrl?: string | null) {
+  if (logoUrl && logoUrl.trim()) {
+    localStorage.setItem(COMPANY_LOGO_STORAGE_KEY, logoUrl)
   } else {
-    localStorage.removeItem(LOGO_STORAGE_KEY)
+    localStorage.removeItem(COMPANY_LOGO_STORAGE_KEY)
   }
 
-  window.dispatchEvent(new Event(BRANDING_EVENT))
+  dispatchBrandingChanged()
+}
+
+export function getCompanyLogo() {
+  return localStorage.getItem(COMPANY_LOGO_STORAGE_KEY) || ''
 }
 
 export function clearCompanyLogo() {
-  localStorage.removeItem(LOGO_STORAGE_KEY)
-  window.dispatchEvent(new Event(BRANDING_EVENT))
+  localStorage.removeItem(COMPANY_LOGO_STORAGE_KEY)
+  dispatchBrandingChanged()
 }
 
 export function getBrandingEventName() {
-  return BRANDING_EVENT
+  return BRANDING_CHANGED_EVENT
 }

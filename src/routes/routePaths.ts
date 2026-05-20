@@ -9,29 +9,26 @@ export const ROUTE_PATHS = {
 
   clients: '/clients',
   createClient: '/clients/new',
-  editClient: '/clients/:id/edit',
 
   services: '/services',
   createService: '/services/new',
-  editService: '/services/:id/edit',
-
-  catalog: '/catalog',
-  createProduct: '/catalog/new',
-  editProduct: '/catalog/:id/edit',
 
   availability: '/availability',
   createAvailability: '/availability/new',
 
   finance: '/finance',
   profile: '/profile',
-  settings: '/settings',
+
+  catalog: '/catalog',
+  createProduct: '/catalog/new',
+  catalogAccess: '/catalog-access',
+  publicCatalog: '/catalogo/:slug',
+
+  publicBooking: '/agendar/:slug',
 
   adminDashboard: '/admin/dashboard',
   adminCompanies: '/admin/companies',
   adminUsers: '/admin/users',
   adminBilling: '/admin/billing',
-
-  publicBooking: '/agendar/:slug',
-  catalogAccess: '/catalogo',
-  publicCatalog: '/catalogo/:slug',
+  adminSettings: '/admin/settings',
 } as const

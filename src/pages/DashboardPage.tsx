@@ -4,9 +4,8 @@ import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import StatusBadge from '../components/ui/StatusBadge'
 import { ROUTE_PATHS } from '../routes/routePaths'
-import { getCurrentUserId } from '../utils/auth'
+import { getCurrentUser, getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
-import { getCurrentUser } from '../utils/auth'
 import CatalogDashboard from '../components/appointments/CatalogDashboard'
 
 type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'cancelled'
@@ -98,14 +97,20 @@ function toDateInputValue(date: Date) {
   return `${year}-${month}-${day}`
 }
 
-function parseLocalDate(value: string) {
-  const [year, month, day] = value.split('-').map(Number)
-  return new Date(year, month - 1, day)
-}
-
 function formatDateLabel(value: string) {
   const [year, month, day] = value.split('-')
   return `${day}/${month}/${year}`
+}
+
+function formatLongDate(value: string) {
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+  }).format(date)
 }
 
 function getWeekStart(date: Date) {
@@ -207,17 +212,31 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [anchorDate, setAnchorDate] = useState(today)
-  
-  const currentUser = getCurrentUser()
-  const isCatalogOnly = !!currentUser?.hasCatalogModule && !currentUser?.hasAppointmentsModule
+  const [selectedDayValue, setSelectedDayValue] = useState(toDateInputValue(today))
 
-  if (isCatalogOnly) {
-    return <CatalogDashboard />
-  }
+  const currentUser = getCurrentUser()
+  const isCatalogOnly =
+    !!currentUser?.hasCatalogModule && !currentUser?.hasAppointmentsModule
 
   useEffect(() => {
     loadDashboard()
   }, [])
+
+  const weekDays = useMemo(() => buildWeekDays(anchorDate), [anchorDate])
+
+  useEffect(() => {
+    const todayValue = toDateInputValue(today)
+    const weekValues = weekDays.map((day) => day.value)
+
+    if (weekValues.includes(todayValue)) {
+      setSelectedDayValue(todayValue)
+      return
+    }
+
+    if (!weekValues.includes(selectedDayValue)) {
+      setSelectedDayValue(weekDays[0]?.value ?? '')
+    }
+  }, [anchorDate])
 
   async function loadDashboard() {
     try {
@@ -271,10 +290,9 @@ export default function DashboardPage() {
     setAnchorDate(new Date())
   }
 
-  const weekDays = useMemo(() => buildWeekDays(anchorDate), [anchorDate])
-
   const weeklyAppointments = useMemo(() => {
     const weekValues = weekDays.map((day) => day.value)
+
     return appointments
       .filter((item) => weekValues.includes(item.date))
       .sort((a, b) => {
@@ -292,7 +310,18 @@ export default function DashboardPage() {
   const weeklyCount = weeklyAppointments.length
 
   const todayValue = toDateInputValue(today)
-  const todayAppointmentsCount = appointments.filter((item) => item.date === todayValue).length
+  const todayAppointmentsCount = appointments.filter(
+    (item) => item.date === todayValue
+  ).length
+
+  const appointmentsByDay = useMemo(() => {
+    return weekDays.map((day) => ({
+      ...day,
+      appointments: weeklyAppointments.filter((item) => item.date === day.value),
+    }))
+  }, [weekDays, weeklyAppointments])
+
+  const selectedDay = appointmentsByDay.find((day) => day.value === selectedDayValue) || appointmentsByDay[0]
 
   const gridData = useMemo(() => {
     return TIME_SLOTS.map((slot) => {
@@ -315,6 +344,10 @@ export default function DashboardPage() {
     })
   }, [weekDays, weeklyAppointments])
 
+  if (isCatalogOnly) {
+    return <CatalogDashboard />
+  }
+
   if (isLoading) {
     return <div className="feedback-card">Carregando dashboard...</div>
   }
@@ -324,13 +357,17 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="page-stack dashboard-week-page">
+    <div className="page-stack dashboard-v3-page">
       <SectionHeader
-        title="Dashboard semanal"
-        description="Visualize sua agenda em formato de calendário profissional."
+        title="Dashboard"
+        description="Acompanhe seus compromissos e sua agenda semanal."
         action={
-          <div className="dashboard-top-actions">
-            <button type="button" className="secondary-button" onClick={goToCurrentWeek}>
+          <div className="dashboard-v3-top-actions">
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={goToCurrentWeek}
+            >
               Semana atual
             </button>
 
@@ -345,125 +382,189 @@ export default function DashboardPage() {
         }
       />
 
-      <div className="dashboard-highlight-grid">
-        <PageCard className="dashboard-highlight-card">
-          <div className="dashboard-highlight-head">
+      <div className="dashboard-v3-stats">
+        <PageCard className="dashboard-v3-stat-card">
+          <div className="dashboard-v3-stat-head">
             <div>
-              <p className="dashboard-highlight-label">Agendamentos hoje</p>
-              <h2 className="dashboard-highlight-number">{todayAppointmentsCount}</h2>
+              <span className="dashboard-v3-stat-label">Hoje</span>
+              <h2>{todayAppointmentsCount}</h2>
             </div>
-            <div className="dashboard-highlight-icon">📅</div>
+            <div className="dashboard-v3-stat-icon">📅</div>
           </div>
-          <p className="dashboard-highlight-text">
-            Compromissos do dia atual.
-          </p>
+          <p>Compromissos do dia atual.</p>
         </PageCard>
 
-        <PageCard className="dashboard-highlight-card">
-          <div className="dashboard-highlight-head">
+        <PageCard className="dashboard-v3-stat-card">
+          <div className="dashboard-v3-stat-head">
             <div>
-              <p className="dashboard-highlight-label">Agendamentos da semana</p>
-              <h2 className="dashboard-highlight-number">{weeklyCount}</h2>
+              <span className="dashboard-v3-stat-label">Semana</span>
+              <h2>{weeklyCount}</h2>
             </div>
-            <div className="dashboard-highlight-icon">🗓️</div>
+            <div className="dashboard-v3-stat-icon">🗓️</div>
           </div>
-          <p className="dashboard-highlight-text">
-            {getWeekRangeLabel(weekDays)}
-          </p>
+          <p>{getWeekRangeLabel(weekDays)}</p>
         </PageCard>
 
-        <PageCard className="dashboard-highlight-card">
-          <div className="dashboard-highlight-head">
+        <PageCard className="dashboard-v3-stat-card">
+          <div className="dashboard-v3-stat-head">
             <div>
-              <p className="dashboard-highlight-label">Receita da semana</p>
-              <h2 className="dashboard-highlight-number">
+              <span className="dashboard-v3-stat-label">Receita semanal</span>
+              <h2>
                 {weeklyRevenue.toLocaleString('pt-BR', {
                   style: 'currency',
                   currency: 'BRL',
                 })}
               </h2>
             </div>
-            <div className="dashboard-highlight-icon">💰</div>
+            <div className="dashboard-v3-stat-icon">💰</div>
           </div>
-          <p className="dashboard-highlight-text">
-            Soma dos atendimentos desta semana.
-          </p>
+          <p>Soma dos atendimentos desta semana.</p>
         </PageCard>
       </div>
 
-      <PageCard className="weekly-calendar-shell">
-        <div className="weekly-calendar-header">
+      <PageCard className="dashboard-v3-calendar-shell">
+        <div className="dashboard-v3-calendar-header">
           <div>
             <h3>Agenda da semana</h3>
             <p>{getWeekRangeLabel(weekDays)}</p>
           </div>
 
-          <div className="weekly-calendar-nav">
-            <button type="button" className="secondary-button" onClick={goToPreviousWeek}>
+          <div className="dashboard-v3-calendar-nav">
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={goToPreviousWeek}
+            >
               ← Semana anterior
             </button>
 
-            <button type="button" className="secondary-button" onClick={goToNextWeek}>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={goToNextWeek}
+            >
               Próxima semana →
             </button>
           </div>
         </div>
 
-        <div className="weekly-calendar-grid">
-          <div className="weekly-grid-corner" />
-
-          {weekDays.map((day) => {
+        <div className="dashboard-v3-day-strip">
+          {appointmentsByDay.map((day) => {
+            const isActive = day.value === selectedDayValue
             const isToday = day.value === todayValue
 
             return (
-              <div
+              <button
                 key={day.value}
-                className={`weekly-day-header ${isToday ? 'today' : ''}`.trim()}
+                type="button"
+                className={`dashboard-v3-day-pill ${isActive ? 'active' : ''} ${isToday ? 'today' : ''}`.trim()}
+                onClick={() => setSelectedDayValue(day.value)}
               >
                 <span>{day.shortLabel}</span>
                 <strong>{day.dayNumber}</strong>
-              </div>
+                <small>{day.appointments.length} ag.</small>
+              </button>
             )
           })}
+        </div>
 
-          {gridData.map((row) => (
-            <div key={row.slot} className="weekly-row-fragment">
-              <div className="weekly-time-cell">{row.slot}</div>
-
-              {row.days.map((day) => (
-                <div key={`${row.slot}-${day.date}`} className="weekly-slot-cell">
-                  {day.items.length === 0 ? (
-                    <div className="weekly-slot-empty" />
-                  ) : (
-                    day.items.map((appointment) => (
-                      <div className="weekly-appointment-card">
-                        <div className="weekly-appointment-top">
-                          <div className="weekly-appointment-title-group">
-                            <strong>{appointment.clientName}</strong>
-                            <p className="weekly-appointment-service">{appointment.serviceName}</p>
-                          </div>
-
-                          <div className="weekly-appointment-status-wrap">
-                            <StatusBadge status={appointment.status} />
-                          </div>
-                        </div>
-
-                        <div className="weekly-appointment-meta">
-                          <span className="soft-pill">{getTimeBadge(appointment)}</span>
-                          <span className="soft-pill">{appointment.priceFormatted}</span>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              ))}
+        <div className="dashboard-v3-mobile-day-view">
+          <div className="dashboard-v3-mobile-day-header">
+            <div>
+              <strong>{selectedDay?.fullLabel}</strong>
+              <p>{selectedDay ? formatLongDate(selectedDay.value) : ''}</p>
             </div>
-          ))}
+
+            <span className="soft-pill">
+              {selectedDay?.appointments.length ?? 0} compromisso(s)
+            </span>
+          </div>
+
+          <div className="dashboard-v3-mobile-day-list">
+            {selectedDay?.appointments.length ? (
+              selectedDay.appointments.map((appointment) => (
+                <div key={appointment.id} className="dashboard-v3-mobile-card">
+                  <div className="dashboard-v3-mobile-card-top">
+                    <div>
+                      <strong>{appointment.clientName}</strong>
+                      <p>{appointment.serviceName}</p>
+                    </div>
+                    <StatusBadge status={appointment.status} />
+                  </div>
+
+                  <div className="dashboard-v3-mobile-card-meta">
+                    <span className="soft-pill">{getTimeBadge(appointment)}</span>
+                    <span className="soft-pill">{appointment.priceFormatted}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="dashboard-v3-empty-state">
+                Nenhum compromisso neste dia.
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="dashboard-v3-desktop-board">
+          <div className="dashboard-v3-board-head">
+            <div className="dashboard-v3-board-corner">Horário</div>
+
+            {weekDays.map((day) => {
+              const isToday = day.value === todayValue
+
+              return (
+                <div
+                  key={day.value}
+                  className={`dashboard-v3-board-day ${isToday ? 'today' : ''}`.trim()}
+                >
+                  <span>{day.shortLabel}</span>
+                  <strong>{day.dayNumber}</strong>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="dashboard-v3-board-body">
+            {gridData.map((row) => (
+              <div key={row.slot} className="dashboard-v3-board-row">
+                <div className="dashboard-v3-time-cell">{row.slot}</div>
+
+                {row.days.map((day) => (
+                  <div key={`${row.slot}-${day.date}`} className="dashboard-v3-slot-cell">
+                    {day.items.length ? (
+                      <div className="dashboard-v3-slot-stack">
+                        {day.items.map((appointment) => (
+                          <div key={appointment.id} className="dashboard-v3-slot-card">
+                            <div className="dashboard-v3-slot-card-top">
+                              <strong>{appointment.clientName}</strong>
+                              <StatusBadge status={appointment.status} />
+                            </div>
+
+                            <p className="dashboard-v3-slot-service">
+                              {appointment.serviceName}
+                            </p>
+
+                            <div className="dashboard-v3-slot-meta">
+                              <span className="soft-pill">{getTimeBadge(appointment)}</span>
+                              <span className="soft-pill">{appointment.priceFormatted}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="dashboard-v3-slot-empty" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </PageCard>
 
-      <div className="dashboard-main-grid">
-        <PageCard className="dashboard-main-card">
+      <div className="dashboard-v3-bottom-grid">
+        <PageCard className="dashboard-v3-bottom-card">
           <div className="dashboard-section-header">
             <div>
               <h3>Próximos agendamentos</h3>
@@ -496,7 +597,7 @@ export default function DashboardPage() {
           </div>
         </PageCard>
 
-        <PageCard className="dashboard-side-card">
+        <PageCard className="dashboard-v3-bottom-card">
           <div className="dashboard-section-header">
             <div>
               <h3>Clientes recentes</h3>
@@ -508,6 +609,7 @@ export default function DashboardPage() {
             {summary?.recentClients?.length ? (
               summary.recentClients.map((client) => {
                 const name = client.fullName || client.name || 'Cliente'
+
                 return (
                   <div key={client.id} className="dashboard-client-item">
                     <div>

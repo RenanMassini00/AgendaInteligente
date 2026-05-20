@@ -1,9 +1,28 @@
+export type ThemeMode = 'light' | 'dark'
+
+export type AccentColor =
+  | 'blue'
+  | 'pink'
+  | 'violet'
+  | 'emerald'
+  | 'cyan'
+  | 'amber'
+  | 'rose'
+  | 'slate'
+
 export type Settings = {
-  id: number
   userId: number
-  theme: string
-  languageCode: string
-  reminderMinutes: number
-  emailNotifications: boolean
-  whatsappNotifications: boolean
+  theme: ThemeMode
+  accentColor: AccentColor
+  companyLogoUrl?: string | null
+}
+
+export type AdminBrandingUser = {
+  userId: number
+  fullName: string
+  businessName?: string | null
+  email: string
+  theme: ThemeMode
+  accentColor: AccentColor
+  companyLogoUrl?: string | null
 }
