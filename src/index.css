@@ -1253,6 +1253,56 @@ input[type='checkbox'] {
   backdrop-filter: none;
 }
 
+.public-booking-choice-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.public-booking-services-panel {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent, #2563eb) 10%, transparent), transparent 52%),
+    color-mix(in srgb, var(--surface, #fff) 94%, transparent);
+}
+
+.public-service-options-showcase {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.public-service-choice-card {
+  min-height: 132px;
+  align-items: start;
+}
+
+.public-booking-path-card {
+  position: sticky;
+  top: 1rem;
+}
+
+.public-booking-path-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.public-booking-path-list div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface-soft, #f8fafc) 80%, transparent);
+}
+
+.public-booking-path-list strong {
+  color: var(--text, #0f172a);
+}
+
+.public-booking-path-list span {
+  color: var(--text-soft, #64748b);
+  line-height: 1.45;
+}
+
 .public-booking-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(330px, 0.85fr);
@@ -1517,13 +1567,126 @@ input[type='checkbox'] {
   box-shadow: none;
 }
 
+.booking-modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.booking-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(2, 6, 23, 0.62);
+  backdrop-filter: blur(10px);
+}
+
+.booking-modal {
+  position: relative;
+  z-index: 1;
+  width: min(980px, 100%);
+  max-height: min(86vh, 860px);
+  overflow: auto;
+  display: grid;
+  gap: 1rem;
+  padding: 1.15rem;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--surface-solid, #fff) 96%, transparent);
+  box-shadow: var(--shadow-floating);
+}
+
+.booking-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.booking-modal-close {
+  flex: 0 0 auto;
+}
+
+.booking-modal-progress {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.booking-modal-progress span {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 999px;
+  color: var(--text-soft, #64748b);
+  font-weight: 800;
+  font-size: 0.88rem;
+}
+
+.booking-modal-progress span.active,
+.booking-modal-progress span.done {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #0f172a 0%, #1d2e4a 100%);
+}
+
+.booking-modal-progress span.done {
+  opacity: 0.72;
+}
+
+.booking-modal-grid {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.78fr) minmax(0, 1.22fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.booking-modal-step {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.booking-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.booking-modal-actions .primary-button,
+.booking-modal-actions .secondary-button {
+  gap: 0.5rem;
+}
+
+.booking-modal-actions .primary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 @media (max-width: 900px) {
+  .public-booking-choice-layout,
   .public-booking-grid {
     grid-template-columns: 1fr;
   }
 
+  .public-booking-path-card {
+    position: static;
+  }
+
   .public-booking-side {
     order: 2;
+  }
+
+  .booking-modal-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1535,6 +1698,33 @@ input[type='checkbox'] {
   .public-booking-panel {
     padding: 1rem;
     border-radius: 20px;
+  }
+
+  .booking-modal-layer {
+    padding: 0.65rem;
+  }
+
+  .booking-modal {
+    max-height: 92vh;
+    padding: 0.9rem;
+    border-radius: 22px;
+  }
+
+  .booking-modal-header {
+    align-items: flex-start;
+  }
+
+  .booking-modal-progress {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .booking-modal-actions .primary-button,
+  .booking-modal-actions .secondary-button {
+    width: 100%;
   }
 
   .public-service-option {

@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { CalendarDays, CheckCircle2, Clock3, Mail, Phone, User } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CheckCircle2, Clock3, Mail, Phone, User, X } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageCard from '../components/ui/PageCard'
 import { api } from '../utils/api'
@@ -72,6 +72,8 @@ export default function PublicBookingPage() {
 
   const [professional, setProfessional] = useState<PublicProfessional | null>(null)
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null)
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+  const [bookingStep, setBookingStep] = useState<'schedule' | 'details'>('schedule')
   const [selectedDate, setSelectedDate] = useState(getTodayValue())
   const [selectedSlot, setSelectedSlot] = useState('')
   const [fullName, setFullName] = useState('')
@@ -100,7 +102,7 @@ export default function PublicBookingPage() {
 
         if (isMounted) {
           setProfessional(response)
-          setSelectedServiceId(response.services[0]?.id ?? null)
+          setSelectedServiceId(null)
           setErrorMessage('')
         }
       } catch (error) {
@@ -188,6 +190,41 @@ export default function PublicBookingPage() {
     !!fullName.trim() &&
     !!phone.trim() &&
     !!email.trim()
+
+  function handleServiceSelect(serviceId: number) {
+    setSelectedServiceId(serviceId)
+    setSelectedSlot('')
+    setBookingStep('schedule')
+    setIsBookingModalOpen(true)
+    setErrorMessage('')
+    setSuccessMessage('')
+  }
+
+  function handleCloseModal() {
+    setIsBookingModalOpen(false)
+    setBookingStep('schedule')
+    setErrorMessage('')
+  }
+
+  function handleGoToDetails() {
+    if (!selectedServiceId || !selectedService) {
+      setErrorMessage('Selecione um servico.')
+      return
+    }
+
+    if (!selectedDate) {
+      setErrorMessage('Selecione uma data.')
+      return
+    }
+
+    if (!selectedSlot) {
+      setErrorMessage('Selecione um horario disponivel.')
+      return
+    }
+
+    setErrorMessage('')
+    setBookingStep('details')
+  }
 
   async function handleSubmit(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault()
@@ -287,199 +324,272 @@ export default function PublicBookingPage() {
           <p>{professional.subtitle}</p>
         </div>
 
-        {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
+        {errorMessage && !isBookingModalOpen ? <div className="feedback-card error-box">{errorMessage}</div> : null}
         {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
 
         <PageCard className="public-booking-card">
-          <form className="public-booking-grid" onSubmit={handleSubmit}>
-            <div className="public-booking-main">
-              <section className="public-booking-panel">
+          <div className="public-booking-choice-layout">
+            <section className="public-booking-panel public-booking-services-panel">
+              <div className="public-booking-step-heading">
+                <span>1</span>
+                <div>
+                  <h2>Escolha seu servico</h2>
+                  <p>Depois disso, abrimos uma jornada rapida para data, horario e seus dados.</p>
+                </div>
+              </div>
+
+              <div className="public-service-options public-service-options-showcase">
+                {professional.services.map((service) => {
+                  const isSelected = Number(service.id) === selectedServiceId
+
+                  return (
+                    <button
+                      key={service.id}
+                      type="button"
+                      className={`public-service-option public-service-choice-card ${isSelected ? 'selected' : ''}`.trim()}
+                      onClick={() => handleServiceSelect(Number(service.id))}
+                      aria-pressed={isSelected}
+                    >
+                      <span className="public-service-check">
+                        {isSelected ? <CheckCircle2 size={19} /> : null}
+                      </span>
+
+                      <span className="public-service-copy">
+                        <strong>{service.name}</strong>
+                        <small>{getServiceDescription(service.description)}</small>
+                      </span>
+
+                      <span className="public-service-meta">
+                        <span>{formatDuration(service.durationMinutes, service.durationFormatted)}</span>
+                        <strong>{service.priceFormatted}</strong>
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </section>
+
+            <aside className="public-booking-panel public-booking-path-card">
+              <div className="public-booking-step-heading">
+                <span>
+                  <Clock3 size={18} />
+                </span>
+                <div>
+                  <h2>Como funciona</h2>
+                  <p>Voce escolhe o servico e finaliza tudo em poucos passos.</p>
+                </div>
+              </div>
+
+              <div className="public-booking-path-list">
+                <div>
+                  <strong>Servico</strong>
+                  <span>Compare duracao, valor e descricao.</span>
+                </div>
+
+                <div>
+                  <strong>Agenda</strong>
+                  <span>Escolha uma data e um horario disponivel.</span>
+                </div>
+
+                <div>
+                  <strong>Confirmacao</strong>
+                  <span>Informe seus dados para receber o comprovante.</span>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </PageCard>
+
+        {isBookingModalOpen && selectedService ? (
+          <div className="booking-modal-layer" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+            <button
+              type="button"
+              className="booking-modal-backdrop"
+              onClick={handleCloseModal}
+              aria-label="Fechar agendamento"
+            />
+
+            <form className="booking-modal" onSubmit={handleSubmit}>
+              <div className="booking-modal-header">
                 <div className="public-booking-step-heading">
-                  <span>1</span>
+                  <span>{bookingStep === 'schedule' ? '2' : '3'}</span>
                   <div>
-                    <h2>Serviço</h2>
-                    <p>Escolha o atendimento que deseja agendar.</p>
+                    <h2 id="booking-modal-title">
+                      {bookingStep === 'schedule' ? 'Quando voce quer realizar?' : 'Seus dados'}
+                    </h2>
+                    <p>
+                      {bookingStep === 'schedule'
+                        ? 'Escolha a melhor data e um horario livre.'
+                        : 'Falta pouco para confirmar seu agendamento.'}
+                    </p>
                   </div>
                 </div>
 
-                <div className="public-service-options">
-                  {professional.services.map((service) => {
-                    const isSelected = Number(service.id) === selectedServiceId
+                <button
+                  type="button"
+                  className="icon-button booking-modal-close"
+                  onClick={handleCloseModal}
+                  aria-label="Fechar"
+                >
+                  <X size={18} />
+                </button>
+              </div>
 
-                    return (
-                      <button
-                        key={service.id}
-                        type="button"
-                        className={`public-service-option ${isSelected ? 'selected' : ''}`.trim()}
-                        onClick={() => setSelectedServiceId(Number(service.id))}
-                        aria-pressed={isSelected}
-                      >
-                        <span className="public-service-check">
-                          {isSelected ? <CheckCircle2 size={19} /> : null}
-                        </span>
+              <div className="booking-modal-progress">
+                <span className="done">Servico</span>
+                <span className={bookingStep === 'schedule' ? 'active' : 'done'}>Agenda</span>
+                <span className={bookingStep === 'details' ? 'active' : ''}>Dados</span>
+              </div>
 
-                        <span className="public-service-copy">
-                          <strong>{service.name}</strong>
-                          <small>{getServiceDescription(service.description)}</small>
-                        </span>
-
-                        <span className="public-service-meta">
-                          <span>{formatDuration(service.durationMinutes, service.durationFormatted)}</span>
-                          <strong>{service.priceFormatted}</strong>
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </section>
-
-              <section className="public-booking-panel">
-                <div className="public-booking-step-heading">
-                  <span>2</span>
-                  <div>
-                    <h2>Data e horário</h2>
-                    <p>{formatDateLabel(selectedDate)}</p>
-                  </div>
-                </div>
-
-                <label className="public-date-field" htmlFor="date">
-                  <CalendarDays size={18} />
-                  <input
-                    id="date"
-                    type="date"
-                    value={selectedDate}
-                    onChange={(event) => setSelectedDate(event.target.value)}
-                  />
-                </label>
-
-                <div className="public-booking-slots">
-                  {isLoadingSlots ? (
-                    <div className="public-booking-empty">Carregando horários...</div>
-                  ) : slots.length === 0 ? (
-                    <div className="public-booking-empty">
-                      Nenhum horário disponível para a data selecionada.
+              <div className="booking-modal-grid">
+                <aside className="public-booking-panel public-booking-summary-card">
+                  <div className="public-booking-summary-list">
+                    <div>
+                      <span>Servico</span>
+                      <strong>{selectedService.name}</strong>
                     </div>
-                  ) : (
-                    <div className="public-booking-slot-grid">
-                      {slots.map((slot) => {
-                        const isSelected = selectedSlot === slot
 
-                        return (
-                          <button
-                            key={slot}
-                            type="button"
-                            className={`public-slot-button ${isSelected ? 'selected' : ''}`.trim()}
-                            onClick={() => setSelectedSlot(slot)}
-                            aria-pressed={isSelected}
-                          >
-                            {slot}
-                          </button>
-                        )
-                      })}
+                    <div>
+                      <span>Data</span>
+                      <strong>{formatDateLabel(selectedDate)}</strong>
+                    </div>
+
+                    <div>
+                      <span>Horario</span>
+                      <strong>{selectedTimeLabel}</strong>
+                    </div>
+
+                    <div>
+                      <span>Valor</span>
+                      <strong>{selectedService.priceFormatted}</strong>
+                    </div>
+                  </div>
+                </aside>
+
+                <section className="booking-modal-step">
+                  {bookingStep === 'schedule' ? (
+                    <>
+                      <label className="public-date-field" htmlFor="date">
+                        <CalendarDays size={18} />
+                        <input
+                          id="date"
+                          type="date"
+                          value={selectedDate}
+                          onChange={(event) => setSelectedDate(event.target.value)}
+                        />
+                      </label>
+
+                      <div className="public-booking-slots">
+                        {isLoadingSlots ? (
+                          <div className="public-booking-empty">Carregando horarios...</div>
+                        ) : slots.length === 0 ? (
+                          <div className="public-booking-empty">
+                            Nenhum horario disponivel para a data selecionada.
+                          </div>
+                        ) : (
+                          <div className="public-booking-slot-grid">
+                            {slots.map((slot) => {
+                              const isSelected = selectedSlot === slot
+
+                              return (
+                                <button
+                                  key={slot}
+                                  type="button"
+                                  className={`public-slot-button ${isSelected ? 'selected' : ''}`.trim()}
+                                  onClick={() => setSelectedSlot(slot)}
+                                  aria-pressed={isSelected}
+                                >
+                                  {slot}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="public-booking-form">
+                      <label className="public-input-field" htmlFor="fullName">
+                        <User size={18} />
+                        <input
+                          id="fullName"
+                          value={fullName}
+                          onChange={(event) => setFullName(event.target.value)}
+                          placeholder="Nome completo"
+                          required
+                        />
+                      </label>
+
+                      <label className="public-input-field" htmlFor="phone">
+                        <Phone size={18} />
+                        <input
+                          id="phone"
+                          value={phone}
+                          onChange={(event) => setPhone(event.target.value)}
+                          placeholder="Telefone"
+                          required
+                        />
+                      </label>
+
+                      <label className="public-input-field" htmlFor="email">
+                        <Mail size={18} />
+                        <input
+                          id="email"
+                          type="email"
+                          value={email}
+                          onChange={(event) => setEmail(event.target.value)}
+                          placeholder="E-mail"
+                          required
+                        />
+                      </label>
+
+                      <textarea
+                        className="public-notes-field"
+                        value={notes}
+                        onChange={(event) => setNotes(event.target.value)}
+                        placeholder="Observacoes para o atendimento"
+                      />
                     </div>
                   )}
-                </div>
-              </section>
-            </div>
+                </section>
+              </div>
 
-            <aside className="public-booking-side">
-              <section className="public-booking-panel public-booking-summary-card">
-                <div className="public-booking-step-heading">
-                  <span>
-                    <Clock3 size={18} />
-                  </span>
-                  <div>
-                    <h2>Resumo</h2>
-                    <p>Confira os dados antes de confirmar.</p>
-                  </div>
-                </div>
+              {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
 
-                <div className="public-booking-summary-list">
-                  <div>
-                    <span>Serviço</span>
-                    <strong>{selectedService?.name ?? 'Não selecionado'}</strong>
-                  </div>
+              <div className="booking-modal-actions">
+                {bookingStep === 'details' ? (
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => setBookingStep('schedule')}
+                  >
+                    <ArrowLeft size={18} />
+                    Voltar
+                  </button>
+                ) : null}
 
-                  <div>
-                    <span>Data</span>
-                    <strong>{formatDateLabel(selectedDate)}</strong>
-                  </div>
-
-                  <div>
-                    <span>Horário</span>
-                    <strong>{selectedTimeLabel}</strong>
-                  </div>
-
-                  <div>
-                    <span>Valor</span>
-                    <strong>{selectedService?.priceFormatted ?? '--'}</strong>
-                  </div>
-                </div>
-              </section>
-
-              <section className="public-booking-panel public-booking-client-card">
-                <div className="public-booking-step-heading">
-                  <span>3</span>
-                  <div>
-                    <h2>Seus dados</h2>
-                    <p>Usaremos essas informações para confirmar a reserva.</p>
-                  </div>
-                </div>
-
-                <div className="public-booking-form">
-                  <label className="public-input-field" htmlFor="fullName">
-                    <User size={18} />
-                    <input
-                      id="fullName"
-                      value={fullName}
-                      onChange={(event) => setFullName(event.target.value)}
-                      placeholder="Nome completo"
-                      required
-                    />
-                  </label>
-
-                  <label className="public-input-field" htmlFor="phone">
-                    <Phone size={18} />
-                    <input
-                      id="phone"
-                      value={phone}
-                      onChange={(event) => setPhone(event.target.value)}
-                      placeholder="Telefone"
-                      required
-                    />
-                  </label>
-
-                  <label className="public-input-field" htmlFor="email">
-                    <Mail size={18} />
-                    <input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      placeholder="E-mail"
-                      required
-                    />
-                  </label>
-
-                  <textarea
-                    className="public-notes-field"
-                    value={notes}
-                    onChange={(event) => setNotes(event.target.value)}
-                    placeholder="Observações para o atendimento"
-                  />
-                </div>
-              </section>
-
-              <button
-                type="submit"
-                className="primary-button public-booking-submit"
-                disabled={isSubmitting || !canSubmit}
-              >
-                {isSubmitting ? 'Confirmando...' : 'Confirmar agendamento'}
-              </button>
-            </aside>
-          </form>
-        </PageCard>
+                {bookingStep === 'schedule' ? (
+                  <button
+                    type="button"
+                    className="primary-button"
+                    onClick={handleGoToDetails}
+                    disabled={!selectedSlot}
+                  >
+                    Continuar
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="primary-button"
+                    disabled={isSubmitting || !canSubmit}
+                  >
+                    {isSubmitting ? 'Confirmando...' : 'Confirmar agendamento'}
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        ) : null}
       </div>
     </div>
   )
