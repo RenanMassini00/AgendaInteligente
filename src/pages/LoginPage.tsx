@@ -161,7 +161,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="login-modern-footer">
+          {/* <div className="login-modern-footer">
             <Link to={ROUTE_PATHS.register} className="login-modern-footer-link">
               Criar conta profissional
             </Link>
@@ -169,7 +169,7 @@ export default function LoginPage() {
             <Link to={ROUTE_PATHS.catalogAccess} className="login-modern-footer-link">
               Acessar catálogo público
             </Link>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

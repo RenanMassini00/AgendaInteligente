@@ -25,6 +25,7 @@ export const ROUTE_PATHS = {
   publicCatalog: '/catalogo/:slug',
 
   publicBooking: '/agendar/:slug',
+  publicBookingSuccess: '/agendar/:slug/sucesso',
 
   adminDashboard: '/admin/dashboard',
   adminCompanies: '/admin/companies',

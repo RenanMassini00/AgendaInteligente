@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { CalendarDays, Clock3, Layers3, RotateCcw, Save, X } from 'lucide-react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { ROUTE_PATHS } from '../routes/routePaths'
@@ -276,12 +277,13 @@ export default function CreateAvailabilityPage() {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack availability-editor-page">
       <SectionHeader
-        title="Nova disponibilidade"
-        description="Cadastre horários recorrentes e também datas específicas."
+        title="Editar disponibilidade"
+        description="Monte sua rotina semanal e adicione exceções para datas especiais."
         action={
           <Link to={ROUTE_PATHS.availability} className="secondary-button">
+            <X size={18} />
             Voltar
           </Link>
         }
@@ -290,13 +292,30 @@ export default function CreateAvailabilityPage() {
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
       {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
 
-      <div className="availability-editor-grid">
-        <PageCard>
+      <div className="availability-editor-grid availability-editor-grid--forms">
+        <PageCard className="availability-editor-card">
           <div className="card-stack">
+            <div className="availability-editor-card-title">
+              <span>
+                <Layers3 size={18} />
+              </span>
+              <div>
+                <h3>Rotina semanal</h3>
+                <p className="muted-text">
+                  Aplique o mesmo horário em vários dias da semana.
+                </p>
+              </div>
+            </div>
+
+            <div className="availability-editor-preview">
+              <strong>{selectedWeekdays.length || 0}</strong>
+              <span>dia(s) selecionado(s)</span>
+              <small>{selectedWeekdayLabels || 'Escolha os dias da semana'}</small>
+            </div>
+
             <div>
-              <h3>Disponibilidade recorrente</h3>
               <p className="muted-text">
-                Aplique o mesmo horário em vários dias da semana.
+                Selecione atalhos ou toque nos dias desejados.
               </p>
             </div>
 
@@ -351,20 +370,26 @@ export default function CreateAvailabilityPage() {
             <div className="form-grid three-columns">
               <div className="form-field">
                 <label>Hora inicial</label>
-                <input
-                  type="time"
-                  value={recurringStartTime}
-                  onChange={(e) => setRecurringStartTime(e.target.value)}
-                />
+                <div className="availability-time-input">
+                  <Clock3 size={17} />
+                  <input
+                    type="time"
+                    value={recurringStartTime}
+                    onChange={(e) => setRecurringStartTime(e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="form-field">
                 <label>Hora final</label>
-                <input
-                  type="time"
-                  value={recurringEndTime}
-                  onChange={(e) => setRecurringEndTime(e.target.value)}
-                />
+                <div className="availability-time-input">
+                  <Clock3 size={17} />
+                  <input
+                    type="time"
+                    value={recurringEndTime}
+                    onChange={(e) => setRecurringEndTime(e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="form-field checkbox-field">
@@ -386,6 +411,7 @@ export default function CreateAvailabilityPage() {
                   className="secondary-button"
                   onClick={resetRecurringForm}
                 >
+                  <RotateCcw size={17} />
                   Cancelar edição
                 </button>
               ) : null}
@@ -396,6 +422,7 @@ export default function CreateAvailabilityPage() {
                 onClick={handleSaveRecurring}
                 disabled={isSavingRecurring}
               >
+                <Save size={17} />
                 {isSavingRecurring
                   ? 'Salvando...'
                   : editingRecurringId
@@ -406,41 +433,55 @@ export default function CreateAvailabilityPage() {
           </div>
         </PageCard>
 
-        <PageCard>
+        <PageCard className="availability-editor-card">
           <div className="card-stack">
-            <div>
-              <h3>Disponibilidade por data</h3>
-              <p className="muted-text">
-                Use para dias especiais, encaixes ou horários fora da rotina semanal.
-              </p>
+            <div className="availability-editor-card-title">
+              <span>
+                <CalendarDays size={18} />
+              </span>
+              <div>
+                <h3>Data específica</h3>
+                <p className="muted-text">
+                  Use para dias especiais, encaixes ou horários fora da rotina semanal.
+                </p>
+              </div>
             </div>
 
             <div className="form-grid">
               <div className="form-field">
                 <label>Data</label>
-                <input
-                  type="date"
-                  value={specificDate}
-                  onChange={(e) => setSpecificDate(e.target.value)}
-                />
+                <div className="availability-time-input">
+                  <CalendarDays size={17} />
+                  <input
+                    type="date"
+                    value={specificDate}
+                    onChange={(e) => setSpecificDate(e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="form-field">
                 <label>Hora inicial</label>
-                <input
-                  type="time"
-                  value={specificStartTime}
-                  onChange={(e) => setSpecificStartTime(e.target.value)}
-                />
+                <div className="availability-time-input">
+                  <Clock3 size={17} />
+                  <input
+                    type="time"
+                    value={specificStartTime}
+                    onChange={(e) => setSpecificStartTime(e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="form-field">
                 <label>Hora final</label>
-                <input
-                  type="time"
-                  value={specificEndTime}
-                  onChange={(e) => setSpecificEndTime(e.target.value)}
-                />
+                <div className="availability-time-input">
+                  <Clock3 size={17} />
+                  <input
+                    type="time"
+                    value={specificEndTime}
+                    onChange={(e) => setSpecificEndTime(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 
@@ -451,6 +492,7 @@ export default function CreateAvailabilityPage() {
                   className="secondary-button"
                   onClick={resetDateForm}
                 >
+                  <RotateCcw size={17} />
                   Cancelar edição
                 </button>
               ) : null}
@@ -461,6 +503,7 @@ export default function CreateAvailabilityPage() {
                 onClick={handleSaveDate}
                 disabled={isSavingDate}
               >
+                <Save size={17} />
                 {isSavingDate
                   ? 'Salvando...'
                   : editingDateId
@@ -472,10 +515,10 @@ export default function CreateAvailabilityPage() {
         </PageCard>
       </div>
 
-      <div className="availability-editor-grid">
-        <PageCard>
+      <div className="availability-editor-grid availability-editor-grid--lists">
+        <PageCard className="availability-editor-card">
           <div className="card-stack">
-            <div>
+            <div className="availability-editor-list-title">
               <h3>Recorrências cadastradas</h3>
               <p className="muted-text">Gerencie os dias fixos da semana.</p>
             </div>
@@ -522,9 +565,9 @@ export default function CreateAvailabilityPage() {
           </div>
         </PageCard>
 
-        <PageCard>
+        <PageCard className="availability-editor-card">
           <div className="card-stack">
-            <div>
+            <div className="availability-editor-list-title">
               <h3>Datas específicas</h3>
               <p className="muted-text">Gerencie exceções e horários especiais.</p>
             </div>

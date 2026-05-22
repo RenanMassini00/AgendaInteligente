@@ -1,18 +1,19 @@
-export type PublicService = {
+export type PublicBookingService = {
   id: number
   name: string
   description?: string | null
   durationMinutes: number
-  duration: string
+  durationFormatted: string
   price: number
   priceFormatted: string
 }
 
 export type PublicProfessional = {
+  name?: string
   displayName: string
   subtitle: string
-  publicSlug: string
-  services: PublicService[]
+  slug: string
+  services: PublicBookingService[]
 }
 
 export type PublicAvailableSlots = {
@@ -23,11 +24,15 @@ export type PublicAvailableSlots = {
 
 export type PublicBookingResponse = {
   appointmentId: number
-  fullName: string
-  phone: string
+  clientName: string
   serviceName: string
   date: string
-  time: string
-  status: string
+  startTime: string
+  endTime: string
+  professionalName: string
+  businessName?: string | null
+  clientEmailSent: boolean
+  professionalEmailSent: boolean
+  calendarCreated: boolean
   message: string
 }

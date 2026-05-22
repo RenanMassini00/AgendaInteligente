@@ -3,10 +3,10 @@ import { useEffect, useMemo, useState } from 'react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import StatusBadge from '../components/ui/StatusBadge'
+import CatalogDashboard from '../components/appointments/CatalogDashboard'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { getCurrentUser, getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
-import CatalogDashboard from '../components/appointments/CatalogDashboard'
 
 type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'cancelled'
 
@@ -18,7 +18,6 @@ type DashboardSummary = {
   expectedRevenueFormatted: string
   upcomingAppointments: DashboardAppointment[]
   recentClients: DashboardClient[]
-  topServices: DashboardService[]
 }
 
 type DashboardAppointment = {
@@ -40,13 +39,6 @@ type DashboardClient = {
   phone: string
 }
 
-type DashboardService = {
-  id: number
-  name: string
-  duration: string
-  priceFormatted: string
-}
-
 type AppointmentApiItem = {
   id: number
   clientName?: string
@@ -62,38 +54,11 @@ type AppointmentApiItem = {
   priceAtBookingFormatted?: string
 }
 
-const WEEKDAY_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-const WEEKDAY_FULL = [
-  'Domingo',
-  'Segunda-feira',
-  'Terça-feira',
-  'Quarta-feira',
-  'Quinta-feira',
-  'Sexta-feira',
-  'Sábado',
-]
-
-const TIME_SLOTS = [
-  '07:00',
-  '08:00',
-  '09:00',
-  '10:00',
-  '11:00',
-  '12:00',
-  '13:00',
-  '14:00',
-  '15:00',
-  '16:00',
-  '17:00',
-  '18:00',
-  '19:00',
-  '20:00',
-]
-
 function toDateInputValue(date: Date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
+
   return `${year}-${month}-${day}`
 }
 
@@ -102,41 +67,26 @@ function formatDateLabel(value: string) {
   return `${day}/${month}/${year}`
 }
 
-function formatLongDate(value: string) {
-  const [year, month, day] = value.split('-').map(Number)
-  const date = new Date(year, month - 1, day)
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-  }).format(date)
-}
-
 function getWeekStart(date: Date) {
   const current = new Date(date)
   const day = current.getDay()
   const diff = day === 0 ? -6 : 1 - day
   current.setDate(current.getDate() + diff)
   current.setHours(0, 0, 0, 0)
+
   return current
 }
 
-function buildWeekDays(baseDate: Date) {
-  const start = getWeekStart(baseDate)
+function getCurrentWeekRange(date: Date) {
+  const start = getWeekStart(date)
+  const end = new Date(start)
+  end.setDate(start.getDate() + 6)
 
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(start)
-    date.setDate(start.getDate() + index)
-
-    return {
-      date,
-      value: toDateInputValue(date),
-      shortLabel: WEEKDAY_SHORT[date.getDay()],
-      fullLabel: WEEKDAY_FULL[date.getDay()],
-      dayNumber: date.getDate(),
-    }
-  })
+  return {
+    startValue: toDateInputValue(start),
+    endValue: toDateInputValue(end),
+    label: `${formatDateLabel(toDateInputValue(start))} até ${formatDateLabel(toDateInputValue(end))}`,
+  }
 }
 
 function normalizeStatus(status?: string): AppointmentStatus {
@@ -176,21 +126,12 @@ function normalizeAppointment(item: AppointmentApiItem): DashboardAppointment {
   }
 }
 
-function getWeekRangeLabel(days: Array<{ value: string }>) {
-  if (!days.length) return ''
-
-  const first = days[0].value
-  const last = days[days.length - 1].value
-
-  return `${formatDateLabel(first)} até ${formatDateLabel(last)}`
-}
-
 function getTimeBadge(appointment: DashboardAppointment) {
   if (appointment.startTime && appointment.endTime) {
-    return `${appointment.startTime} - ${appointment.endTime}`
+    return `${appointment.startTime.slice(0, 5)} - ${appointment.endTime.slice(0, 5)}`
   }
 
-  return appointment.time || '--:--'
+  return appointment.time?.slice(0, 5) || '--:--'
 }
 
 function normalizeMoney(formatted: string) {
@@ -205,14 +146,11 @@ function normalizeMoney(formatted: string) {
 }
 
 export default function DashboardPage() {
-  const today = new Date()
-
+  const today = useMemo(() => new Date(), [])
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [appointments, setAppointments] = useState<DashboardAppointment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [anchorDate, setAnchorDate] = useState(today)
-  const [selectedDayValue, setSelectedDayValue] = useState(toDateInputValue(today))
 
   const currentUser = getCurrentUser()
   const isCatalogOnly =
@@ -221,22 +159,6 @@ export default function DashboardPage() {
   useEffect(() => {
     loadDashboard()
   }, [])
-
-  const weekDays = useMemo(() => buildWeekDays(anchorDate), [anchorDate])
-
-  useEffect(() => {
-    const todayValue = toDateInputValue(today)
-    const weekValues = weekDays.map((day) => day.value)
-
-    if (weekValues.includes(todayValue)) {
-      setSelectedDayValue(todayValue)
-      return
-    }
-
-    if (!weekValues.includes(selectedDayValue)) {
-      setSelectedDayValue(weekDays[0]?.value ?? '')
-    }
-  }, [anchorDate])
 
   async function loadDashboard() {
     try {
@@ -270,36 +192,17 @@ export default function DashboardPage() {
     }
   }
 
-  function goToPreviousWeek() {
-    setAnchorDate((current) => {
-      const next = new Date(current)
-      next.setDate(current.getDate() - 7)
-      return next
-    })
-  }
-
-  function goToNextWeek() {
-    setAnchorDate((current) => {
-      const next = new Date(current)
-      next.setDate(current.getDate() + 7)
-      return next
-    })
-  }
-
-  function goToCurrentWeek() {
-    setAnchorDate(new Date())
-  }
+  const todayValue = toDateInputValue(today)
+  const currentWeek = getCurrentWeekRange(today)
 
   const weeklyAppointments = useMemo(() => {
-    const weekValues = weekDays.map((day) => day.value)
-
-    return appointments
-      .filter((item) => weekValues.includes(item.date))
-      .sort((a, b) => {
-        if (a.date !== b.date) return a.date.localeCompare(b.date)
-        return (a.startTime || a.time).localeCompare(b.startTime || b.time)
-      })
-  }, [appointments, weekDays])
+    return appointments.filter((appointment) => {
+      return (
+        appointment.date >= currentWeek.startValue &&
+        appointment.date <= currentWeek.endValue
+      )
+    })
+  }, [appointments, currentWeek.endValue, currentWeek.startValue])
 
   const weeklyRevenue = useMemo(() => {
     return weeklyAppointments.reduce((total, item) => {
@@ -307,42 +210,9 @@ export default function DashboardPage() {
     }, 0)
   }, [weeklyAppointments])
 
-  const weeklyCount = weeklyAppointments.length
-
-  const todayValue = toDateInputValue(today)
   const todayAppointmentsCount = appointments.filter(
     (item) => item.date === todayValue
   ).length
-
-  const appointmentsByDay = useMemo(() => {
-    return weekDays.map((day) => ({
-      ...day,
-      appointments: weeklyAppointments.filter((item) => item.date === day.value),
-    }))
-  }, [weekDays, weeklyAppointments])
-
-  const selectedDay = appointmentsByDay.find((day) => day.value === selectedDayValue) || appointmentsByDay[0]
-
-  const gridData = useMemo(() => {
-    return TIME_SLOTS.map((slot) => {
-      const slotHour = slot.slice(0, 2)
-
-      return {
-        slot,
-        days: weekDays.map((day) => {
-          const items = weeklyAppointments.filter((appointment) => {
-            const start = appointment.startTime || appointment.time || ''
-            return appointment.date === day.value && start.startsWith(slotHour)
-          })
-
-          return {
-            date: day.value,
-            items,
-          }
-        }),
-      }
-    })
-  }, [weekDays, weeklyAppointments])
 
   if (isCatalogOnly) {
     return <CatalogDashboard />
@@ -360,16 +230,12 @@ export default function DashboardPage() {
     <div className="page-stack dashboard-v3-page">
       <SectionHeader
         title="Dashboard"
-        description="Acompanhe seus compromissos e sua agenda semanal."
+        description="Veja os principais indicadores e atalhos da sua operação."
         action={
           <div className="dashboard-v3-top-actions">
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={goToCurrentWeek}
-            >
-              Semana atual
-            </button>
+            <Link to={ROUTE_PATHS.appointments} className="secondary-button">
+              Ver agenda
+            </Link>
 
             <Link to={ROUTE_PATHS.createAppointment} className="primary-button">
               Novo agendamento
@@ -398,11 +264,11 @@ export default function DashboardPage() {
           <div className="dashboard-v3-stat-head">
             <div>
               <span className="dashboard-v3-stat-label">Semana</span>
-              <h2>{weeklyCount}</h2>
+              <h2>{weeklyAppointments.length}</h2>
             </div>
             <div className="dashboard-v3-stat-icon">🗓️</div>
           </div>
-          <p>{getWeekRangeLabel(weekDays)}</p>
+          <p>{currentWeek.label}</p>
         </PageCard>
 
         <PageCard className="dashboard-v3-stat-card">
@@ -421,147 +287,6 @@ export default function DashboardPage() {
           <p>Soma dos atendimentos desta semana.</p>
         </PageCard>
       </div>
-
-      <PageCard className="dashboard-v3-calendar-shell">
-        <div className="dashboard-v3-calendar-header">
-          <div>
-            <h3>Agenda da semana</h3>
-            <p>{getWeekRangeLabel(weekDays)}</p>
-          </div>
-
-          <div className="dashboard-v3-calendar-nav">
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={goToPreviousWeek}
-            >
-              ← Semana anterior
-            </button>
-
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={goToNextWeek}
-            >
-              Próxima semana →
-            </button>
-          </div>
-        </div>
-
-        <div className="dashboard-v3-day-strip">
-          {appointmentsByDay.map((day) => {
-            const isActive = day.value === selectedDayValue
-            const isToday = day.value === todayValue
-
-            return (
-              <button
-                key={day.value}
-                type="button"
-                className={`dashboard-v3-day-pill ${isActive ? 'active' : ''} ${isToday ? 'today' : ''}`.trim()}
-                onClick={() => setSelectedDayValue(day.value)}
-              >
-                <span>{day.shortLabel}</span>
-                <strong>{day.dayNumber}</strong>
-                <small>{day.appointments.length} ag.</small>
-              </button>
-            )
-          })}
-        </div>
-
-        <div className="dashboard-v3-mobile-day-view">
-          <div className="dashboard-v3-mobile-day-header">
-            <div>
-              <strong>{selectedDay?.fullLabel}</strong>
-              <p>{selectedDay ? formatLongDate(selectedDay.value) : ''}</p>
-            </div>
-
-            <span className="soft-pill">
-              {selectedDay?.appointments.length ?? 0} compromisso(s)
-            </span>
-          </div>
-
-          <div className="dashboard-v3-mobile-day-list">
-            {selectedDay?.appointments.length ? (
-              selectedDay.appointments.map((appointment) => (
-                <div key={appointment.id} className="dashboard-v3-mobile-card">
-                  <div className="dashboard-v3-mobile-card-top">
-                    <div>
-                      <strong>{appointment.clientName}</strong>
-                      <p>{appointment.serviceName}</p>
-                    </div>
-                    <StatusBadge status={appointment.status} />
-                  </div>
-
-                  <div className="dashboard-v3-mobile-card-meta">
-                    <span className="soft-pill">{getTimeBadge(appointment)}</span>
-                    <span className="soft-pill">{appointment.priceFormatted}</span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="dashboard-v3-empty-state">
-                Nenhum compromisso neste dia.
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="dashboard-v3-desktop-board">
-          <div className="dashboard-v3-board-head">
-            <div className="dashboard-v3-board-corner">Horário</div>
-
-            {weekDays.map((day) => {
-              const isToday = day.value === todayValue
-
-              return (
-                <div
-                  key={day.value}
-                  className={`dashboard-v3-board-day ${isToday ? 'today' : ''}`.trim()}
-                >
-                  <span>{day.shortLabel}</span>
-                  <strong>{day.dayNumber}</strong>
-                </div>
-              )
-            })}
-          </div>
-
-          <div className="dashboard-v3-board-body">
-            {gridData.map((row) => (
-              <div key={row.slot} className="dashboard-v3-board-row">
-                <div className="dashboard-v3-time-cell">{row.slot}</div>
-
-                {row.days.map((day) => (
-                  <div key={`${row.slot}-${day.date}`} className="dashboard-v3-slot-cell">
-                    {day.items.length ? (
-                      <div className="dashboard-v3-slot-stack">
-                        {day.items.map((appointment) => (
-                          <div key={appointment.id} className="dashboard-v3-slot-card">
-                            <div className="dashboard-v3-slot-card-top">
-                              <strong>{appointment.clientName}</strong>
-                              <StatusBadge status={appointment.status} />
-                            </div>
-
-                            <p className="dashboard-v3-slot-service">
-                              {appointment.serviceName}
-                            </p>
-
-                            <div className="dashboard-v3-slot-meta">
-                              <span className="soft-pill">{getTimeBadge(appointment)}</span>
-                              <span className="soft-pill">{appointment.priceFormatted}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="dashboard-v3-slot-empty" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </PageCard>
 
       <div className="dashboard-v3-bottom-grid">
         <PageCard className="dashboard-v3-bottom-card">
@@ -586,7 +311,7 @@ export default function DashboardPage() {
 
                   <div className="dashboard-appointment-right">
                     <span className="soft-pill">{appointment.date}</span>
-                    <span className="soft-pill">{appointment.time}</span>
+                    <span className="soft-pill">{getTimeBadge(appointment)}</span>
                     <span className="soft-pill">{appointment.priceFormatted}</span>
                   </div>
                 </div>

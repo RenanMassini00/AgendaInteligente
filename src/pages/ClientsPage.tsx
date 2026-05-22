@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { Mail, Phone, Plus, Pencil, Trash2 } from 'lucide-react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { ROUTE_PATHS } from '../routes/routePaths'
@@ -57,12 +58,13 @@ export default function ClientsPage() {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack management-page">
       <SectionHeader
         title="Clientes"
-        description="Gerencie os clientes cadastrados no sistema."
+        description="Gerencie contatos, telefones e informações rápidas dos seus clientes."
         action={
           <Link to={ROUTE_PATHS.createClient} className="primary-button">
+            <Plus size={18} />
             Novo cliente
           </Link>
         }
@@ -71,7 +73,7 @@ export default function ClientsPage() {
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
       {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
 
-      <div className="cards-grid three-cols">
+      <div className="cards-grid three-cols compact-entity-grid">
         {isLoading ? (
           <div className="feedback-card">Carregando clientes...</div>
         ) : clients.length === 0 ? (
@@ -82,34 +84,45 @@ export default function ClientsPage() {
             const initial = displayName.charAt(0).toUpperCase()
 
             return (
-              <PageCard key={client.id}>
+              <PageCard key={client.id} className="compact-entity-card client-entity-card">
                 <div className="entity-card">
-                  <div className="split-row">
-                    <div>
+                  <div className="entity-card-head">
+                    <div className="avatar light">{initial}</div>
+
+                    <div className="entity-card-title">
                       <h3>{displayName}</h3>
-                      <p className="muted-text">{client.phone}</p>
-                      <p className="muted-text small-text">
-                        {client.email || 'Sem e-mail cadastrado'}
-                      </p>
+                      <span>Cliente cadastrado</span>
+                    </div>
+                  </div>
+
+                  <div className="entity-card-meta-list">
+                    <div className="entity-card-meta-item">
+                      <Phone size={16} />
+                      <span>{client.phone || 'Sem telefone'}</span>
                     </div>
 
-                    <div className="avatar light">{initial}</div>
+                    <div className="entity-card-meta-item">
+                      <Mail size={16} />
+                      <span>{client.email || 'Sem e-mail cadastrado'}</span>
+                    </div>
                   </div>
 
                   <div className="entity-card-actions">
                     <button
                       type="button"
-                      className="secondary-button"
+                      className="secondary-button small-button"
                       onClick={() => handleEditClient(client.id)}
                     >
+                      <Pencil size={16} />
                       Editar
                     </button>
 
                     <button
                       type="button"
-                      className="danger-button"
+                      className="danger-button small-button"
                       onClick={() => handleDeleteClient(client.id)}
                     >
+                      <Trash2 size={16} />
                       Excluir
                     </button>
                   </div>

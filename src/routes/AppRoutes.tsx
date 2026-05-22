@@ -25,6 +25,7 @@ import AdminUsersPage from '../pages/admin/AdminUsersPage'
 import SettingsPage from '../pages/SettingsPage'
 import { getCurrentRole, isAuthenticated } from '../utils/auth'
 import { ROUTE_PATHS } from './routePaths'
+import PublicBookingSuccessPage from '../pages/PublicBookingSuccessPage'
 
 export default function AppRoutes() {
   const location = useLocation()
@@ -45,6 +46,7 @@ export default function AppRoutes() {
   if (isPublicBookingPath) {
     return (
       <Routes>
+        <Route path={ROUTE_PATHS.publicBookingSuccess} element={<PublicBookingSuccessPage />} />
         <Route path={ROUTE_PATHS.publicBooking} element={<PublicBookingPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

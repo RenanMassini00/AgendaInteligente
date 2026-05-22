@@ -222,11 +222,7 @@ export default function PublicCatalogPage() {
 
   function renderAction(product: PublicCatalogProduct) {
     if (!product.whatsappUrl) {
-      return (
-        <button type="button" className="secondary-button public-catalog-action" disabled>
-          WhatsApp não configurado
-        </button>
-      )
+      return null
     }
 
     return (
@@ -445,9 +441,11 @@ export default function PublicCatalogPage() {
                         </span>
                       </div>
 
-                      <div className="public-catalog-card-footer premium">
-                        {renderAction(product)}
-                      </div>
+                      {product.whatsappUrl ? (
+                        <div className="public-catalog-card-footer premium">
+                          {renderAction(product)}
+                        </div>
+                      ) : null}
                     </div>
                   </article>
                 ))}

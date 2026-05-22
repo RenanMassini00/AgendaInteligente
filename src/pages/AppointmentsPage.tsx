@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import StatusBadge from '../components/ui/StatusBadge'
+import WeeklyAgenda from '../components/appointments/WeeklyAgenda'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
@@ -114,7 +115,16 @@ export default function AppointmentsPage() {
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
       {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
 
-      <PageCard className="table-card">
+      <WeeklyAgenda appointments={appointments} isLoading={isLoading} />
+
+      <PageCard className="table-card appointments-list-card">
+        <div className="appointments-list-header">
+          <div>
+            <h3>Todos os agendamentos</h3>
+            <p>Lista completa para conferência, edição e conclusão.</p>
+          </div>
+        </div>
+
         <div className="table-wrapper">
           <table>
             <thead>
