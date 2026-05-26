@@ -2,10 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   ArrowUpDown,
+  BadgeCheck,
   MessageCircle,
+  PackageCheck,
   RotateCcw,
   Search,
+  ShoppingBag,
   Sparkles,
+  Store,
   Tag,
 } from 'lucide-react'
 import { api } from '../utils/api'
@@ -26,6 +30,22 @@ function buildStoreWhatsAppUrl(catalog: PublicCatalog | null) {
   if (!phone) return ''
 
   const message = `Olá! Vim pelo catálogo e gostaria de saber mais sobre os produtos da loja ${catalog.businessName || catalog.professionalName}.`
+  return `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`
+}
+
+function buildProductWhatsAppUrl(catalog: PublicCatalog | null, product: PublicCatalogProduct) {
+  if (product.whatsappUrl) return product.whatsappUrl
+  if (!catalog?.phone) return ''
+
+  const phone = normalizePhone(catalog.phone)
+  if (!phone) return ''
+
+  const storeName = catalog.businessName || catalog.professionalName
+  const customMessage = product.whatsAppMessage?.trim()
+  const message =
+    customMessage ||
+    `Olá! Vim pelo catálogo da loja ${storeName} e tenho interesse no produto: ${product.name} (${product.effectivePriceFormatted}).`
+
   return `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`
 }
 
@@ -172,6 +192,7 @@ export default function PublicCatalogPage() {
   const totalVisible = filteredProducts.length
   const totalProducts = catalog?.products.length ?? 0
   const availableCount = catalog?.products.filter((item) => item.stockQuantity > 0).length ?? 0
+  const catalogName = catalog?.businessName || catalog?.professionalName || ''
 
   const hasActiveFilters =
     searchTerm.trim().length > 0 ||
@@ -221,17 +242,20 @@ export default function PublicCatalogPage() {
   }
 
   function renderAction(product: PublicCatalogProduct) {
-    if (!product.whatsappUrl) {
+    const productWhatsAppUrl = buildProductWhatsAppUrl(catalog, product)
+
+    if (!productWhatsAppUrl) {
       return null
     }
 
     return (
       <a
-        href={product.whatsappUrl}
+        href={productWhatsAppUrl}
         target="_blank"
         rel="noreferrer"
         className="primary-button public-catalog-action"
       >
+        <MessageCircle size={16} />
         Tenho interesse
       </a>
     )
@@ -250,24 +274,51 @@ export default function PublicCatalogPage() {
           <>
             <section className="public-catalog-hero premium">
               <div className="public-catalog-hero-main">
-                <div>
-                  <span className="public-catalog-kicker">Catálogo online</span>
-                  <h1>{catalog.businessName || catalog.professionalName}</h1>
+                <div className="public-catalog-title-block">
+                  <div className="public-catalog-brand-row">
+                    <div className="public-catalog-brand-mark">
+                      <Store size={22} />
+                    </div>
+
+                    <div>
+                      <span className="public-catalog-kicker">Catálogo online</span>
+                      <span className="public-catalog-status">
+                        <BadgeCheck size={14} />
+                        Vitrine ativa
+                      </span>
+                    </div>
+                  </div>
+
+                  <h1>{catalogName}</h1>
                   <p>
                     {catalog.specialty ||
                       'Escolha seus produtos favoritos e fale direto no WhatsApp.'}
                   </p>
+
+                  <div className="public-catalog-hero-pills">
+                    {storeWhatsAppUrl ? (
+                      <span>
+                        <MessageCircle size={15} />
+                        Atendimento direto
+                      </span>
+                    ) : null}
+
+                    <span>
+                      <PackageCheck size={15} />
+                      Estoque atualizado
+                    </span>
+                  </div>
                 </div>
 
                 <div className="public-catalog-summary premium">
                   <div className="public-catalog-summary-card premium">
-                    <strong>{totalProducts}</strong>
                     <span>produtos</span>
+                    <strong>{totalProducts}</strong>
                   </div>
 
                   <div className="public-catalog-summary-card premium">
-                    <strong>{availableCount}</strong>
                     <span>disponíveis</span>
+                    <strong>{availableCount}</strong>
                   </div>
                 </div>
               </div>
@@ -397,18 +448,31 @@ export default function PublicCatalogPage() {
                 Nenhum produto encontrado com os filtros informados.
               </div>
             ) : (
-              <div className="public-catalog-grid premium">
+              <div
+                className={`public-catalog-grid premium ${
+                  filteredProducts.length === 1 ? 'single-product' : ''
+                }`}
+              >
                 {filteredProducts.map((product) => (
-                  <article key={product.id} className="public-catalog-card premium">
+                  <article
+                    key={product.id}
+                    className={`public-catalog-card premium ${
+                      product.stockQuantity > 0 && product.stockQuantity <= 3 ? 'low-stock' : ''
+                    }`}
+                  >
                     <div className="public-catalog-image-wrap premium">
                       {product.imageUrl ? (
                         <img
                           src={product.imageUrl}
                           alt={product.name}
+                          loading="lazy"
                           className="public-catalog-image"
                         />
                       ) : (
-                        <div className="public-catalog-image-placeholder">Sem imagem</div>
+                        <div className="public-catalog-image-placeholder">
+                          <ShoppingBag size={24} />
+                          <span>Sem imagem</span>
+                        </div>
                       )}
                     </div>
 
@@ -441,11 +505,9 @@ export default function PublicCatalogPage() {
                         </span>
                       </div>
 
-                      {product.whatsappUrl ? (
-                        <div className="public-catalog-card-footer premium">
-                          {renderAction(product)}
-                        </div>
-                      ) : null}
+                      <div className="public-catalog-card-footer premium">
+                        {renderAction(product)}
+                      </div>
                     </div>
                   </article>
                 ))}

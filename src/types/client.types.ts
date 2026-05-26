@@ -5,4 +5,6 @@ export type Client = {
   phone: string
   birthDate?: string | null
   notes?: string | null
+  status: string
+  createdAt: string
 }

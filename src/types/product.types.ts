@@ -37,6 +37,7 @@ export type PublicCatalogProduct = {
   imageUrl?: string | null
   stockQuantity: number
   isFeatured: boolean
+  whatsAppMessage?: string | null
   whatsappUrl?: string | null
 }
 

@@ -21,6 +21,7 @@ export const ROUTE_PATHS = {
 
   catalog: '/catalog',
   createProduct: '/catalog/new',
+  editProduct: '/catalog/:id/edit',
   catalogAccess: '/catalog-access',
   publicCatalog: '/catalogo/:slug',
 

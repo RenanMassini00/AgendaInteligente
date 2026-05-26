@@ -1,12 +1,36 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { Mail, Phone, Plus, Pencil, Trash2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Mail, Phone, Pencil, Plus, Trash2 } from 'lucide-react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { ROUTE_PATHS } from '../routes/routePaths'
-import { getCurrentUserId } from '../utils/auth'
-import { api } from '../utils/api'
 import type { Client } from '../types/client.types'
+import { api } from '../utils/api'
+import { getCurrentUserId } from '../utils/auth'
+
+function getInitials(name?: string | null) {
+  if (!name?.trim()) return 'C'
+
+  const parts = name.trim().split(' ').filter(Boolean)
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 1).toUpperCase()
+  }
+
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+}
+
+function formatPhone(phone?: string | null) {
+  return phone?.trim() || 'Sem telefone cadastrado'
+}
+
+function formatEmail(email?: string | null) {
+  return email?.trim() || 'Sem e-mail cadastrado'
+}
+
+function formatClientNote(notes?: string | null) {
+  return notes?.trim() || 'Cliente cadastrado'
+}
 
 export default function ClientsPage() {
   const navigate = useNavigate()
@@ -14,7 +38,8 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+
+  const userId = useMemo(() => getCurrentUserId(), [])
 
   useEffect(() => {
     loadClients()
@@ -23,115 +48,114 @@ export default function ClientsPage() {
   async function loadClients() {
     try {
       setIsLoading(true)
-      const response = await api.get<Client[]>(`/api/clients?userId=${getCurrentUserId()}`)
-      setClients(response)
       setErrorMessage('')
+
+      const response = await api.get<Client[]>(`/api/clients?userId=${userId}`)
+      setClients(response)
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : 'Não foi possível carregar os clientes.'
+        error instanceof Error
+          ? error.message
+          : 'Nao foi possivel carregar os clientes.'
       )
     } finally {
       setIsLoading(false)
     }
   }
 
-  async function handleDeleteClient(id: number) {
+  function handleCreate() {
+    navigate(ROUTE_PATHS.createClient)
+  }
+
+  function handleEdit(clientId: number) {
+    navigate(`/clients/${clientId}/edit`)
+  }
+
+  async function handleDelete(clientId: number) {
     const confirmed = window.confirm('Deseja realmente excluir este cliente?')
     if (!confirmed) return
 
     try {
-      setErrorMessage('')
-      setSuccessMessage('')
-
-      await api.delete(`/api/clients/${id}`)
-      setSuccessMessage('Cliente excluído com sucesso.')
+      await api.delete(`/api/clients/${clientId}`)
       await loadClients()
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : 'Não foi possível excluir o cliente.'
+        error instanceof Error
+          ? error.message
+          : 'Nao foi possivel excluir o cliente.'
       )
     }
   }
 
-  function handleEditClient(id: number) {
-    navigate(`/clients/${id}/edit`)
-  }
-
   return (
-    <div className="page-stack management-page">
+    <div className="page-stack clients-page">
       <SectionHeader
         title="Clientes"
-        description="Gerencie contatos, telefones e informações rápidas dos seus clientes."
-        action={
-          <Link to={ROUTE_PATHS.createClient} className="primary-button">
-            <Plus size={18} />
+        description="Gerencie contatos, telefones e informacoes rapidas dos seus clientes."
+        action={(
+          <button type="button" className="primary-button small-button clients-add-button" onClick={handleCreate}>
+            <Plus size={16} />
             Novo cliente
-          </Link>
-        }
+          </button>
+        )}
       />
 
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
-      {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
 
-      <div className="cards-grid three-cols compact-entity-grid">
-        {isLoading ? (
-          <div className="feedback-card">Carregando clientes...</div>
-        ) : clients.length === 0 ? (
-          <div className="feedback-card">Nenhum cliente encontrado.</div>
-        ) : (
-          clients.map((client) => {
-            const displayName = client.fullName || 'Cliente'
-            const initial = displayName.charAt(0).toUpperCase()
+      {isLoading ? (
+        <div className="feedback-card">Carregando clientes...</div>
+      ) : clients.length === 0 ? (
+        <div className="feedback-card">Nenhum cliente cadastrado ainda.</div>
+      ) : (
+        <div className="cards-grid three-cols compact-entity-grid clients-grid">
+          {clients.map((client) => (
+            <PageCard key={client.id} className="compact-entity-card client-card">
+              <div className="entity-card">
+                <div className="entity-card-head">
+                  <div className="entity-icon client-icon">{getInitials(client.fullName)}</div>
 
-            return (
-              <PageCard key={client.id} className="compact-entity-card client-entity-card">
-                <div className="entity-card">
-                  <div className="entity-card-head">
-                    <div className="avatar light">{initial}</div>
-
-                    <div className="entity-card-title">
-                      <h3>{displayName}</h3>
-                      <span>Cliente cadastrado</span>
-                    </div>
-                  </div>
-
-                  <div className="entity-card-meta-list">
-                    <div className="entity-card-meta-item">
-                      <Phone size={16} />
-                      <span>{client.phone || 'Sem telefone'}</span>
-                    </div>
-
-                    <div className="entity-card-meta-item">
-                      <Mail size={16} />
-                      <span>{client.email || 'Sem e-mail cadastrado'}</span>
-                    </div>
-                  </div>
-
-                  <div className="entity-card-actions">
-                    <button
-                      type="button"
-                      className="secondary-button small-button"
-                      onClick={() => handleEditClient(client.id)}
-                    >
-                      <Pencil size={16} />
-                      Editar
-                    </button>
-
-                    <button
-                      type="button"
-                      className="danger-button small-button"
-                      onClick={() => handleDeleteClient(client.id)}
-                    >
-                      <Trash2 size={16} />
-                      Excluir
-                    </button>
+                  <div className="entity-card-title">
+                    <h3>{client.fullName || 'Cliente sem nome'}</h3>
+                    <span>{formatClientNote(client.notes)}</span>
                   </div>
                 </div>
-              </PageCard>
-            )
-          })
-        )}
-      </div>
+
+                <div className="entity-card-meta-list entity-card-meta-list--inline">
+                  <div className="entity-card-meta-item">
+                    <Phone size={16} />
+                    <strong>{formatPhone(client.phone)}</strong>
+                  </div>
+
+                  <div className="entity-card-meta-item">
+                    <Mail size={16} />
+                    <strong>{formatEmail(client.email)}</strong>
+                  </div>
+                </div>
+
+                <div className="entity-card-actions client-card-actions">
+                  <button
+                    type="button"
+                    className="secondary-button small-button"
+                    onClick={() => handleEdit(client.id)}
+                  >
+                    <Pencil size={15} />
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    className="danger-button small-button"
+                    onClick={() => handleDelete(client.id)}
+                  >
+                    <Trash2 size={15} />
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            </PageCard>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

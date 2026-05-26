@@ -122,6 +122,7 @@ export default function AppRoutes() {
 
         <Route path={ROUTE_PATHS.catalog} element={<CatalogPage />} />
         <Route path={ROUTE_PATHS.createProduct} element={<CreateProductPage />} />
+        <Route path={ROUTE_PATHS.editProduct} element={<CreateProductPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

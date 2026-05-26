@@ -1,5 +1,6 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { ImagePlus, UploadCloud, X } from 'lucide-react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { ROUTE_PATHS } from '../routes/routePaths'
@@ -18,6 +19,57 @@ const commonCategories = [
   'Joias',
 ]
 
+const maxProductImageEdge = 1400
+const productImageQuality = 0.86
+
+function readImageFile(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        reject(new Error('Não foi possível ler a imagem selecionada.'))
+        return
+      }
+
+      if (file.type === 'image/svg+xml') {
+        resolve(reader.result)
+        return
+      }
+
+      const image = new Image()
+
+      image.onload = () => {
+        const originalWidth = image.naturalWidth || image.width
+        const originalHeight = image.naturalHeight || image.height
+        const scale = Math.min(1, maxProductImageEdge / Math.max(originalWidth, originalHeight))
+        const width = Math.max(1, Math.round(originalWidth * scale))
+        const height = Math.max(1, Math.round(originalHeight * scale))
+        const canvas = document.createElement('canvas')
+        const context = canvas.getContext('2d')
+
+        if (!context) {
+          resolve(reader.result as string)
+          return
+        }
+
+        canvas.width = width
+        canvas.height = height
+        context.fillStyle = '#ffffff'
+        context.fillRect(0, 0, width, height)
+        context.drawImage(image, 0, 0, width, height)
+        resolve(canvas.toDataURL('image/jpeg', productImageQuality))
+      }
+
+      image.onerror = () => reject(new Error('Não foi possível preparar a imagem selecionada.'))
+      image.src = reader.result
+    }
+
+    reader.onerror = () => reject(new Error('Não foi possível ler a imagem selecionada.'))
+    reader.readAsDataURL(file)
+  })
+}
+
 export default function CreateProductPage() {
   const navigate = useNavigate()
   const { id } = useParams()
@@ -30,6 +82,7 @@ export default function CreateProductPage() {
   const [originalPrice, setOriginalPrice] = useState('')
   const [promotionalPrice, setPromotionalPrice] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [imageFileName, setImageFileName] = useState('')
   const [stockQuantity, setStockQuantity] = useState('0')
   const [whatsAppMessage, setWhatsAppMessage] = useState('')
   const [isActive, setIsActive] = useState(true)
@@ -57,6 +110,7 @@ export default function CreateProductPage() {
         setOriginalPrice(response.originalPrice != null ? String(response.originalPrice) : '')
         setPromotionalPrice(response.promotionalPrice != null ? String(response.promotionalPrice) : '')
         setImageUrl(response.imageUrl ?? '')
+        setImageFileName(response.imageUrl ? 'Imagem cadastrada' : '')
         setStockQuantity(String(response.stockQuantity))
         setWhatsAppMessage(response.whatsAppMessage ?? '')
         setIsActive(response.isActive)
@@ -107,6 +161,33 @@ export default function CreateProductPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  async function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      setErrorMessage('Selecione um arquivo de imagem válido.')
+      event.target.value = ''
+      return
+    }
+
+    try {
+      setErrorMessage('')
+      const imageDataUrl = await readImageFile(file)
+      setImageUrl(imageDataUrl)
+      setImageFileName(file.name)
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível anexar a imagem.')
+    } finally {
+      event.target.value = ''
+    }
+  }
+
+  function handleRemoveImage() {
+    setImageUrl('')
+    setImageFileName('')
   }
 
   return (
@@ -216,14 +297,49 @@ export default function CreateProductPage() {
             </div>
 
             <div className="form-field full-width">
-              <label className="label" htmlFor="imageUrl">URL da imagem</label>
-              <input
-                id="imageUrl"
-                className="form-input"
-                value={imageUrl}
-                onChange={(event) => setImageUrl(event.target.value)}
-                placeholder="https://..."
-              />
+              <span className="label">Imagem do produto</span>
+
+              <div className="product-image-uploader">
+                <label className="product-image-dropzone" htmlFor="productImage">
+                  <input
+                    id="productImage"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+
+                  <span className="product-image-dropzone-icon">
+                    <UploadCloud size={22} />
+                  </span>
+
+                  <span>
+                    <strong>{imageFileName || 'Anexar imagem'}</strong>
+                    <small>PNG, JPG ou WEBP direto do computador.</small>
+                  </span>
+                </label>
+
+                {imageUrl ? (
+                  <div className="product-image-preview-card">
+                    <div className="product-image-preview">
+                      <img src={imageUrl} alt="Prévia do produto" />
+                    </div>
+
+                    <button
+                      type="button"
+                      className="secondary-button small-button"
+                      onClick={handleRemoveImage}
+                    >
+                      <X size={15} />
+                      Remover
+                    </button>
+                  </div>
+                ) : (
+                  <div className="product-image-empty-preview">
+                    <ImagePlus size={24} />
+                    <span>Prévia da imagem</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="form-field full-width">
