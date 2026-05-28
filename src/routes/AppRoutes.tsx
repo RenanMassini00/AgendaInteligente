@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import AppLayout from '../components/layout/AppLayout'
+import ClientLayout from '../components/layout/ClientLayout'
 import AvailabilityPage from '../pages/AvailabilityPage'
 import AppointmentsPage from '../pages/AppointmentsPage'
 import ClientsPage from '../pages/ClientsPage'
@@ -8,6 +9,11 @@ import CreateAvailabilityPage from '../pages/CreateAvailabilityPage'
 import CreateClientPage from '../pages/CreateClientPage'
 import CreateProductPage from '../pages/CreateProductPage'
 import CreateServicePage from '../pages/CreateServicePage'
+import ClientAppointmentsPage from '../pages/ClientAppointmentsPage'
+import ClientBookAppointmentPage from '../pages/ClientBookAppointmentPage'
+import ClientHomePage from '../pages/ClientHomePage'
+import ClientRegisterPage from '../pages/ClientRegisterPage'
+import CatalogAccessPage from '../pages/CatalogAccessPage'
 import DashboardPage from '../pages/DashboardPage'
 import FinancePage from '../pages/FinancePage'
 import LoginPage from '../pages/LoginPage'
@@ -38,6 +44,7 @@ export default function AppRoutes() {
   const publicPaths: string[] = [
     ROUTE_PATHS.login,
     ROUTE_PATHS.register,
+    ROUTE_PATHS.clientRegister,
     ROUTE_PATHS.catalogAccess,
   ]
 
@@ -71,6 +78,10 @@ export default function AppRoutes() {
       return <Navigate to={ROUTE_PATHS.adminDashboard} replace />
     }
 
+    if (role === 'client') {
+      return <Navigate to={ROUTE_PATHS.clientHome} replace />
+    }
+
     return <Navigate to={ROUTE_PATHS.dashboard} replace />
   }
 
@@ -79,8 +90,23 @@ export default function AppRoutes() {
       <Routes>
         <Route path={ROUTE_PATHS.login} element={<LoginPage />} />
         <Route path={ROUTE_PATHS.register} element={<RegisterPage />} />
+        <Route path={ROUTE_PATHS.clientRegister} element={<ClientRegisterPage />} />
+        <Route path={ROUTE_PATHS.catalogAccess} element={<CatalogAccessPage />} />
         <Route path="*" element={<Navigate to={ROUTE_PATHS.login} replace />} />
       </Routes>
+    )
+  }
+
+  if (role === 'client') {
+    return (
+      <ClientLayout>
+        <Routes>
+          <Route path={ROUTE_PATHS.clientHome} element={<ClientHomePage />} />
+          <Route path={ROUTE_PATHS.clientBook} element={<ClientBookAppointmentPage />} />
+          <Route path={ROUTE_PATHS.clientAppointments} element={<ClientAppointmentsPage />} />
+          <Route path="*" element={<Navigate to={ROUTE_PATHS.clientHome} replace />} />
+        </Routes>
+      </ClientLayout>
     )
   }
 

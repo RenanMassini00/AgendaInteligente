@@ -4,7 +4,7 @@ import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { api } from '../utils/api'
 import { getCurrentUserId } from '../utils/auth'
-import { ROUTE_PATHS } from '../routes/routePaths'
+import { filterVisibleAppointments, isCancelledAppointmentStatus } from '../utils/appointments'
 import type { FinanceSummary } from '../types/finance.types'
 
 function getCurrentMonthValue() {
@@ -38,7 +38,8 @@ function getStatusTheme(status: string) {
 
 function canComplete(status: string) {
   const normalized = (status || '').toLowerCase()
-  return !['completed', 'concluded', 'done', 'concluído', 'cancelled', 'canceled', 'cancelado'].includes(normalized)
+  return !['completed', 'concluded', 'done', 'concluído'].includes(normalized) &&
+    !isCancelledAppointmentStatus(status)
 }
 
 function canDelete(status: string) {
@@ -132,6 +133,27 @@ export default function FinancePage() {
     return Math.max(...summary.dailyTotals.map((item) => item.amount))
   }, [summary])
 
+  const visibleAppointments = useMemo(() => {
+    return summary ? filterVisibleAppointments(summary.appointments) : []
+  }, [summary])
+
+  const visibleStatusTotals = useMemo(() => {
+    return summary
+      ? summary.statusTotals.filter(
+          (item) =>
+            !isCancelledAppointmentStatus(item.status) &&
+            !isCancelledAppointmentStatus(item.label)
+        )
+      : []
+  }, [summary])
+
+  const visibleCompletedAppointmentsCount = useMemo(() => {
+    return visibleAppointments.filter((item) => {
+      const normalized = (item.status || '').toLowerCase()
+      return ['completed', 'concluded', 'done', 'concluído'].includes(normalized)
+    }).length
+  }, [visibleAppointments])
+
   return (
     <div className="page-stack finance-page">
       <SectionHeader
@@ -212,7 +234,7 @@ export default function FinancePage() {
               <span className="finance-card-label">Taxa de conclusão</span>
               <strong className="finance-card-value">{summary.completionRateFormatted}</strong>
               <p className="finance-card-caption">
-                {summary.completedAppointmentsCount} concluído(s) de {summary.appointmentsCount}.
+                {visibleCompletedAppointmentsCount} concluído(s) de {visibleAppointments.length}.
               </p>
             </PageCard>
           </div>
@@ -281,7 +303,7 @@ export default function FinancePage() {
 
                 <div className="finance-indicator-box">
                   <span className="muted-text">Atendimentos do mês</span>
-                  <strong>{summary.appointmentsCount}</strong>
+                  <strong>{visibleAppointments.length}</strong>
                   <small className="muted-text">
                     Visão total de atendimentos lançados.
                   </small>
@@ -300,10 +322,10 @@ export default function FinancePage() {
               </div>
 
               <div className="finance-status-grid">
-                {summary.statusTotals.length === 0 ? (
+                {visibleStatusTotals.length === 0 ? (
                   <div className="empty-state">Nenhum status encontrado.</div>
                 ) : (
-                  summary.statusTotals.map((item) => (
+                  visibleStatusTotals.map((item) => (
                     <div
                       key={`${item.status}-${item.label}`}
                       className={`finance-status-card ${getStatusTheme(item.status)}`}
@@ -357,10 +379,10 @@ export default function FinancePage() {
             </div>
 
             <div className="dashboard-appointments-list">
-              {summary.appointments.length === 0 ? (
+              {visibleAppointments.length === 0 ? (
                 <div className="empty-state">Nenhum lançamento encontrado.</div>
               ) : (
-                summary.appointments.map((item) => (
+                visibleAppointments.map((item) => (
                   <div key={item.id} className="dashboard-appointment-item finance-appointment-item">
                     <div className="dashboard-appointment-left">
                       <div className="dashboard-appointment-main">

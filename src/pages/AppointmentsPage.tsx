@@ -7,11 +7,13 @@ import WeeklyAgenda from '../components/appointments/WeeklyAgenda'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
+import { filterVisibleAppointments, isCancelledAppointmentStatus } from '../utils/appointments'
 import type { Appointment } from '../types/appointment.types'
 
 function canComplete(status: string) {
   const normalized = (status || '').toLowerCase()
-  return !['completed', 'concluded', 'done', 'concluído', 'cancelled', 'canceled', 'cancelado'].includes(normalized)
+  return !['completed', 'concluded', 'done', 'concluído'].includes(normalized) &&
+    !isCancelledAppointmentStatus(status)
 }
 
 function canDelete(status: string) {
@@ -40,7 +42,7 @@ export default function AppointmentsPage() {
         `/api/appointments?userId=${getCurrentUserId()}`
       )
 
-      setAppointments(response)
+      setAppointments(filterVisibleAppointments(response))
     } catch (error) {
       setErrorMessage(
         error instanceof Error

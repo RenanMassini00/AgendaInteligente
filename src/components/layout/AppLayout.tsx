@@ -1,9 +1,14 @@
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Header from './Header'
+import MobileTabBar from './MobileTabBar'
 import Sidebar from './Sidebar'
-import { adminNavigationItems, professionalNavigationItems } from '../../config/navigation'
-import { getCurrentRole } from '../../utils/auth'
+import { getCurrentUser } from '../../utils/auth'
+import {
+  getCurrentNavigationItem,
+  getMobileNavigationItems,
+  getNavigationItemsForUser,
+} from '../../utils/navigation'
 
 type AppLayoutProps = {
   children: ReactNode
@@ -12,20 +17,26 @@ type AppLayoutProps = {
 export default function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const role = getCurrentRole()
+  const user = getCurrentUser()
+  const role = user?.role
 
   const navigationItems = useMemo(() => {
-    return role === 'master_admin' ? adminNavigationItems : professionalNavigationItems
-  }, [role])
+    return getNavigationItemsForUser(user)
+  }, [user?.hasAppointmentsModule, user?.hasCatalogModule, user?.role])
 
-  const currentItem = navigationItems.find((item) => {
-    if (location.pathname === item.path) return true
-    return location.pathname.startsWith(item.path)
-  })
+  const mobileNavigationItems = useMemo(() => {
+    return getMobileNavigationItems(navigationItems, user)
+  }, [navigationItems, user?.role])
+
+  const currentItem = getCurrentNavigationItem(navigationItems, location.pathname)
 
   const title =
     currentItem?.label ??
     (role === 'master_admin' ? 'Painel Administrativo' : 'Painel')
+
+  useEffect(() => {
+    setIsSidebarOpen(false)
+  }, [location.pathname])
 
   return (
     <div className={`app-shell ${role === 'master_admin' ? 'app-shell--admin' : 'app-shell--professional'}`}>
@@ -55,6 +66,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
           </aside>
         </div>
       ) : null}
+
+      <MobileTabBar
+        items={mobileNavigationItems}
+        onOpenMenu={() => setIsSidebarOpen(true)}
+      />
     </div>
   )
 }

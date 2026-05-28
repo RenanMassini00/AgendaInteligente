@@ -28,6 +28,11 @@ export const ROUTE_PATHS = {
   publicBooking: '/agendar/:slug',
   publicBookingSuccess: '/agendar/:slug/sucesso',
 
+  clientRegister: '/client/register',
+  clientHome: '/client',
+  clientBook: '/client/book',
+  clientAppointments: '/client/appointments',
+
   adminDashboard: '/admin/dashboard',
   adminCompanies: '/admin/companies',
   adminUsers: '/admin/users',

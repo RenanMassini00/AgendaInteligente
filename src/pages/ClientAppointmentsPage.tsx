@@ -4,6 +4,7 @@ import SectionHeader from '../components/ui/SectionHeader'
 import StatusBadge from '../components/ui/StatusBadge'
 import { api } from '../utils/api'
 import { getCurrentUserId } from '../utils/auth'
+import { filterVisibleAppointments } from '../utils/appointments'
 import type { Appointment } from '../types/appointment.types'
 
 export default function ClientAppointmentsPage() {
@@ -19,7 +20,7 @@ export default function ClientAppointmentsPage() {
         setIsLoading(true)
         const data = await api.get<Appointment[]>(`/api/client/appointments?userId=${getCurrentUserId()}`)
         if (isMounted) {
-          setAppointments(data)
+          setAppointments(filterVisibleAppointments(data))
           setErrorMessage('')
         }
       } catch (error) {

@@ -8,3 +8,5 @@ export type Service = {
   priceFormatted: string
   colorHex?: string | null
 }
+
+export type ServiceItem = Service

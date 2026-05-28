@@ -1,4 +1,4 @@
-export type UserRole = 'professional' | 'client'
+export type UserRole = 'professional' | 'client' | 'master_admin'
 
 export type AuthUser = {
   id: number
@@ -7,11 +7,13 @@ export type AuthUser = {
   email: string
   phone?: string | null
   specialty?: string | null
-  timezone: string
+  timezone?: string | null
   role: UserRole
   professionalUserId?: number | null
   clientId?: number | null
   publicSlug?: string | null
+  hasAppointmentsModule?: boolean
+  hasCatalogModule?: boolean
 }
 
 export type LoginResponse = {

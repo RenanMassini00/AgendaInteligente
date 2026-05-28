@@ -1,11 +1,14 @@
 import { LogOut, X } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { adminNavigationItems, professionalNavigationItems } from '../../config/navigation'
 import { ROUTE_PATHS } from '../../routes/routePaths'
 import { getCurrentUser, signOut } from '../../utils/auth'
 import { getBrandingEventName, getCompanyLogo } from '../../utils/branding'
 import { MASSINI_BRANDING } from '../../config/branding'
+import {
+  getNavigationItemsForUser,
+  getWorkspaceModuleCopy,
+} from '../../utils/navigation'
 
 type SidebarProps = {
   onNavigate?: () => void
@@ -18,23 +21,8 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
   const user = getCurrentUser()
   const role = user?.role
   const isAdmin = user?.role === 'master_admin'
-
-  const navigationItems =
-    user?.role === 'master_admin'
-      ? adminNavigationItems
-      : professionalNavigationItems.filter((item) => {
-          if (item.key === 'catalog') {
-            return user?.hasCatalogModule
-          }
-
-          if (
-            ['appointments', 'clients', 'services', 'availability', 'finance'].includes(item.key)
-          ) {
-            return user?.hasAppointmentsModule
-          }
-
-          return true
-        })
+  const navigationItems = getNavigationItemsForUser(user)
+  const workspaceCopy = getWorkspaceModuleCopy(user)
 
   const title =
     role === 'master_admin'
@@ -48,20 +36,6 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
 
   const caption = isAdmin ? MASSINI_BRANDING.name : 'Agenda Pro'
   const initial = title.charAt(0).toUpperCase()
-  const moduleSummary = isAdmin
-    ? 'Operação SaaS'
-    : user?.hasAppointmentsModule && user?.hasCatalogModule
-      ? 'Agenda e catálogo'
-      : user?.hasCatalogModule
-        ? 'Catálogo'
-        : 'Agenda'
-  const moduleDescription = isAdmin
-    ? 'Empresas, usuários, cobrança e identidade visual.'
-    : user?.hasAppointmentsModule && user?.hasCatalogModule
-      ? 'Atendimentos, clientes, serviços e produtos no mesmo painel.'
-      : user?.hasCatalogModule
-        ? 'Produtos e vendas direcionadas em destaque.'
-        : 'Agenda, clientes, serviços e disponibilidade.'
   const [logoUrl, setLogoUrl] = useState(
     isAdmin ? MASSINI_BRANDING.logo : getCompanyLogo()
   )
@@ -128,9 +102,9 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
       </div>
 
       <div className="sidebar-workspace-card">
-        <span>{isAdmin ? 'Área administrativa' : 'Módulos ativos'}</span>
-        <strong>{moduleSummary}</strong>
-        <small>{moduleDescription}</small>
+        <span>{workspaceCopy.label}</span>
+        <strong>{workspaceCopy.summary}</strong>
+        <small>{workspaceCopy.description}</small>
       </div>
 
       <nav className="sidebar-nav" aria-label="Navegação principal">

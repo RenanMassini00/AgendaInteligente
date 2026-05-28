@@ -14,8 +14,29 @@ function Field({ label, value }: { label: string; value: string }) {
   )
 }
 
+function getInitialProfile(): AuthUser | null {
+  const user = getCurrentUser()
+  if (!user) return null
+
+  return {
+    id: user.userId,
+    fullName: user.fullName,
+    businessName: user.businessName ?? null,
+    email: user.email,
+    phone: user.phone ?? null,
+    specialty: user.specialty ?? null,
+    timezone: user.timezone ?? null,
+    role: user.role,
+    professionalUserId: user.professionalUserId ?? null,
+    clientId: user.clientId ?? null,
+    publicSlug: user.publicSlug ?? null,
+    hasAppointmentsModule: user.hasAppointmentsModule,
+    hasCatalogModule: user.hasCatalogModule,
+  }
+}
+
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<AuthUser | null>(getCurrentUser())
+  const [profile, setProfile] = useState<AuthUser | null>(getInitialProfile())
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -70,7 +91,7 @@ export default function ProfilePage() {
           <Field label="Especialidade" value={profile.specialty || '-'} />
           <Field label="E-mail" value={profile.email} />
           <Field label="Telefone" value={profile.phone || '-'} />
-          <Field label="Fuso horário" value={profile.timezone} />
+          <Field label="Fuso horário" value={profile.timezone || '-'} />
         </div>
       </PageCard>
     </div>

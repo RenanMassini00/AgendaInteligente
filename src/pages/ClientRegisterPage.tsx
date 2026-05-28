@@ -76,7 +76,18 @@ export default function ClientRegisterPage() {
         notes: form.notes || null,
       })
 
-      signIn(data)
+      signIn({
+        token: data.token,
+        userId: data.user.id,
+        role: 'client',
+        fullName: data.user.fullName,
+        email: data.user.email,
+        phone: data.user.phone ?? null,
+        professionalUserId: data.user.professionalUserId ?? Number(form.professionalUserId),
+        clientId: data.user.clientId ?? null,
+        hasAppointmentsModule: false,
+        hasCatalogModule: false,
+      })
       navigate(ROUTE_PATHS.clientHome)
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Não foi possível criar a conta do cliente.')

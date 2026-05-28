@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { MASSINI_BRANDING } from '../../config/branding'
 import { getCurrentUser } from '../../utils/auth'
 import { getBrandingEventName, getCompanyLogo } from '../../utils/branding'
+import { getWorkspaceModuleCopy } from '../../utils/navigation'
 
 type HeaderProps = {
   title: string
@@ -19,22 +20,10 @@ function getGreeting(isAdmin: boolean) {
   return 'Boa noite'
 }
 
-function getWorkspaceLabel(user: ReturnType<typeof getCurrentUser>, isAdmin: boolean) {
-  if (isAdmin) return 'Gestão do ecossistema'
-
-  if (user?.hasAppointmentsModule && user?.hasCatalogModule) {
-    return 'Agenda + catálogo'
-  }
-
-  if (user?.hasCatalogModule) return 'Catálogo ativo'
-  if (user?.hasAppointmentsModule) return 'Agenda ativa'
-
-  return 'Painel profissional'
-}
-
 export default function Header({ title, onOpenSidebar }: HeaderProps) {
   const user = getCurrentUser()
   const isAdmin = user?.role === 'master_admin'
+  const workspaceCopy = getWorkspaceModuleCopy(user)
 
   const displayName = isAdmin
     ? MASSINI_BRANDING.name
@@ -46,7 +35,6 @@ export default function Header({ title, onOpenSidebar }: HeaderProps) {
 
   const initial = displayName.charAt(0).toUpperCase()
   const greeting = getGreeting(isAdmin)
-  const workspaceLabel = getWorkspaceLabel(user, isAdmin)
   const todayLabel = new Intl.DateTimeFormat('pt-BR', {
     weekday: 'short',
     day: '2-digit',
@@ -95,7 +83,7 @@ export default function Header({ title, onOpenSidebar }: HeaderProps) {
           <div className="header-insight-row" aria-label="Resumo do painel">
             <span className="header-insight-pill">
               <Sparkles size={15} />
-              {workspaceLabel}
+              {workspaceCopy.summary}
             </span>
             <span className="header-insight-pill header-insight-pill--muted">
               {subtitle}

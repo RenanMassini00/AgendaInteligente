@@ -123,7 +123,7 @@ export default function AppointmentForm({ onSubmitSuccess }: AppointmentFormProp
           <select className="text-input" name="clientId" value={form.clientId} onChange={handleChange}>
             <option value="">Selecione</option>
             {clients.map((client) => (
-              <option key={client.id} value={client.id}>{client.name}</option>
+              <option key={client.id} value={client.id}>{client.fullName || client.name}</option>
             ))}
           </select>
         </div>

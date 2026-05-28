@@ -67,34 +67,6 @@ export default function CatalogPage() {
     }
   }
 
-  async function handleMarkSold(product: Product) {
-    try {
-      setErrorMessage('')
-      setSuccessMessage('')
-
-      await api.put(`/api/products/${product.id}`, {
-        userId: getCurrentUserId(),
-        name: product.name,
-        category: product.category ?? null,
-        description: product.description ?? null,
-        price: product.price,
-        originalPrice: product.originalPrice ?? null,
-        promotionalPrice: product.promotionalPrice ?? null,
-        imageUrl: product.imageUrl ?? null,
-        stockQuantity: product.stockQuantity,
-        isActive: product.isActive,
-        isSold: true,
-        isFeatured: product.isFeatured,
-        whatsAppMessage: product.whatsAppMessage ?? null,
-      } as never)
-
-      setSuccessMessage('Produto marcado como vendido.')
-      await loadPage()
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível atualizar o produto.')
-    }
-  }
-
   async function handleCopyPublicLink() {
     if (!publicCatalogUrl) return
 

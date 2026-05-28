@@ -7,6 +7,7 @@ import CatalogDashboard from '../components/appointments/CatalogDashboard'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { getCurrentUser, getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
+import { filterVisibleAppointments, isCancelledAppointmentStatus } from '../utils/appointments'
 
 type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'cancelled'
 
@@ -90,6 +91,10 @@ function getCurrentWeekRange(date: Date) {
 }
 
 function normalizeStatus(status?: string): AppointmentStatus {
+  if (isCancelledAppointmentStatus(status)) {
+    return 'cancelled'
+  }
+
   switch ((status || '').toLowerCase()) {
     case 'confirmed':
       return 'confirmed'
@@ -97,9 +102,6 @@ function normalizeStatus(status?: string): AppointmentStatus {
     case 'concluded':
     case 'done':
       return 'completed'
-    case 'cancelled':
-    case 'canceled':
-      return 'cancelled'
     case 'scheduled':
     case 'agendado':
     default:
@@ -172,15 +174,21 @@ export default function DashboardPage() {
         api.get<AppointmentApiItem[]>(`/api/appointments?userId=${userId}`),
       ])
 
-      setSummary({
-        ...summaryResponse,
-        upcomingAppointments: (summaryResponse.upcomingAppointments || []).map((item) => ({
+      const upcomingAppointments = filterVisibleAppointments(
+        (summaryResponse.upcomingAppointments || []).map((item) => ({
           ...item,
           status: normalizeStatus(item.status),
-        })),
+        }))
+      )
+
+      setSummary({
+        ...summaryResponse,
+        upcomingAppointments,
       })
 
-      setAppointments((appointmentsResponse || []).map(normalizeAppointment))
+      setAppointments(
+        filterVisibleAppointments((appointmentsResponse || []).map(normalizeAppointment))
+      )
     } catch (error) {
       setErrorMessage(
         error instanceof Error
