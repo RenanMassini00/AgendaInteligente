@@ -1,52 +1,49 @@
-# Scheduler Starter
+# Scheduler Frontend Integrado
 
-Projeto inicial em React + TypeScript + Vite para um sistema de agendamento voltado a profissionais autônomos.
+Front-end React + TypeScript integrado com a API .NET do projeto.
 
-## O que já vem pronto
+## O que já está integrado
 
-- layout inicial completo
-- sidebar responsiva
-- header
-- dashboard
-- páginas de agendamentos, clientes, serviços, disponibilidade, perfil e configurações
-- rotas funcionando
-- mocks para acelerar o início do desenvolvimento
+- Login em `/login`
+- Dashboard consumindo `/api/dashboard`
+- Agendamentos consumindo `/api/appointments`
+- Novo agendamento consumindo `POST /api/appointments`
+- Clientes consumindo `/api/clients`
+- Serviços consumindo `/api/services`
+- Disponibilidade consumindo `/api/availability`
+- Perfil consumindo `/api/profile`
+- Configurações consumindo `/api/settings`
 
-## Como rodar
+## Pré-requisitos
+
+- Node.js 20+
+- API .NET rodando em `http://localhost:5080`
+
+## Configuração
+
+1. Copie o arquivo `.env.example` para `.env`
+2. Se necessário, ajuste `VITE_API_URL`
+
+```bash
+cp .env.example .env
+```
+
+## Instalação
 
 ```bash
 npm install
 npm run dev
 ```
 
-Depois abra o endereço exibido no terminal.
+## Login de teste
 
-## Build de produção
+Use o usuário seedado no banco:
 
-```bash
-npm run build
-npm run preview
-```
+- e-mail: `renan@email.com`
+- senha: qualquer valor não vazio
 
-## Estrutura principal
+## Observações
 
-```txt
-src/
-  components/
-    layout/
-    ui/
-  config/
-  mocks/
-  pages/
-  routes/
-  types/
-  utils/
-```
-
-## Próximos passos sugeridos
-
-1. Criar autenticação real
-2. Adicionar formulários com React Hook Form
-3. Integrar com API
-4. Criar CRUD de clientes e serviços
-5. Adicionar calendário real
+- Este front usa a sessão salva no `localStorage`
+- O backend atual já aceita o usuário seedado do script SQL
+- Os botões de criação de cliente, serviço e edição de disponibilidade ainda estão visuais e prontos para a próxima etapa de CRUD

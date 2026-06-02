@@ -1,8 +1,14 @@
 import { LogOut, X } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { navigationItems } from '../../config/navigation'
+import { useEffect, useState } from 'react'
 import { ROUTE_PATHS } from '../../routes/routePaths'
-import { signOut } from '../../utils/auth'
+import { getCurrentUser, signOut } from '../../utils/auth'
+import { getBrandingEventName, getCompanyLogo } from '../../utils/branding'
+import { MASSINI_BRANDING } from '../../config/branding'
+import {
+  getNavigationItemsForUser,
+  getWorkspaceModuleCopy,
+} from '../../utils/navigation'
 
 type SidebarProps = {
   onNavigate?: () => void
@@ -12,6 +18,46 @@ type SidebarProps = {
 
 export default function Sidebar({ onNavigate, onClose, mobile = false }: SidebarProps) {
   const navigate = useNavigate()
+  const user = getCurrentUser()
+  const role = user?.role
+  const isAdmin = user?.role === 'master_admin'
+  const navigationItems = getNavigationItemsForUser(user)
+  const workspaceCopy = getWorkspaceModuleCopy(user)
+
+  const title =
+    role === 'master_admin'
+      ? MASSINI_BRANDING.name
+      : user?.businessName || user?.fullName || 'Agenda Pro'
+
+  const subtitle =
+    role === 'master_admin'
+      ? MASSINI_BRANDING.adminSubtitle
+      : user?.specialty || 'Painel profissional'
+
+  const caption = isAdmin ? MASSINI_BRANDING.name : 'Agenda Pro'
+  const initial = title.charAt(0).toUpperCase()
+  const [logoUrl, setLogoUrl] = useState(
+    isAdmin ? MASSINI_BRANDING.logo : getCompanyLogo()
+  )
+
+  useEffect(() => {
+    if (isAdmin) {
+      setLogoUrl(MASSINI_BRANDING.logo)
+      return
+    }
+
+    function syncBranding() {
+      setLogoUrl(getCompanyLogo())
+    }
+
+    window.addEventListener(getBrandingEventName(), syncBranding)
+    window.addEventListener('storage', syncBranding)
+
+    return () => {
+      window.removeEventListener(getBrandingEventName(), syncBranding)
+      window.removeEventListener('storage', syncBranding)
+    }
+  }, [isAdmin])
 
   function handleLogout() {
     signOut()
@@ -22,20 +68,48 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
 
   return (
     <div className="sidebar-shell">
-      <div className="sidebar-brand">
-        <div>
-          <p>Agenda Pro</p>
-          <h2>Scheduler</h2>
+      <div className={`sidebar-brand ${isAdmin ? 'sidebar-brand--admin' : ''}`}>
+        <div className="sidebar-branding-wrap">
+          <div className="sidebar-brand-mark">
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={title}
+                className={`brand-logo brand-logo--sidebar ${isAdmin ? 'brand-logo--massini' : ''}`}
+              />
+            ) : (
+              <span>{initial || 'M'}</span>
+            )}
+          </div>
+
+          <div>
+            <p>{caption}</p>
+            <h2>{title}</h2>
+            <small>{subtitle}</small>
+          </div>
         </div>
 
         {mobile && (
-          <button type="button" className="icon-button only-mobile" onClick={onClose} aria-label="Fechar menu">
+          <button
+            type="button"
+            className="icon-button only-mobile"
+            onClick={onClose}
+            aria-label="Fechar menu"
+          >
             <X size={18} />
           </button>
         )}
       </div>
 
-      <nav className="sidebar-nav">
+      <div className="sidebar-workspace-card">
+        <span>{workspaceCopy.label}</span>
+        <strong>{workspaceCopy.summary}</strong>
+        <small>{workspaceCopy.description}</small>
+      </div>
+
+      <nav className="sidebar-nav" aria-label="Navegação principal">
+        <p className="sidebar-nav-label">Navegação</p>
+
         {navigationItems.map((item) => {
           const Icon = item.icon
 
@@ -46,7 +120,9 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
               onClick={onNavigate}
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`.trim()}
             >
-              <Icon size={18} />
+              <span className="sidebar-link-icon">
+                <Icon size={18} />
+              </span>
               <span>{item.label}</span>
             </NavLink>
           )
@@ -54,8 +130,15 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
       </nav>
 
       <div className="sidebar-footer">
+        <div className="sidebar-session">
+          <span>Conectado como</span>
+          <strong>{isAdmin ? 'Admin master' : user?.fullName || title}</strong>
+        </div>
+
         <button type="button" className="sidebar-link logout-button" onClick={handleLogout}>
-          <LogOut size={18} />
+          <span className="sidebar-link-icon">
+            <LogOut size={18} />
+          </span>
           <span>Sair</span>
         </button>
       </div>

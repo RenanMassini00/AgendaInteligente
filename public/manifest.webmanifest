@@ -1,0 +1,18 @@
+{
+  "name": "Agenda Inteligente",
+  "short_name": "Agenda",
+  "description": "Sistema de agenda, catálogo e gestão para negócios de atendimento.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f8fc",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
