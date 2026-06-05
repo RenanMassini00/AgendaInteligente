@@ -1,7 +1,23 @@
 import { getAuthToken, redirectToLogin, signOut } from './auth'
 import type { ApiMessage } from '../types/api.types'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5080'
+type RuntimeConfig = {
+  VITE_API_URL?: string
+}
+
+declare global {
+  interface Window {
+    __APP_CONFIG__?: RuntimeConfig
+  }
+}
+
+function removeTrailingSlash(url: string): string {
+  return url.endsWith('/') ? url.slice(0, -1) : url
+}
+
+const configuredApiUrl = window.__APP_CONFIG__?.VITE_API_URL ?? import.meta.env.VITE_API_URL
+const API_BASE_URL =
+  configuredApiUrl === undefined ? 'http://localhost:5080' : removeTrailingSlash(configuredApiUrl)
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getAuthToken()
