@@ -17,7 +17,7 @@ Front-end React + TypeScript integrado com a API .NET do projeto.
 ## Pré-requisitos
 
 - Node.js 20+
-- API .NET rodando em `http://2.25.147.236:5000`
+- API .NET rodando em `https://macroloapp.com.br`
 
 ## Configuração
 

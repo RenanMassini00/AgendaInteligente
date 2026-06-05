@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-api_url="${VITE_API_URL-http://2.25.147.236:5000}"
+api_url="${VITE_API_URL-https://macroloapp.com.br}"
 
 json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'

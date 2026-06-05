@@ -4,7 +4,7 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
-ARG VITE_API_URL=http://2.25.147.236:5000
+ARG VITE_API_URL=https://macroloapp.com.br
 ENV VITE_API_URL=${VITE_API_URL}
 
 COPY package*.json ./
