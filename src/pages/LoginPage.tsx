@@ -1,6 +1,14 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
+import {
+  ArrowRight,
+  BarChart3,
+  CalendarCheck,
+  ClipboardList,
+  ShoppingBag,
+  Users,
+  X,
+} from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import MassiniBrand from '../components/branding/MassiniBrand'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { api } from '../utils/api'
 import { signIn } from '../utils/auth'
@@ -31,6 +39,31 @@ function normalizeRole(role?: string | null) {
     : 'professional'
 }
 
+const systemCards = [
+  {
+    title: 'Agenda online',
+    description: 'Controle horários, disponibilidade, serviços e confirmações em um só painel.',
+    Icon: CalendarCheck,
+  },
+  {
+    title: 'Catálogo digital',
+    description: 'Publique produtos, destaque ofertas e direcione pedidos para o WhatsApp.',
+    Icon: ShoppingBag,
+  },
+  {
+    title: 'Clientes e serviços',
+    description: 'Centralize cadastros, histórico de atendimento e dados essenciais da operação.',
+    Icon: Users,
+  },
+  {
+    title: 'Financeiro',
+    description: 'Acompanhe indicadores, recebimentos e a saúde do negócio com mais clareza.',
+    Icon: BarChart3,
+  },
+]
+
+const flowItems = ['Clientes', 'Agenda', 'Catálogo', 'Resultados']
+
 export default function LoginPage() {
   const navigate = useNavigate()
 
@@ -38,6 +71,27 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+
+  useEffect(() => {
+    if (!isLoginModalOpen) return undefined
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsLoginModalOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isLoginModalOpen])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -82,96 +136,171 @@ export default function LoginPage() {
     }
   }
 
-  return (
-    <div className="login-modern-shell massini-auth-shell">
-      <div className="login-modern-grid">
-        <div className="login-modern-hero">
-          <div className="auth-brand-block">
-            <MassiniBrand className="massini-brand--hero" />
-          </div>
+  function openLoginModal() {
+    setErrorMessage('')
+    setIsLoginModalOpen(true)
+  }
 
-          <h1 className="login-modern-title">
-            Soluções digitais para
-            <span> agendamento, catálogo e gestão.</span>
+  return (
+    <div className="login-modern-shell app-entry-shell">
+      <main className="app-entry">
+        <section className="app-entry-hero" aria-labelledby="app-entry-title">
+          <span className="app-entry-eyebrow">Plataforma integrada</span>
+
+          <h1 id="app-entry-title" className="app-entry-title">
+            Tudo para atender, vender e administrar em uma tela.
           </h1>
 
-          <p className="login-modern-description">
-            Tecnologia que simplifica processos e prepara sua operação para crescer
-            dentro do ecossistema Massini Labs.
+          <p className="app-entry-description">
+            Uma central de trabalho para organizar agenda, clientes, serviços,
+            catálogo online e indicadores financeiros com uma experiência simples
+            para quem usa todos os dias.
           </p>
 
-          <div className="login-modern-highlights">
-            <div className="login-highlight-card">
-              <strong>Agendamentos</strong>
-              <span>Organize clientes, serviços, disponibilidade e compromissos.</span>
-            </div>
-
-            <div className="login-highlight-card">
-              <strong>Catálogo</strong>
-              <span>Venda produtos com visual moderno e direcionamento para WhatsApp.</span>
-            </div>
-
-            <div className="login-highlight-card">
-              <strong>Expansão</strong>
-              <span>Novos serviços poderão ser adicionados no mesmo ecossistema.</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="login-modern-card massini-auth-card">
-          <div className="login-modern-card-header">
-            <p className="login-modern-kicker">Entrar</p>
-            <h2>Login profissional</h2>
-            <span>Acesse seu painel administrativo.</span>
+          <div className="app-entry-actions">
+            <button type="button" className="primary-button app-entry-access" onClick={openLoginModal}>
+              <span>Acessar</span>
+              <ArrowRight size={20} aria-hidden="true" />
+            </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="login-modern-form">
-            <div className="form-field">
-              <label htmlFor="email">E-mail</label>
-              <input
-                id="email"
-                type="email"
-                className="form-input"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="seuemail@empresa.com"
-              />
+          <div className="app-entry-systems" aria-label="Sistemas disponíveis">
+            {systemCards.map(({ title, description, Icon }) => (
+              <article className="app-entry-system-card" key={title}>
+                <span className="app-entry-system-icon" aria-hidden="true">
+                  <Icon size={22} />
+                </span>
+                <strong>{title}</strong>
+                <p>{description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="app-entry-showcase" aria-label="Visão geral dos sistemas">
+          <div className="app-entry-console">
+            <div className="app-entry-console-top">
+              <span>Operação</span>
+              <strong>Fluxo integrado</strong>
             </div>
 
-            <div className="form-field">
-              <label htmlFor="password">Senha</label>
-              <input
-                id="password"
-                type="password"
-                className="form-input"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Digite sua senha"
-              />
+            <div className="app-entry-flow">
+              {flowItems.map((item, index) => (
+                <div className="app-entry-flow-step" key={item}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <strong>{item}</strong>
+                </div>
+              ))}
             </div>
 
-            {errorMessage ? <div className="auth-error">{errorMessage}</div> : null}
+            <div className="app-entry-console-screen">
+              <div className="app-entry-screen-header">
+                <span>Hoje</span>
+                <strong>Visão operacional</strong>
+              </div>
 
+              <div className="app-entry-screen-grid">
+                <div className="app-entry-screen-stat">
+                  <CalendarCheck size={18} aria-hidden="true" />
+                  <span>Agenda</span>
+                  <strong>12 horários</strong>
+                </div>
+                <div className="app-entry-screen-stat">
+                  <ShoppingBag size={18} aria-hidden="true" />
+                  <span>Catálogo</span>
+                  <strong>38 produtos</strong>
+                </div>
+                <div className="app-entry-screen-stat">
+                  <Users size={18} aria-hidden="true" />
+                  <span>Clientes</span>
+                  <strong>Base ativa</strong>
+                </div>
+                <div className="app-entry-screen-stat">
+                  <ClipboardList size={18} aria-hidden="true" />
+                  <span>Serviços</span>
+                  <strong>Controle total</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {isLoginModalOpen ? (
+        <div
+          className="login-modal-overlay"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !isSubmitting) {
+              setIsLoginModalOpen(false)
+            }
+          }}
+        >
+          <section
+            className="login-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="login-modal-title"
+          >
             <button
-              type="submit"
-              className="primary-button login-modern-submit"
+              type="button"
+              className="login-modal-close"
+              aria-label="Fechar login"
+              onClick={() => setIsLoginModalOpen(false)}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Entrando...' : 'Entrar'}
+              <X size={20} aria-hidden="true" />
             </button>
-          </form>
 
-          {/* <div className="login-modern-footer">
-            <Link to={ROUTE_PATHS.register} className="login-modern-footer-link">
-              Criar conta profissional
-            </Link>
+            <div className="login-modal-header">
+              <p className="login-modern-kicker">Entrar</p>
+              <h2 id="login-modal-title">Acesse sua conta</h2>
+              <span>Informe seus dados para abrir o painel administrativo.</span>
+            </div>
 
-            <Link to={ROUTE_PATHS.catalogAccess} className="login-modern-footer-link">
-              Acessar catálogo público
-            </Link>
-          </div> */}
+            <form onSubmit={handleSubmit} className="login-modern-form">
+              <div className="form-field">
+                <label htmlFor="email">E-mail</label>
+                <input
+                  id="email"
+                  type="email"
+                  className="form-input"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="seuemail@empresa.com"
+                  autoComplete="email"
+                  autoFocus
+                  required
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="password">Senha</label>
+                <input
+                  id="password"
+                  type="password"
+                  className="form-input"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Digite sua senha"
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+
+              {errorMessage ? <div className="auth-error">{errorMessage}</div> : null}
+
+              <button
+                type="submit"
+                className="primary-button login-modern-submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Entrando...' : 'Entrar'}
+              </button>
+            </form>
+          </section>
         </div>
-      </div>
+      ) : null}
     </div>
   )
 }
