@@ -17,7 +17,7 @@ function removeTrailingSlash(url: string): string {
 
 const configuredApiUrl = window.__APP_CONFIG__?.VITE_API_URL ?? import.meta.env.VITE_API_URL
 const API_BASE_URL =
-  configuredApiUrl === undefined ? 'http://localhost:5080' : removeTrailingSlash(configuredApiUrl)
+  configuredApiUrl === undefined ? 'http://2.25.147.236:5000' : removeTrailingSlash(configuredApiUrl)
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getAuthToken()

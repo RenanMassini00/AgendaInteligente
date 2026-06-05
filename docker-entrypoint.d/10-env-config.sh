@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-api_url="${VITE_API_URL-http://localhost:5080}"
+api_url="${VITE_API_URL-http://2.25.147.236:5000}"
 
 json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
