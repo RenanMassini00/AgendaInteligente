@@ -48,3 +48,4 @@ jobs:
               --restart always \
               -p 3000:80 \
               renanmassini/agenda-front:latest
+
