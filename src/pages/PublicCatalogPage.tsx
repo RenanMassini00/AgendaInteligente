@@ -262,7 +262,7 @@ export default function PublicCatalogPage() {
   }
 
   return (
-    <div className="public-catalog-shell premium">
+    <div className="public-catalog-shell premium marketplace-catalog-shell">
       <div className="public-catalog-container premium">
         {isLoading ? (
           <div className="feedback-card">Carregando catálogo...</div>

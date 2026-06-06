@@ -118,7 +118,7 @@ export default function CatalogPage() {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack catalog-management-page">
       <SectionHeader
         title="Catálogo"
         description="Cadastre e gerencie seus produtos para venda no catálogo público."
@@ -167,14 +167,14 @@ export default function CatalogPage() {
         </PageCard>
       ) : null}
 
-      <div className="public-catalog-grid premium">
+      <div className="public-catalog-grid premium catalog-management-grid">
         {isLoading ? (
           <div className="feedback-card full-width">Carregando produtos...</div>
         ) : products.length === 0 ? (
           <div className="feedback-card full-width">Nenhum produto cadastrado.</div>
         ) : (
           products.map((product) => (
-            <article key={product.id} className="public-catalog-card premium">
+            <article key={product.id} className="public-catalog-card premium catalog-management-card">
               <div className="public-catalog-image-wrap premium">
                 {product.imageUrl ? (
                   <img src={product.imageUrl} alt={product.name} className="public-catalog-image" />

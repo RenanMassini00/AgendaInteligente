@@ -58,7 +58,7 @@ export default function ServicesPage() {
   }
 
   return (
-    <div className="page-stack management-page">
+    <div className="page-stack management-page services-market-page">
       <SectionHeader
         title="Serviços"
         description="Organize os serviços, preços e duração que aparecem para agendamento."
@@ -80,7 +80,7 @@ export default function ServicesPage() {
           <div className="feedback-card">Nenhum serviço encontrado.</div>
         ) : (
           services.map((service) => (
-            <PageCard key={service.id} className="compact-entity-card service-entity-card">
+            <PageCard key={service.id} className="compact-entity-card service-entity-card service-market-card">
               <div className="entity-card">
                 <div className="entity-card-head">
                   <div className="entity-icon service-icon">

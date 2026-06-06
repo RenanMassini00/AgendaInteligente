@@ -191,7 +191,7 @@ export default function CreateProductPage() {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack product-editor-page">
       <SectionHeader
         title={isEditMode ? 'Editar produto' : 'Novo produto'}
         description={
@@ -212,11 +212,11 @@ export default function CreateProductPage() {
 
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
 
-      <PageCard>
+      <PageCard className="product-editor-card">
         {isLoading ? (
           <div className="feedback-card">Carregando produto...</div>
         ) : (
-          <form onSubmit={handleSubmit} className="form-grid two-column-grid">
+          <form onSubmit={handleSubmit} className="form-grid two-column-grid product-editor-form">
             <div className="form-field">
               <label className="label" htmlFor="name">Nome do produto</label>
               <input
