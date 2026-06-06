@@ -1,5 +1,17 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, CalendarDays, CheckCircle2, Clock3, Mail, Phone, User, X } from 'lucide-react'
+import {
+  ArrowLeft,
+  BadgeCheck,
+  CalendarDays,
+  CheckCircle2,
+  ChevronRight,
+  Clock3,
+  Mail,
+  Phone,
+  Sparkles,
+  User,
+  X,
+} from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageCard from '../components/ui/PageCard'
 import { api } from '../utils/api'
@@ -57,6 +69,14 @@ function formatDuration(minutes?: number, formatted?: string | null) {
 
 function getServiceDescription(description?: string | null) {
   return description?.trim() || 'Atendimento profissional'
+}
+
+function getInitials(value: string) {
+  const words = value.trim().split(/\s+/).filter(Boolean)
+  const first = words[0]?.[0] ?? 'A'
+  const second = words.length > 1 ? words[words.length - 1]?.[0] : ''
+
+  return `${first}${second}`.toUpperCase()
 }
 
 function formatTimeRange(slot: string, durationMinutes?: number) {
@@ -182,6 +202,18 @@ export default function PublicBookingPage() {
     selectedSlot,
     selectedService?.durationMinutes
   )
+
+  const startingPrice = useMemo(() => {
+    if (!professional?.services.length) return ''
+
+    const cheapestService = professional.services.reduce((current, service) =>
+      service.price < current.price ? service : current
+    )
+
+    return cheapestService.priceFormatted
+  }, [professional])
+
+  const profileInitials = professional ? getInitials(professional.displayName) : 'AI'
 
   const canSubmit =
     !!selectedService &&
@@ -316,25 +348,57 @@ export default function PublicBookingPage() {
   }
 
   return (
-    <div className="public-booking-shell">
+    <div className="public-booking-shell app-scheduler-shell">
       <div className="public-booking-container">
-        <div className="public-booking-hero">
-          <span className="public-booking-kicker">Agendamento online</span>
-          <h1>{professional.displayName}</h1>
-          <p>{professional.subtitle}</p>
-        </div>
+        <section className="public-booking-hero app-scheduler-hero">
+          <div className="app-scheduler-profile">
+            <div className="app-scheduler-avatar" aria-hidden="true">
+              {profileInitials}
+            </div>
+
+            <div className="app-scheduler-business">
+              <span className="public-booking-kicker">Agendamento online</span>
+              <h1>{professional.displayName}</h1>
+              <p>{professional.subtitle}</p>
+            </div>
+
+            <div className="app-scheduler-status">
+              <BadgeCheck size={16} />
+              Agenda aberta
+            </div>
+          </div>
+
+          <div className="app-scheduler-stats" aria-label="Resumo do agendamento">
+            <span>
+              <strong>{professional.services.length}</strong>
+              servicos
+            </span>
+            {startingPrice ? (
+              <span>
+                <strong>{startingPrice}</strong>
+                a partir de
+              </span>
+            ) : null}
+            <span>
+              <strong>24h</strong>
+              online
+            </span>
+          </div>
+        </section>
 
         {errorMessage && !isBookingModalOpen ? <div className="feedback-card error-box">{errorMessage}</div> : null}
         {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
 
         <PageCard className="public-booking-card">
           <div className="public-booking-choice-layout">
-            <section className="public-booking-panel public-booking-services-panel">
+            <section className="public-booking-panel public-booking-services-panel app-scheduler-services-panel">
               <div className="public-booking-step-heading">
-                <span>1</span>
+                <span>
+                  <Sparkles size={18} />
+                </span>
                 <div>
-                  <h2>Escolha seu servico</h2>
-                  <p>Depois disso, abrimos uma jornada rapida para data, horario e seus dados.</p>
+                  <h2>Escolha um servico</h2>
+                  <p>Toque no servico desejado para ver os horarios disponiveis.</p>
                 </div>
               </div>
 
@@ -351,7 +415,7 @@ export default function PublicBookingPage() {
                       aria-pressed={isSelected}
                     >
                       <span className="public-service-check">
-                        {isSelected ? <CheckCircle2 size={19} /> : null}
+                        {isSelected ? <CheckCircle2 size={19} /> : <Sparkles size={17} />}
                       </span>
 
                       <span className="public-service-copy">
@@ -362,6 +426,10 @@ export default function PublicBookingPage() {
                       <span className="public-service-meta">
                         <span>{formatDuration(service.durationMinutes, service.durationFormatted)}</span>
                         <strong>{service.priceFormatted}</strong>
+                        <span className="public-service-action-pill">
+                          Escolher
+                          <ChevronRight size={14} />
+                        </span>
                       </span>
                     </button>
                   )
@@ -369,31 +437,31 @@ export default function PublicBookingPage() {
               </div>
             </section>
 
-            <aside className="public-booking-panel public-booking-path-card">
+            <aside className="public-booking-panel public-booking-path-card app-scheduler-side-card">
               <div className="public-booking-step-heading">
                 <span>
                   <Clock3 size={18} />
                 </span>
                 <div>
-                  <h2>Como funciona</h2>
-                  <p>Voce escolhe o servico e finaliza tudo em poucos passos.</p>
+                  <h2>Agende em minutos</h2>
+                  <p>O fluxo foi pensado para escolher, revisar e confirmar sem complicacao.</p>
                 </div>
               </div>
 
               <div className="public-booking-path-list">
                 <div>
-                  <strong>Servico</strong>
-                  <span>Compare duracao, valor e descricao.</span>
+                  <strong>1. Servico</strong>
+                  <span>{selectedService ? selectedService.name : 'Escolha uma opcao da lista.'}</span>
                 </div>
 
                 <div>
-                  <strong>Agenda</strong>
-                  <span>Escolha uma data e um horario disponivel.</span>
+                  <strong>2. Horario</strong>
+                  <span>{selectedSlot ? selectedTimeLabel : 'Veja os horarios disponiveis.'}</span>
                 </div>
 
                 <div>
-                  <strong>Confirmacao</strong>
-                  <span>Informe seus dados para receber o comprovante.</span>
+                  <strong>3. Confirmacao</strong>
+                  <span>Informe seus dados e receba a confirmacao do agendamento.</span>
                 </div>
               </div>
             </aside>
@@ -401,7 +469,7 @@ export default function PublicBookingPage() {
         </PageCard>
 
         {isBookingModalOpen && selectedService ? (
-          <div className="booking-modal-layer" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+          <div className="booking-modal-layer app-scheduler-modal-layer" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
             <button
               type="button"
               className="booking-modal-backdrop"
@@ -409,7 +477,7 @@ export default function PublicBookingPage() {
               aria-label="Fechar agendamento"
             />
 
-            <form className="booking-modal" onSubmit={handleSubmit}>
+            <form className="booking-modal app-scheduler-modal" onSubmit={handleSubmit}>
               <div className="booking-modal-header">
                 <div className="public-booking-step-heading">
                   <span>{bookingStep === 'schedule' ? '2' : '3'}</span>

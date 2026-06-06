@@ -10015,3 +10015,534 @@ td {
     padding: 0.5rem;
   }
 }
+
+/* =========================================================
+   AGENDAMENTO PUBLICO - FLUXO MODERNO DE MERCADO
+   ========================================================= */
+
+.app-scheduler-shell.public-booking-shell {
+  min-height: 100vh;
+  padding: clamp(0.75rem, 2vw, 1.4rem);
+  background:
+    linear-gradient(132deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 34%),
+    linear-gradient(320deg, rgba(16, 185, 129, 0.12), transparent 38%),
+    linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--surface-muted) 52%, var(--bg)) 100%);
+}
+
+.app-scheduler-shell .public-booking-container {
+  max-width: 1120px;
+  gap: 0.85rem;
+}
+
+.app-scheduler-hero.public-booking-hero {
+  display: grid;
+  gap: 0.8rem;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-solid) 96%, transparent);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+}
+
+.app-scheduler-profile {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.app-scheduler-avatar {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  font-size: 1.15rem;
+  font-weight: 950;
+  box-shadow: 0 16px 28px rgba(15, 23, 42, 0.18);
+}
+
+.app-scheduler-business {
+  min-width: 0;
+}
+
+.app-scheduler-shell .public-booking-kicker {
+  color: var(--accent);
+  font-size: 0.68rem;
+  letter-spacing: 0;
+}
+
+.app-scheduler-shell .public-booking-hero h1 {
+  overflow: hidden;
+  margin: 0.1rem 0 0;
+  color: var(--text);
+  font-size: clamp(1.45rem, 3.2vw, 2.4rem);
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-scheduler-shell .public-booking-hero p {
+  display: -webkit-box;
+  margin-top: 0.26rem;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.app-scheduler-status {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--success) 32%, transparent);
+  border-radius: 999px;
+  color: var(--success-text);
+  background: var(--success-bg);
+  font-size: 0.76rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.app-scheduler-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.app-scheduler-stats span {
+  min-width: 0;
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.58rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface-soft) 88%, transparent);
+  color: var(--text-soft);
+  font-size: 0.7rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.app-scheduler-stats strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.98rem;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.app-scheduler-shell .public-booking-choice-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(286px, 0.36fr);
+  gap: 0.85rem;
+}
+
+.app-scheduler-shell .public-booking-panel {
+  gap: 0.8rem;
+  padding: 0.9rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-solid) 95%, transparent);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+}
+
+.app-scheduler-services-panel.public-booking-services-panel {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 56%),
+    color-mix(in srgb, var(--surface-solid) 96%, transparent);
+}
+
+.app-scheduler-shell .public-booking-step-heading {
+  gap: 0.65rem;
+}
+
+.app-scheduler-shell .public-booking-step-heading > span {
+  width: 34px;
+  height: 34px;
+  flex-basis: 34px;
+  border-radius: 9px;
+}
+
+.app-scheduler-shell .public-booking-step-heading h2 {
+  font-size: 1rem;
+}
+
+.app-scheduler-shell .public-booking-step-heading p {
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.app-scheduler-shell .public-service-options-showcase {
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.58rem;
+}
+
+.app-scheduler-shell .public-service-option {
+  min-height: 98px;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 0.62rem;
+  padding: 0.72rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-solid) 94%, var(--surface-soft));
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.045);
+}
+
+.app-scheduler-shell .public-service-option:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+}
+
+.app-scheduler-shell .public-service-option.selected {
+  border-color: color-mix(in srgb, var(--accent) 56%, transparent);
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--accent) 17%, transparent);
+}
+
+.app-scheduler-shell .public-service-check {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 70%, var(--surface-solid));
+}
+
+.app-scheduler-shell .public-service-copy strong {
+  display: -webkit-box;
+  color: var(--text);
+  font-size: 0.94rem;
+  line-height: 1.15;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.app-scheduler-shell .public-service-copy small {
+  display: -webkit-box;
+  margin-top: 0.22rem;
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  line-height: 1.28;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.app-scheduler-shell .public-service-meta {
+  align-self: stretch;
+  align-content: space-between;
+  gap: 0.3rem;
+}
+
+.app-scheduler-shell .public-service-meta > span:not(.public-service-action-pill) {
+  color: var(--text-soft);
+  font-size: 0.72rem;
+}
+
+.app-scheduler-shell .public-service-meta strong {
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.public-service-action-pill {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: 999px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 76%, transparent);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.app-scheduler-side-card.public-booking-path-card {
+  top: 0.85rem;
+}
+
+.app-scheduler-shell .public-booking-path-list {
+  gap: 0.5rem;
+}
+
+.app-scheduler-shell .public-booking-path-list div {
+  min-height: 72px;
+  padding: 0.65rem;
+  border-radius: 9px;
+}
+
+.app-scheduler-shell .public-booking-path-list strong {
+  font-size: 0.84rem;
+}
+
+.app-scheduler-shell .public-booking-path-list span {
+  display: -webkit-box;
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.app-scheduler-modal-layer.booking-modal-layer {
+  z-index: 100;
+}
+
+.app-scheduler-modal.booking-modal {
+  width: min(860px, 100%);
+  gap: 0.82rem;
+  padding: 0.95rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface-solid) 98%, transparent);
+}
+
+.app-scheduler-modal .booking-modal-header {
+  align-items: center;
+}
+
+.app-scheduler-modal .booking-modal-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.app-scheduler-modal .booking-modal-progress {
+  gap: 0.35rem;
+}
+
+.app-scheduler-modal .booking-modal-progress span {
+  min-height: 34px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+}
+
+.app-scheduler-modal .booking-modal-grid {
+  grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
+  gap: 0.75rem;
+}
+
+.app-scheduler-modal .public-booking-summary-card {
+  padding: 0.72rem;
+  border-radius: 10px;
+}
+
+.app-scheduler-modal .public-booking-summary-list {
+  gap: 0.45rem;
+}
+
+.app-scheduler-modal .public-booking-summary-list div {
+  padding: 0.55rem;
+  border-radius: 8px;
+}
+
+.app-scheduler-modal .public-booking-summary-list span {
+  font-size: 0.66rem;
+}
+
+.app-scheduler-modal .public-booking-summary-list strong {
+  display: -webkit-box;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.app-scheduler-modal .booking-modal-step {
+  gap: 0.7rem;
+}
+
+.app-scheduler-modal .public-date-field,
+.app-scheduler-modal .public-input-field {
+  min-height: 46px;
+  border-radius: 9px;
+}
+
+.app-scheduler-modal .public-booking-slot-grid {
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 0.45rem;
+}
+
+.app-scheduler-modal .public-slot-button {
+  min-height: 42px;
+  border-radius: 9px;
+  font-size: 0.82rem;
+}
+
+.app-scheduler-modal .public-booking-empty {
+  border-radius: 9px;
+  font-size: 0.84rem;
+}
+
+.app-scheduler-modal .public-booking-form {
+  gap: 0.6rem;
+}
+
+.app-scheduler-modal .public-notes-field {
+  min-height: 82px;
+  border-radius: 9px;
+}
+
+.app-scheduler-modal .booking-modal-actions {
+  gap: 0.5rem;
+}
+
+.app-scheduler-modal .booking-modal-actions .primary-button,
+.app-scheduler-modal .booking-modal-actions .secondary-button {
+  min-height: 42px;
+  border-radius: 9px;
+}
+
+@media (max-width: 900px) {
+  .app-scheduler-shell .public-booking-choice-layout,
+  .app-scheduler-modal .booking-modal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-scheduler-side-card.public-booking-path-card {
+    position: static;
+  }
+
+  .app-scheduler-shell .public-booking-path-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .app-scheduler-shell.public-booking-shell {
+    padding: 0.65rem;
+  }
+
+  .app-scheduler-profile {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .app-scheduler-status {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  .app-scheduler-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+  }
+
+  .app-scheduler-shell .public-booking-hero h1 {
+    white-space: normal;
+  }
+
+  .app-scheduler-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.38rem;
+  }
+
+  .app-scheduler-stats span {
+    padding: 0.48rem;
+    font-size: 0.58rem;
+  }
+
+  .app-scheduler-stats strong {
+    font-size: 0.78rem;
+  }
+
+  .app-scheduler-shell .public-booking-panel {
+    padding: 0.72rem;
+    border-radius: 10px;
+  }
+
+  .app-scheduler-shell .public-service-options-showcase {
+    grid-template-columns: 1fr;
+  }
+
+  .app-scheduler-shell .public-service-option {
+    min-height: 86px;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    padding: 0.62rem;
+  }
+
+  .app-scheduler-shell .public-service-check {
+    width: 28px;
+    height: 28px;
+  }
+
+  .app-scheduler-shell .public-service-meta {
+    justify-items: end;
+  }
+
+  .app-scheduler-shell .public-booking-path-list {
+    grid-template-columns: 1fr;
+  }
+
+  .app-scheduler-modal-layer.booking-modal-layer {
+    align-items: end;
+    padding: 0;
+  }
+
+  .app-scheduler-modal.booking-modal {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 18px 18px 0 0;
+    padding: 0.78rem;
+  }
+
+  .app-scheduler-modal .booking-modal-header {
+    align-items: flex-start;
+  }
+
+  .app-scheduler-modal .booking-modal-progress {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .app-scheduler-modal .booking-modal-progress span {
+    min-height: 32px;
+    font-size: 0.68rem;
+  }
+
+  .app-scheduler-modal .public-booking-summary-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-scheduler-modal .public-booking-slot-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .app-scheduler-modal .booking-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .app-scheduler-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .app-scheduler-stats span {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+  }
+
+  .app-scheduler-shell .public-service-option {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .app-scheduler-shell .public-service-meta {
+    grid-column: 2;
+    grid-template-columns: repeat(3, max-content);
+    justify-items: start;
+  }
+
+  .app-scheduler-modal .public-booking-slot-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
