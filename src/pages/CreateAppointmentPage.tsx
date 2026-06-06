@@ -8,13 +8,13 @@ export default function CreateAppointmentPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="page-stack">
+    <div className="page-stack appointment-editor-page">
       <SectionHeader
         title="Novo agendamento"
         description="Crie um novo compromisso integrado diretamente com a API."
       />
 
-      <PageCard>
+      <PageCard className="appointment-editor-card">
         <AppointmentForm onSubmitSuccess={() => navigate(ROUTE_PATHS.appointments)} />
       </PageCard>
     </div>

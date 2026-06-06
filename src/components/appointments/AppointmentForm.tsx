@@ -114,7 +114,7 @@ export default function AppointmentForm({ onSubmitSuccess }: AppointmentFormProp
   }
 
   return (
-    <form className="page-stack" onSubmit={handleSubmit}>
+    <form className="page-stack appointment-form" onSubmit={handleSubmit}>
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
 
       <div className="form-grid two-columns">
@@ -160,7 +160,7 @@ export default function AppointmentForm({ onSubmitSuccess }: AppointmentFormProp
       </div>
 
       {selectedService ? (
-        <div className="soft-panel">
+        <div className="soft-panel appointment-service-summary">
           <strong>{selectedService.name}</strong>
           <p className="muted-text">Duração: {selectedService.duration}</p>
           <p className="muted-text">Valor: {selectedService.priceFormatted}</p>
@@ -172,7 +172,7 @@ export default function AppointmentForm({ onSubmitSuccess }: AppointmentFormProp
         <textarea className="text-input textarea-input" name="notes" value={form.notes} onChange={handleChange} />
       </div>
 
-      <div className="section-actions">
+      <div className="section-actions appointment-form-actions">
         <button className="primary-button" type="submit" disabled={isSaving}>
           {isSaving ? 'Salvando...' : 'Salvar agendamento'}
         </button>

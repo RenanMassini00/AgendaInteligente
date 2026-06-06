@@ -7,6 +7,14 @@ import { getCurrentUserId } from '../utils/auth'
 import { filterVisibleAppointments } from '../utils/appointments'
 import type { Appointment } from '../types/appointment.types'
 
+function getAppointmentTime(appointment: Appointment) {
+  if (appointment.startTime && appointment.endTime) {
+    return `${appointment.startTime.slice(0, 5)} - ${appointment.endTime.slice(0, 5)}`
+  }
+
+  return appointment.time?.slice(0, 5) || '--:--'
+}
+
 export default function ClientAppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -25,7 +33,7 @@ export default function ClientAppointmentsPage() {
         }
       } catch (error) {
         if (isMounted) {
-          setErrorMessage(error instanceof Error ? error.message : 'Não foi possível carregar seus agendamentos.')
+          setErrorMessage(error instanceof Error ? error.message : 'Nao foi possivel carregar seus agendamentos.')
         }
       } finally {
         if (isMounted) {
@@ -44,39 +52,37 @@ export default function ClientAppointmentsPage() {
   if (errorMessage) return <div className="feedback-card error-box">{errorMessage}</div>
 
   return (
-    <div className="page-stack">
-      <SectionHeader title="Meus agendamentos" description="Acompanhe seus horários marcados." />
+    <div className="page-stack client-appointments-page">
+      <SectionHeader title="Meus agendamentos" description="Acompanhe seus horarios marcados." />
 
-      <PageCard className="table-card">
-        <div className="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Serviço</th>
-                <th>Data</th>
-                <th>Hora</th>
-                <th>Status</th>
-                <th>Valor</th>
-              </tr>
-            </thead>
-            <tbody>
-              {appointments.length === 0 ? (
-                <tr>
-                  <td colSpan={5}>Nenhum agendamento encontrado.</td>
-                </tr>
-              ) : (
-                appointments.map((appointment) => (
-                  <tr key={appointment.id}>
-                    <td>{appointment.serviceName}</td>
-                    <td>{appointment.date}</td>
-                    <td>{appointment.time}</td>
-                    <td><StatusBadge status={appointment.status} /></td>
-                    <td>{appointment.priceFormatted}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      <PageCard className="client-appointments-card appointment-cards-panel">
+        <div className="appointment-cards-grid client">
+          {appointments.length === 0 ? (
+            <div className="feedback-card full-width">Nenhum agendamento encontrado.</div>
+          ) : (
+            appointments.map((appointment) => (
+              <article key={appointment.id} className="appointment-summary-card client">
+                <div className="appointment-summary-top">
+                  <span className="appointment-summary-time">
+                    {getAppointmentTime(appointment)}
+                  </span>
+                  <StatusBadge status={appointment.status} />
+                </div>
+
+                <div className="appointment-summary-main">
+                  <h3>{appointment.serviceName}</h3>
+                  <p>{appointment.date}</p>
+                </div>
+
+                <div className="appointment-summary-meta single-line">
+                  <span>
+                    <small>Valor</small>
+                    <strong>{appointment.priceFormatted}</strong>
+                  </span>
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </PageCard>
     </div>

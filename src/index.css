@@ -9469,3 +9469,549 @@ td {
     display: none;
   }
 }
+
+/* =========================================================
+   AGENDAMENTOS - CARDS COMPACTOS E GRID MOBILE 2X
+   ========================================================= */
+
+.appointments-management-page,
+.client-appointments-page,
+.client-booking-page,
+.appointment-editor-page {
+  --appointment-card-radius: 8px;
+  --appointment-card-bg: color-mix(in srgb, var(--surface-solid) 96%, transparent);
+  --appointment-card-border: color-mix(in srgb, var(--border) 78%, transparent);
+}
+
+.appointments-management-page .section-header,
+.client-appointments-page .section-header,
+.client-booking-page .section-header,
+.appointment-editor-page .section-header {
+  gap: 0.7rem;
+}
+
+.appointments-management-page .appointments-agenda-shell {
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border-radius: var(--appointment-card-radius);
+}
+
+.appointments-management-page .appointments-agenda-header h3 {
+  font-size: 1.05rem;
+}
+
+.appointments-management-page .appointments-agenda-header p,
+.appointments-management-page .appointments-agenda-kicker {
+  font-size: 0.76rem;
+}
+
+.appointments-management-page .appointments-agenda-actions {
+  gap: 0.45rem;
+}
+
+.appointments-management-page .appointments-agenda-actions .secondary-button {
+  min-height: 36px;
+  border-radius: 8px;
+  padding: 0.48rem 0.62rem;
+  font-size: 0.78rem;
+}
+
+.appointments-management-page .appointments-agenda-stats {
+  gap: 0.45rem;
+}
+
+.appointments-management-page .appointments-agenda-stats div {
+  min-height: 34px;
+  border-radius: 8px;
+  padding: 0.42rem 0.58rem;
+  font-size: 0.78rem;
+}
+
+.appointments-management-page .appointments-agenda-board {
+  min-width: 920px;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+
+.appointments-management-page .appointments-agenda-day {
+  min-height: 280px;
+  border-radius: 8px;
+}
+
+.appointments-management-page .appointments-agenda-day header {
+  min-height: 66px;
+  padding: 0.55rem;
+}
+
+.appointments-management-page .appointments-agenda-day header strong {
+  font-size: 1.15rem;
+}
+
+.appointments-management-page .appointments-agenda-day header span,
+.appointments-management-page .appointments-agenda-day header small {
+  font-size: 0.68rem;
+}
+
+.appointments-management-page .appointments-agenda-day-list {
+  max-height: 360px;
+  gap: 0.42rem;
+  padding: 0.48rem;
+}
+
+.appointments-management-page .appointments-agenda-card,
+.appointments-agenda-mobile-list .appointments-agenda-card {
+  gap: 0.35rem;
+  padding: 0.55rem;
+  border-radius: 8px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.07);
+}
+
+.appointments-management-page .appointments-agenda-card-top,
+.appointments-agenda-mobile-list .appointments-agenda-card-top {
+  gap: 0.28rem;
+}
+
+.appointments-management-page .appointments-agenda-time,
+.appointments-management-page .appointments-agenda-price,
+.appointments-agenda-mobile-list .appointments-agenda-time,
+.appointments-agenda-mobile-list .appointments-agenda-price {
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 0.2rem 0.42rem;
+  font-size: 0.68rem;
+}
+
+.appointments-management-page .appointments-agenda-card .status-badge,
+.appointments-agenda-mobile-list .appointments-agenda-card .status-badge {
+  padding: 0.2rem 0.42rem;
+  font-size: 0.62rem;
+}
+
+.appointments-management-page .appointments-agenda-card strong,
+.appointments-agenda-mobile-list .appointments-agenda-card strong {
+  display: -webkit-box;
+  font-size: 0.82rem;
+  line-height: 1.18;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.appointments-management-page .appointments-agenda-card p,
+.appointments-agenda-mobile-list .appointments-agenda-card p {
+  display: -webkit-box;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.appointments-list-card.appointment-cards-panel,
+.client-appointments-card.appointment-cards-panel,
+.appointment-editor-card.card,
+.client-booking-card.card {
+  overflow: hidden;
+  padding: 0;
+  border-radius: var(--appointment-card-radius);
+}
+
+.appointments-list-card .appointments-list-header {
+  padding: 0.75rem 0.85rem;
+}
+
+.appointments-list-card .appointments-list-header h3 {
+  font-size: 1rem;
+}
+
+.appointments-list-card .appointments-list-header p {
+  font-size: 0.82rem;
+}
+
+.appointment-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.65rem;
+  padding: 0.75rem;
+}
+
+.appointment-cards-grid.client {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+
+.appointment-summary-card {
+  min-width: 0;
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.72rem;
+  border: 1px solid var(--appointment-card-border);
+  border-radius: var(--appointment-card-radius);
+  background: var(--appointment-card-bg);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.appointment-summary-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 36%, var(--border));
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+}
+
+.appointment-summary-top {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.38rem;
+}
+
+.appointment-summary-time {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.5rem;
+  border: 1px solid var(--appointment-card-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-soft) 86%, transparent);
+  color: var(--text);
+  font-size: 0.74rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.appointment-summary-card .status-badge {
+  flex-shrink: 0;
+  padding: 0.22rem 0.5rem;
+  font-size: 0.66rem;
+  white-space: nowrap;
+}
+
+.appointment-summary-main {
+  min-width: 0;
+}
+
+.appointment-summary-main h3 {
+  display: -webkit-box;
+  margin: 0;
+  color: var(--text);
+  font-size: 0.98rem;
+  line-height: 1.18;
+  letter-spacing: 0;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.appointment-summary-main p {
+  display: -webkit-box;
+  margin: 0.22rem 0 0;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  line-height: 1.28;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.appointment-summary-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.42rem;
+}
+
+.appointment-summary-meta.single-line {
+  grid-template-columns: 1fr;
+}
+
+.appointment-summary-meta span {
+  min-width: 0;
+  display: grid;
+  gap: 0.12rem;
+  padding: 0.48rem 0.55rem;
+  border: 1px solid var(--appointment-card-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface-soft) 86%, transparent);
+}
+
+.appointment-summary-meta small {
+  color: var(--text-soft);
+  font-size: 0.64rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.appointment-summary-meta strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appointment-summary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.36rem;
+}
+
+.appointment-summary-actions > *:last-child:nth-child(3) {
+  grid-column: 1 / -1;
+}
+
+.appointment-summary-actions .small-button {
+  min-height: 34px;
+  border-radius: 7px;
+  padding: 0.44rem 0.48rem;
+  font-size: 0.74rem;
+  line-height: 1.1;
+}
+
+.appointment-editor-card.card,
+.client-booking-card.card {
+  padding: 0.85rem;
+}
+
+.appointment-form {
+  gap: 0.75rem;
+}
+
+.appointment-form .form-grid.two-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.appointment-form .form-grid.three-columns {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.appointment-form .label,
+.client-booking-form .label {
+  margin-bottom: 0.35rem;
+  font-size: 0.82rem;
+}
+
+.appointment-form .text-input,
+.client-booking-form .text-input {
+  min-height: 42px;
+  border-radius: 8px;
+  padding: 0.66rem 0.75rem;
+}
+
+.appointment-form .textarea-input,
+.client-booking-form textarea.text-input {
+  min-height: 86px;
+}
+
+.appointment-service-summary.soft-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, 0.8fr));
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.68rem;
+  border-radius: 8px;
+}
+
+.appointment-service-summary p {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.appointment-form-actions {
+  justify-content: flex-end;
+}
+
+.appointment-form-actions .primary-button,
+.client-booking-submit {
+  min-height: 42px;
+  border-radius: 8px;
+}
+
+.client-booking-form {
+  gap: 0.75rem;
+}
+
+.client-booking-controls.two-column-grid {
+  gap: 0.65rem;
+}
+
+.client-booking-page .empty-state,
+.client-booking-page .feedback-card {
+  border-radius: 8px;
+}
+
+.client-slot-grid.slot-grid {
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: 0.48rem;
+}
+
+.client-slot-grid .slot-button {
+  min-height: 38px;
+  border-radius: 8px;
+  padding: 0.46rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 900px) {
+  .appointments-management-page .appointments-agenda-actions .secondary-button {
+    flex: 1 1 0;
+  }
+
+  .appointment-form .form-grid.three-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .appointment-form .form-grid.three-columns > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .appointments-management-page .appointments-agenda-shell {
+    padding: 0.75rem;
+    border-radius: 8px;
+  }
+
+  .appointments-management-page .appointments-agenda-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .appointments-management-page .appointments-agenda-actions .secondary-button {
+    width: 100%;
+    min-width: 0;
+    font-size: 0.68rem;
+  }
+
+  .appointments-management-page .appointments-agenda-day-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem;
+    overflow: visible;
+  }
+
+  .appointments-management-page .appointments-agenda-day-pill {
+    min-width: 0;
+    min-height: 58px;
+    border-radius: 8px;
+  }
+
+  .appointments-management-page .appointments-agenda-day-pill strong {
+    font-size: 1rem;
+  }
+
+  .appointments-management-page .appointments-agenda-day-pill span,
+  .appointments-management-page .appointments-agenda-day-pill small {
+    font-size: 0.62rem;
+  }
+
+  .appointments-agenda-mobile-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .appointments-agenda-mobile-title {
+    grid-column: 1 / -1;
+  }
+
+  .appointment-cards-grid,
+  .appointment-cards-grid.client {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    padding: 0.62rem;
+  }
+
+  .appointment-summary-card {
+    gap: 0.42rem;
+    padding: 0.58rem;
+  }
+
+  .appointment-summary-top {
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .appointment-summary-main h3 {
+    font-size: 0.84rem;
+  }
+
+  .appointment-summary-main p {
+    font-size: 0.7rem;
+    -webkit-line-clamp: 1;
+  }
+
+  .appointment-summary-time,
+  .appointment-summary-card .status-badge {
+    width: fit-content;
+    min-height: 22px;
+    padding: 0.18rem 0.38rem;
+    font-size: 0.6rem;
+  }
+
+  .appointment-summary-meta {
+    grid-template-columns: 1fr;
+    gap: 0.32rem;
+  }
+
+  .appointment-summary-meta span {
+    padding: 0.38rem 0.42rem;
+  }
+
+  .appointment-summary-meta small {
+    font-size: 0.56rem;
+  }
+
+  .appointment-summary-meta strong {
+    font-size: 0.68rem;
+  }
+
+  .appointment-summary-actions {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  .appointment-summary-actions > *:last-child:nth-child(3) {
+    grid-column: auto;
+  }
+
+  .appointment-summary-actions .small-button {
+    min-height: 30px;
+    font-size: 0.66rem;
+  }
+
+  .appointment-form .form-grid.two-columns,
+  .appointment-form .form-grid.three-columns,
+  .client-booking-controls.two-column-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .appointment-form .form-grid.three-columns > :last-child {
+    grid-column: auto;
+  }
+
+  .appointment-service-summary.soft-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .client-slot-grid.slot-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .appointments-management-page .appointments-agenda-day-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .appointment-cards-grid,
+  .appointment-cards-grid.client,
+  .appointments-agenda-mobile-list {
+    gap: 0.45rem;
+  }
+
+  .appointment-summary-card {
+    padding: 0.5rem;
+  }
+}

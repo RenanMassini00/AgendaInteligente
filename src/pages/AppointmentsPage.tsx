@@ -10,15 +10,30 @@ import { api } from '../utils/api'
 import { filterVisibleAppointments, isCancelledAppointmentStatus } from '../utils/appointments'
 import type { Appointment } from '../types/appointment.types'
 
+function normalizeStatusLabel(status: string) {
+  return (status || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
 function canComplete(status: string) {
-  const normalized = (status || '').toLowerCase()
-  return !['completed', 'concluded', 'done', 'concluído'].includes(normalized) &&
+  const normalized = normalizeStatusLabel(status)
+  return !['completed', 'concluded', 'done', 'concluido'].includes(normalized) &&
     !isCancelledAppointmentStatus(status)
 }
 
 function canDelete(status: string) {
-  const normalized = (status || '').toLowerCase()
-  return !['completed', 'concluded', 'done', 'concluído'].includes(normalized)
+  const normalized = normalizeStatusLabel(status)
+  return !['completed', 'concluded', 'done', 'concluido'].includes(normalized)
+}
+
+function getAppointmentTime(appointment: Appointment) {
+  if (appointment.startTime && appointment.endTime) {
+    return `${appointment.startTime.slice(0, 5)} - ${appointment.endTime.slice(0, 5)}`
+  }
+
+  return appointment.time?.slice(0, 5) || '--:--'
 }
 
 export default function AppointmentsPage() {
@@ -47,7 +62,7 @@ export default function AppointmentsPage() {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : 'Não foi possível carregar os agendamentos.'
+          : 'Nao foi possivel carregar os agendamentos.'
       )
     } finally {
       setIsLoading(false)
@@ -59,7 +74,7 @@ export default function AppointmentsPage() {
   }
 
   async function handleCompleteAppointment(id: number) {
-    const confirmed = window.confirm('Deseja marcar este agendamento como concluído?')
+    const confirmed = window.confirm('Deseja marcar este agendamento como concluido?')
     if (!confirmed) return
 
     try {
@@ -70,13 +85,13 @@ export default function AppointmentsPage() {
         status: 'completed',
       } as never)
 
-      setSuccessMessage('Agendamento concluído com sucesso.')
+      setSuccessMessage('Agendamento concluido com sucesso.')
       await loadAppointments()
     } catch (error) {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : 'Não foi possível concluir o agendamento.'
+          : 'Nao foi possivel concluir o agendamento.'
       )
     }
   }
@@ -91,19 +106,19 @@ export default function AppointmentsPage() {
 
       await api.delete(`/api/appointments/${id}`)
 
-      setSuccessMessage('Agendamento excluído com sucesso.')
+      setSuccessMessage('Agendamento excluido com sucesso.')
       await loadAppointments()
     } catch (error) {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : 'Não foi possível excluir o agendamento.'
+          : 'Nao foi possivel excluir o agendamento.'
       )
     }
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack appointments-management-page">
       <SectionHeader
         title="Agendamentos"
         description="Visualize e gerencie os compromissos do profissional."
@@ -119,88 +134,77 @@ export default function AppointmentsPage() {
 
       <WeeklyAgenda appointments={appointments} isLoading={isLoading} />
 
-      <PageCard className="table-card appointments-list-card">
+      <PageCard className="appointments-list-card appointment-cards-panel">
         <div className="appointments-list-header">
           <div>
             <h3>Todos os agendamentos</h3>
-            <p>Lista completa para conferência, edição e conclusão.</p>
+            <p>Cards compactos para conferencia, edicao e conclusao.</p>
           </div>
         </div>
 
-        <div className="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Cliente</th>
-                <th>Serviço</th>
-                <th>Data</th>
-                <th>Hora</th>
-                <th>Status</th>
-                <th>Valor</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
+        <div className="appointment-cards-grid">
+          {isLoading ? (
+            <div className="feedback-card full-width">Carregando agendamentos...</div>
+          ) : appointments.length === 0 ? (
+            <div className="feedback-card full-width">Nenhum agendamento encontrado.</div>
+          ) : (
+            appointments.map((appointment) => (
+              <article key={appointment.id} className="appointment-summary-card professional">
+                <div className="appointment-summary-top">
+                  <span className="appointment-summary-time">
+                    {getAppointmentTime(appointment)}
+                  </span>
+                  <StatusBadge status={appointment.status} />
+                </div>
 
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={7} className="table-feedback">
-                    Carregando agendamentos...
-                  </td>
-                </tr>
-              ) : appointments.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="table-feedback">
-                    Nenhum agendamento encontrado.
-                  </td>
-                </tr>
-              ) : (
-                appointments.map((appointment) => (
-                  <tr key={appointment.id}>
-                    <td>{appointment.clientName}</td>
-                    <td>{appointment.serviceName}</td>
-                    <td>{appointment.date}</td>
-                    <td>{appointment.time}</td>
-                    <td>
-                      <StatusBadge status={appointment.status} />
-                    </td>
-                    <td>{appointment.priceFormatted}</td>
-                    <td>
-                      <div className="table-actions">
-                        <button
-                          type="button"
-                          className="secondary-button small-button"
-                          onClick={() => handleEditAppointment(appointment.id)}
-                        >
-                          Editar
-                        </button>
+                <div className="appointment-summary-main">
+                  <h3>{appointment.clientName}</h3>
+                  <p>{appointment.serviceName}</p>
+                </div>
 
-                        {canComplete(appointment.status) ? (
-                          <button
-                            type="button"
-                            className="secondary-button small-button"
-                            onClick={() => handleCompleteAppointment(appointment.id)}
-                          >
-                            Concluir
-                          </button>
-                        ) : null}
+                <div className="appointment-summary-meta">
+                  <span>
+                    <small>Data</small>
+                    <strong>{appointment.date}</strong>
+                  </span>
+                  <span>
+                    <small>Valor</small>
+                    <strong>{appointment.priceFormatted}</strong>
+                  </span>
+                </div>
 
-                        {canDelete(appointment.status) ? (
-                          <button
-                            type="button"
-                            className="danger-button small-button"
-                            onClick={() => handleDeleteAppointment(appointment.id)}
-                          >
-                            Excluir
-                          </button>
-                        ) : null}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                <div className="appointment-summary-actions">
+                  <button
+                    type="button"
+                    className="secondary-button small-button"
+                    onClick={() => handleEditAppointment(appointment.id)}
+                  >
+                    Editar
+                  </button>
+
+                  {canComplete(appointment.status) ? (
+                    <button
+                      type="button"
+                      className="secondary-button small-button"
+                      onClick={() => handleCompleteAppointment(appointment.id)}
+                    >
+                      Concluir
+                    </button>
+                  ) : null}
+
+                  {canDelete(appointment.status) ? (
+                    <button
+                      type="button"
+                      className="danger-button small-button"
+                      onClick={() => handleDeleteAppointment(appointment.id)}
+                    >
+                      Excluir
+                    </button>
+                  ) : null}
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </PageCard>
     </div>

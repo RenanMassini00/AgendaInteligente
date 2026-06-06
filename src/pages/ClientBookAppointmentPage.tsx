@@ -123,12 +123,12 @@ export default function ClientBookAppointmentPage() {
   if (isLoading) return <div className="feedback-card">Carregando formulário...</div>
 
   return (
-    <div className="page-stack">
+    <div className="page-stack client-booking-page">
       <SectionHeader title="Agendar horário" description="Escolha o serviço, a data e um horário disponível." />
 
-      <PageCard>
-        <form className="page-stack" onSubmit={handleSubmit}>
-          <div className="two-column-grid">
+      <PageCard className="client-booking-card">
+        <form className="page-stack client-booking-form" onSubmit={handleSubmit}>
+          <div className="two-column-grid client-booking-controls">
             <div>
               <label className="label">Serviço</label>
               <select className="text-input" value={serviceId} onChange={(event) => setServiceId(event.target.value)}>
@@ -152,7 +152,7 @@ export default function ClientBookAppointmentPage() {
             ) : slots.length === 0 ? (
               <div className="empty-state">Nenhum horário disponível para esta data.</div>
             ) : (
-              <div className="slot-grid top-gap">
+              <div className="slot-grid top-gap client-slot-grid">
                 {slots.map((slot) => (
                   <button
                     key={slot.time}
@@ -174,7 +174,7 @@ export default function ClientBookAppointmentPage() {
 
           {errorMessage ? <div className="error-box">{errorMessage}</div> : null}
 
-          <button className="primary-button" type="submit" disabled={isSubmitting}>
+          <button className="primary-button client-booking-submit" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Confirmando...' : 'Confirmar agendamento'}
           </button>
         </form>
