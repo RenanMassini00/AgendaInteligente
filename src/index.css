@@ -8337,6 +8337,79 @@ td {
   }
 }
 
+.admin-users-page .admin-users-layout {
+  align-items: start;
+  grid-template-columns: minmax(420px, 0.95fr) minmax(430px, 1.05fr);
+}
+
+.admin-users-page .admin-users-form-card,
+.admin-users-page .admin-users-list-card,
+.admin-user-main {
+  min-width: 0;
+}
+
+.admin-user-item {
+  align-items: flex-start;
+}
+
+.admin-user-main {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.admin-user-main strong,
+.admin-user-main p {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-user-actions {
+  flex: 0 0 126px;
+  align-items: stretch;
+  gap: 0.6rem;
+}
+
+.admin-user-actions .soft-pill {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.5rem 0.7rem;
+  white-space: nowrap;
+}
+
+.admin-user-actions .item-actions {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+
+.admin-user-actions .item-actions > * {
+  width: 100%;
+}
+
+@media (max-width: 1440px) {
+  .app-shell--admin .admin-users-page .admin-users-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell--admin .admin-user-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 126px;
+    align-items: start;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell--admin .admin-user-item {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-user-actions {
+    width: 100%;
+    flex-basis: auto;
+  }
+}
+
 /* =========================================================
    TELA INICIAL - APRESENTACAO DOS SISTEMAS
    ========================================================= */

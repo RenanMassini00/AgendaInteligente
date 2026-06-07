@@ -171,7 +171,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack admin-users-page">
       <SectionHeader
         title="Usuários"
         description="Cadastre, altere ou inative usuários profissionais do sistema."
@@ -180,8 +180,8 @@ export default function AdminUsersPage() {
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
       {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
 
-      <div className="cards-grid two-cols">
-        <PageCard>
+      <div className="cards-grid two-cols admin-users-layout">
+        <PageCard className="admin-users-form-card">
           <div className="card-stack">
             <div className="card-heading">
               <div>
@@ -352,7 +352,7 @@ export default function AdminUsersPage() {
           </div>
         </PageCard>
 
-        <PageCard>
+        <PageCard className="admin-users-list-card">
           <div className="card-stack">
             <div className="card-heading">
               <div>
@@ -368,8 +368,8 @@ export default function AdminUsersPage() {
             ) : (
               <div className="card-stack">
                 {users.map((user) => (
-                  <div key={user.id} className="dashboard-client-item">
-                    <div>
+                  <div key={user.id} className="dashboard-client-item admin-user-item">
+                    <div className="admin-user-main">
                       <strong>{user.businessName || user.fullName}</strong>
                       <p className="muted-text">{user.fullName}</p>
                       <p className="muted-text small-text">{user.email}</p>
@@ -379,7 +379,7 @@ export default function AdminUsersPage() {
                       </p>
                     </div>
 
-                    <div className="card-stack">
+                    <div className="card-stack admin-user-actions">
                       <span className="soft-pill">{user.status}</span>
                       <span className="soft-pill">{user.createdAt}</span>
 
