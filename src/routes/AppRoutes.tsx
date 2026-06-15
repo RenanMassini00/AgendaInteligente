@@ -139,6 +139,7 @@ export default function AppRoutes() {
 
         <Route path={ROUTE_PATHS.services} element={<ServicesPage />} />
         <Route path={ROUTE_PATHS.createService} element={<CreateServicePage />} />
+        <Route path={ROUTE_PATHS.editService} element={<CreateServicePage />} />
 
         <Route path={ROUTE_PATHS.availability} element={<AvailabilityPage />} />
         <Route path={ROUTE_PATHS.createAvailability} element={<CreateAvailabilityPage />} />

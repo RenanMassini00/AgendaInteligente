@@ -12,6 +12,7 @@ export const ROUTE_PATHS = {
 
   services: '/services',
   createService: '/services/new',
+  editService: '/services/:id/edit',
 
   availability: '/availability',
   createAvailability: '/availability/new',

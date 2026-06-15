@@ -43,7 +43,7 @@ export default function ServicesPage() {
       setErrorMessage('')
       setSuccessMessage('')
 
-      await api.delete(`/api/services/${id}`)
+      await api.delete(`/api/services/${id}?userId=${getCurrentUserId()}`)
       setSuccessMessage('Serviço excluído com sucesso.')
       await loadServices()
     } catch (error) {
