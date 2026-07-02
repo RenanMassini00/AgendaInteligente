@@ -18,7 +18,6 @@ const commonCategories = [
   'Artesanato',
   'Joias',
 ]
-
 const maxProductImageEdge = 1400
 const productImageQuality = 0.86
 
