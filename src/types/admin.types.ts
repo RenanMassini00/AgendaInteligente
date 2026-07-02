@@ -20,6 +20,23 @@ export type AdminDashboardSummary = {
   recentCompanies: AdminRecentCompany[]
 }
 
+export type AdminClientAppointmentMetric = {
+  clientId?: number | string | null
+  clientReference?: string | null
+  clientLabel?: string | null
+  appointmentsCount: number
+}
+
+export type AdminAppointmentAnalytics = {
+  date: string
+  totalAppointments: number
+  totalClientsWithAppointments: number
+  averageAppointmentsPerClient?: number | null
+  clientAppointmentCounts?: AdminClientAppointmentMetric[]
+  clients?: AdminClientAppointmentMetric[]
+  items?: AdminClientAppointmentMetric[]
+}
+
 export type AdminCompany = {
   id: number
   name: string

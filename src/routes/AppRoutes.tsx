@@ -146,6 +146,7 @@ export default function AppRoutes() {
 
         <Route path={ROUTE_PATHS.finance} element={<FinancePage />} />
         <Route path={ROUTE_PATHS.profile} element={<ProfilePage />} />
+        <Route path={ROUTE_PATHS.settings} element={<SettingsPage />} />
 
         <Route path={ROUTE_PATHS.catalog} element={<CatalogPage />} />
         <Route path={ROUTE_PATHS.createProduct} element={<CreateProductPage />} />

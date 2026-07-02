@@ -9,6 +9,7 @@ import {
   Building2,
   ShieldCheck,
   ShoppingBag,
+  Settings,
 } from 'lucide-react'
 import { ROUTE_PATHS } from '../routes/routePaths'
 
@@ -35,6 +36,7 @@ export const professionalNavigationItems = [
   },
   { key: 'finance', label: 'Financeiro', path: ROUTE_PATHS.finance, icon: DollarSign },
   { key: 'profile', label: 'Perfil', path: ROUTE_PATHS.profile, icon: UserCircle2 },
+  { key: 'settings', label: 'Configurações', path: ROUTE_PATHS.settings, icon: Settings },
   { key: 'catalog', label: 'Catálogo', path: ROUTE_PATHS.catalog, icon: ShoppingBag },
 ]
 

@@ -1,17 +1,87 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import PageCard from '../../components/ui/PageCard'
 import SectionHeader from '../../components/ui/SectionHeader'
 import { api } from '../../utils/api'
-import type { AdminDashboardSummary } from '../../types/admin.types'
+import type {
+  AdminAppointmentAnalytics,
+  AdminClientAppointmentMetric,
+  AdminDashboardSummary,
+} from '../../types/admin.types'
+
+function getTodayInputValue() {
+  const now = new Date()
+  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60 * 1000)
+  return localDate.toISOString().slice(0, 10)
+}
+
+function formatInputDate(value: string) {
+  const [year, month, day] = value.split('-')
+
+  if (!year || !month || !day) {
+    return value || 'data selecionada'
+  }
+
+  return `${day}/${month}/${year}`
+}
+
+function getClientMetricRows(analytics: AdminAppointmentAnalytics | null) {
+  if (!analytics) return []
+
+  return analytics.clientAppointmentCounts ?? analytics.clients ?? analytics.items ?? []
+}
+
+function getMetricCount(metric: AdminClientAppointmentMetric) {
+  return Number(metric.appointmentsCount || 0)
+}
 
 export default function AdminDashboardPage() {
   const [summary, setSummary] = useState<AdminDashboardSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const [analyticsDate, setAnalyticsDate] = useState(getTodayInputValue)
+  const [appointmentAnalytics, setAppointmentAnalytics] =
+    useState<AdminAppointmentAnalytics | null>(null)
+  const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(false)
+  const [analyticsErrorMessage, setAnalyticsErrorMessage] = useState('')
+
+  const clientMetricRows = useMemo(
+    () => getClientMetricRows(appointmentAnalytics),
+    [appointmentAnalytics]
+  )
+
+  const totalAppointmentsForDate = useMemo(() => {
+    if (appointmentAnalytics?.totalAppointments !== undefined) {
+      return appointmentAnalytics.totalAppointments
+    }
+
+    return clientMetricRows.reduce((total, metric) => total + getMetricCount(metric), 0)
+  }, [appointmentAnalytics, clientMetricRows])
+
+  const clientsWithAppointments = useMemo(() => {
+    if (appointmentAnalytics?.totalClientsWithAppointments !== undefined) {
+      return appointmentAnalytics.totalClientsWithAppointments
+    }
+
+    return clientMetricRows.length
+  }, [appointmentAnalytics, clientMetricRows])
+
+  const averageAppointmentsPerClient = useMemo(() => {
+    if (appointmentAnalytics?.averageAppointmentsPerClient !== undefined) {
+      return appointmentAnalytics.averageAppointmentsPerClient ?? 0
+    }
+
+    if (clientsWithAppointments === 0) return 0
+
+    return totalAppointmentsForDate / clientsWithAppointments
+  }, [appointmentAnalytics, clientsWithAppointments, totalAppointmentsForDate])
 
   useEffect(() => {
     loadSummary()
   }, [])
+
+  useEffect(() => {
+    loadAppointmentAnalytics(analyticsDate)
+  }, [analyticsDate])
 
   async function loadSummary() {
     try {
@@ -28,6 +98,28 @@ export default function AdminDashboardPage() {
       )
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  async function loadAppointmentAnalytics(date: string) {
+    try {
+      setIsAnalyticsLoading(true)
+      setAnalyticsErrorMessage('')
+
+      const response = await api.get<AdminAppointmentAnalytics>(
+        `/api/admin/appointments/client-summary?date=${encodeURIComponent(date)}`
+      )
+
+      setAppointmentAnalytics(response)
+    } catch (error) {
+      setAppointmentAnalytics(null)
+      setAnalyticsErrorMessage(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível carregar o resumo de agendamentos.'
+      )
+    } finally {
+      setIsAnalyticsLoading(false)
     }
   }
 
@@ -91,6 +183,71 @@ export default function AdminDashboardPage() {
           </div>
         </PageCard>
       </div>
+
+      <PageCard className="admin-appointment-metrics-card">
+        <div className="admin-metrics-header">
+          <div>
+            <h3>Agendamentos por cliente</h3>
+            <p>Resumo numérico por cliente, sem exibir dados pessoais.</p>
+          </div>
+
+          <div className="form-field admin-metrics-date-filter">
+            <label htmlFor="adminAppointmentDate">Filtrar por dia</label>
+            <input
+              id="adminAppointmentDate"
+              type="date"
+              className="form-input"
+              value={analyticsDate}
+              onChange={(event) => setAnalyticsDate(event.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="admin-metrics-summary-grid">
+          <div className="admin-metrics-summary-item">
+            <span>Total no dia</span>
+            <strong>{totalAppointmentsForDate}</strong>
+          </div>
+
+          <div className="admin-metrics-summary-item">
+            <span>Clientes atendidos</span>
+            <strong>{clientsWithAppointments}</strong>
+          </div>
+
+          <div className="admin-metrics-summary-item">
+            <span>Média por cliente</span>
+            <strong>{averageAppointmentsPerClient.toFixed(1)}</strong>
+          </div>
+        </div>
+
+        {analyticsErrorMessage ? (
+          <div className="feedback-card error-box admin-metrics-feedback">
+            {analyticsErrorMessage}
+          </div>
+        ) : isAnalyticsLoading ? (
+          <div className="feedback-card admin-metrics-feedback">
+            Carregando resumo de {formatInputDate(analyticsDate)}...
+          </div>
+        ) : clientMetricRows.length === 0 ? (
+          <div className="feedback-card admin-metrics-feedback">
+            Nenhum agendamento encontrado para {formatInputDate(analyticsDate)}.
+          </div>
+        ) : (
+          <div className="admin-client-count-list">
+            {clientMetricRows.map((metric, index) => (
+              <div
+                key={`${metric.clientId ?? metric.clientReference ?? index}`}
+                className="admin-client-count-row"
+              >
+                <span className="admin-client-count-label">Cliente {index + 1}</span>
+                <strong className="admin-client-count-number">
+                  {getMetricCount(metric)}
+                </strong>
+              </div>
+            ))}
+          </div>
+        )}
+      </PageCard>
 
       <div className="dashboard-main-grid">
         <PageCard className="dashboard-main-card">

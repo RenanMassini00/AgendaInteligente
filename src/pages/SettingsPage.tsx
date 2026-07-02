@@ -1,7 +1,8 @@
-import { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { api } from '../utils/api'
+import { getCurrentRole, getCurrentUser, getCurrentUserId } from '../utils/auth'
 import type {
   AccentColor,
   AdminBrandingUser,
@@ -23,6 +24,18 @@ const accentOptions: Array<{
   { value: 'slate', label: 'Slate', previewClass: 'accent-preview-slate' },
 ]
 
+type PasswordForm = {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
+const initialPasswordForm: PasswordForm = {
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+}
+
 async function fileToDataUrl(file: File) {
   return await new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
@@ -32,7 +45,7 @@ async function fileToDataUrl(file: File) {
   })
 }
 
-export default function SettingsPage() {
+function AdminSettingsPage() {
   const [users, setUsers] = useState<AdminBrandingUser[]>([])
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
 
@@ -314,4 +327,162 @@ export default function SettingsPage() {
       )}
     </div>
   )
+}
+
+function ProfessionalSettingsPage() {
+  const user = getCurrentUser()
+  const [passwordForm, setPasswordForm] = useState<PasswordForm>(initialPasswordForm)
+  const [isSavingPassword, setIsSavingPassword] = useState(false)
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState('')
+  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState('')
+
+  function updatePasswordField<K extends keyof PasswordForm>(
+    field: K,
+    value: PasswordForm[K]
+  ) {
+    setPasswordForm((current) => ({
+      ...current,
+      [field]: value,
+    }))
+  }
+
+  async function handlePasswordSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    if (
+      !passwordForm.currentPassword ||
+      !passwordForm.newPassword ||
+      !passwordForm.confirmPassword
+    ) {
+      setPasswordErrorMessage('Preencha a senha atual, a nova senha e a confirmação.')
+      setPasswordSuccessMessage('')
+      return
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordErrorMessage('A nova senha deve ter pelo menos 6 caracteres.')
+      setPasswordSuccessMessage('')
+      return
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordErrorMessage('A confirmação precisa ser igual à nova senha.')
+      setPasswordSuccessMessage('')
+      return
+    }
+
+    try {
+      setIsSavingPassword(true)
+      setPasswordErrorMessage('')
+      setPasswordSuccessMessage('')
+
+      await api.patch('/api/profile/password', {
+        userId: getCurrentUserId(),
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      } as never)
+
+      setPasswordForm(initialPasswordForm)
+      setPasswordSuccessMessage('Senha alterada com sucesso.')
+    } catch (error) {
+      setPasswordErrorMessage(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível alterar a senha.'
+      )
+    } finally {
+      setIsSavingPassword(false)
+    }
+  }
+
+  return (
+    <div className="page-stack">
+      <SectionHeader
+        title="Configurações"
+        description="Gerencie a segurança do seu acesso profissional."
+      />
+
+      {passwordErrorMessage ? (
+        <div className="feedback-card error-box">{passwordErrorMessage}</div>
+      ) : null}
+      {passwordSuccessMessage ? (
+        <div className="feedback-card success-box">{passwordSuccessMessage}</div>
+      ) : null}
+
+      <PageCard className="professional-settings-card">
+        <div className="professional-settings-header">
+          <div>
+            <h3>Senha de acesso</h3>
+            <p>Atualize sua senha usando a senha atual da conta.</p>
+          </div>
+
+          <div className="professional-settings-account">
+            <span>Conta</span>
+            <strong>{user?.businessName || user?.fullName || 'Profissional'}</strong>
+            <small>{user?.email || 'E-mail não encontrado'}</small>
+          </div>
+        </div>
+
+        <form
+          className="form-grid two-column-grid professional-password-form"
+          onSubmit={handlePasswordSubmit}
+        >
+          <div className="form-field full-width">
+            <label className="label" htmlFor="currentPassword">Senha atual</label>
+            <input
+              id="currentPassword"
+              type="password"
+              className="form-input"
+              value={passwordForm.currentPassword}
+              onChange={(event) => updatePasswordField('currentPassword', event.target.value)}
+              placeholder="Digite sua senha atual"
+              autoComplete="current-password"
+            />
+          </div>
+
+          <div className="form-field">
+            <label className="label" htmlFor="newPassword">Nova senha</label>
+            <input
+              id="newPassword"
+              type="password"
+              className="form-input"
+              value={passwordForm.newPassword}
+              onChange={(event) => updatePasswordField('newPassword', event.target.value)}
+              placeholder="Digite a nova senha"
+              autoComplete="new-password"
+            />
+          </div>
+
+          <div className="form-field">
+            <label className="label" htmlFor="confirmPassword">Confirmar nova senha</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              className="form-input"
+              value={passwordForm.confirmPassword}
+              onChange={(event) => updatePasswordField('confirmPassword', event.target.value)}
+              placeholder="Repita a nova senha"
+              autoComplete="new-password"
+            />
+          </div>
+
+          <div className="full-width actions-row">
+            <button
+              type="submit"
+              className="primary-button"
+              disabled={isSavingPassword}
+            >
+              {isSavingPassword ? 'Alterando...' : 'Alterar senha'}
+            </button>
+          </div>
+        </form>
+      </PageCard>
+    </div>
+  )
+}
+
+export default function SettingsPage() {
+  return getCurrentRole() === 'master_admin'
+    ? <AdminSettingsPage />
+    : <ProfessionalSettingsPage />
 }

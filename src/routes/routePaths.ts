@@ -19,6 +19,7 @@ export const ROUTE_PATHS = {
 
   finance: '/finance',
   profile: '/profile',
+  settings: '/settings',
 
   catalog: '/catalog',
   createProduct: '/catalog/new',
