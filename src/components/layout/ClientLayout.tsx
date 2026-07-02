@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { CalendarDays, Home, LogOut } from 'lucide-react'
 import { ROUTE_PATHS } from '../../routes/routePaths'
 import { getCurrentUser, signOut } from '../../utils/auth'
+import { getBrandingEventName, getCompanyLogo } from '../../utils/branding'
 
 type ClientLayoutProps = {
   children: ReactNode
@@ -17,6 +18,21 @@ const navigation = [
 export default function ClientLayout({ children }: ClientLayoutProps) {
   const navigate = useNavigate()
   const user = getCurrentUser()
+  const [logoUrl, setLogoUrl] = useState(getCompanyLogo())
+
+  useEffect(() => {
+    function syncBranding() {
+      setLogoUrl(getCompanyLogo())
+    }
+
+    window.addEventListener(getBrandingEventName(), syncBranding)
+    window.addEventListener('storage', syncBranding)
+
+    return () => {
+      window.removeEventListener(getBrandingEventName(), syncBranding)
+      window.removeEventListener('storage', syncBranding)
+    }
+  }, [])
 
   function handleLogout() {
     signOut()
@@ -28,9 +44,21 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       <aside className="sidebar desktop-sidebar client-sidebar-visible">
         <div className="sidebar-shell">
           <div className="sidebar-brand">
-            <div>
-              <p>Portal do cliente</p>
-              <h2>{user?.fullName || 'Cliente'}</h2>
+            <div className="sidebar-branding-wrap">
+              {logoUrl ? (
+                <div className="sidebar-brand-mark">
+                  <img
+                    src={logoUrl}
+                    alt="Logo do profissional"
+                    className="brand-logo brand-logo--sidebar"
+                  />
+                </div>
+              ) : null}
+
+              <div>
+                <p>Portal do cliente</p>
+                <h2>{user?.fullName || 'Cliente'}</h2>
+              </div>
             </div>
           </div>
 
@@ -69,7 +97,11 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
               <strong>{user?.fullName || 'Cliente'}</strong>
               <span>{user?.email || 'Conta do cliente'}</span>
             </div>
-            <div className="avatar light">{(user?.fullName || 'C').charAt(0).toUpperCase()}</div>
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo do profissional" className="brand-logo" />
+            ) : (
+              <div className="avatar light">{(user?.fullName || 'C').charAt(0).toUpperCase()}</div>
+            )}
           </div>
         </header>
 

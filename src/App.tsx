@@ -1,19 +1,16 @@
 import { useEffect } from 'react'
 import AppRoutes from './routes/AppRoutes'
 import { api } from './utils/api'
-import { isAuthenticated, getCurrentUserId } from './utils/auth'
+import { getAuthChangedEventName, getSession } from './utils/auth'
 import {
   applyAccentColor,
   applyTheme,
   getStoredAccentColor,
   getStoredTheme,
   initializeTheme,
-  setStoredAccentColor,
-  setStoredTheme,
-  type AppAccent,
-  type AppTheme,
 } from './utils/theme'
-import { setCompanyLogo, clearCompanyLogo } from './utils/branding'
+import { clearCompanyLogo } from './utils/branding'
+import { persistVisualSettings } from './utils/visualSettings'
 import type { Settings } from './types/settings.types'
 
 export default function App() {
@@ -21,7 +18,9 @@ export default function App() {
     initializeTheme()
 
     async function loadVisualSettings() {
-      if (!isAuthenticated()) {
+      const session = getSession()
+
+      if (!session) {
         applyTheme(getStoredTheme())
         applyAccentColor(getStoredAccentColor())
         clearCompanyLogo()
@@ -29,16 +28,16 @@ export default function App() {
       }
 
       try {
+        const settingsUserId =
+          session.role === 'client'
+            ? session.professionalUserId ?? session.userId
+            : session.userId
+
         const settings = await api.get<Settings>(
-          `/api/settings?userId=${getCurrentUserId()}`
+          `/api/settings?userId=${settingsUserId}`
         )
 
-        const theme = (settings.theme === 'dark' ? 'dark' : 'light') as AppTheme
-        const accent = (settings.accentColor || 'blue') as AppAccent
-
-        setStoredTheme(theme)
-        setStoredAccentColor(accent)
-        setCompanyLogo(settings.companyLogoUrl)
+        persistVisualSettings(settings)
       } catch {
         applyTheme(getStoredTheme())
         applyAccentColor(getStoredAccentColor())
@@ -46,6 +45,14 @@ export default function App() {
     }
 
     loadVisualSettings()
+
+    window.addEventListener(getAuthChangedEventName(), loadVisualSettings)
+    window.addEventListener('storage', loadVisualSettings)
+
+    return () => {
+      window.removeEventListener(getAuthChangedEventName(), loadVisualSettings)
+      window.removeEventListener('storage', loadVisualSettings)
+    }
   }, [])
 
   return <AppRoutes />

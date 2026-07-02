@@ -1,3 +1,5 @@
+import type { AccentColor, ThemeMode } from './settings.types'
+
 export type PublicBookingService = {
   id: number
   name: string
@@ -13,6 +15,9 @@ export type PublicProfessional = {
   displayName: string
   subtitle: string
   slug: string
+  theme?: ThemeMode | null
+  accentColor?: AccentColor | null
+  companyLogoUrl?: string | null
   services: PublicBookingService[]
 }
 

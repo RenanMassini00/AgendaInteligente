@@ -11,6 +11,16 @@ export type AppAccent =
 
 const THEME_STORAGE_KEY = 'scheduler_theme'
 const ACCENT_STORAGE_KEY = 'scheduler_accent'
+const ACCENT_VALUES: AppAccent[] = [
+  'blue',
+  'pink',
+  'violet',
+  'emerald',
+  'cyan',
+  'amber',
+  'rose',
+  'slate',
+]
 
 export function applyTheme(theme: AppTheme) {
   document.documentElement.setAttribute('data-theme', theme)
@@ -28,19 +38,21 @@ export function getStoredTheme(): AppTheme {
 export function getStoredAccentColor(): AppAccent {
   const value = localStorage.getItem(ACCENT_STORAGE_KEY) as AppAccent | null
 
-  if (
-    value === 'pink' ||
-    value === 'violet' ||
-    value === 'emerald' ||
-    value === 'cyan' ||
-    value === 'amber' ||
-    value === 'rose' ||
-    value === 'slate'
-  ) {
+  if (value && ACCENT_VALUES.includes(value)) {
     return value
   }
 
   return 'blue'
+}
+
+export function normalizeTheme(theme?: string | null): AppTheme {
+  return theme === 'dark' ? 'dark' : 'light'
+}
+
+export function normalizeAccentColor(accent?: string | null): AppAccent {
+  return accent && ACCENT_VALUES.includes(accent as AppAccent)
+    ? (accent as AppAccent)
+    : 'blue'
 }
 
 export function setStoredTheme(theme: AppTheme) {

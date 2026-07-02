@@ -15,6 +15,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import PageCard from '../components/ui/PageCard'
 import { api } from '../utils/api'
+import { applyVisualSettings } from '../utils/visualSettings'
 import type {
   PublicAvailableSlots,
   PublicBookingResponse,
@@ -121,6 +122,7 @@ export default function PublicBookingPage() {
         )
 
         if (isMounted) {
+          applyVisualSettings(response, { includeLogo: false })
           setProfessional(response)
           setSelectedServiceId(null)
           setErrorMessage('')
@@ -352,8 +354,15 @@ export default function PublicBookingPage() {
       <div className="public-booking-container">
         <section className="public-booking-hero app-scheduler-hero">
           <div className="app-scheduler-profile">
-            <div className="app-scheduler-avatar" aria-hidden="true">
-              {profileInitials}
+            <div
+              className={`app-scheduler-avatar ${professional.companyLogoUrl ? 'app-scheduler-avatar--logo' : ''}`.trim()}
+              aria-hidden="true"
+            >
+              {professional.companyLogoUrl ? (
+                <img src={professional.companyLogoUrl} alt="" />
+              ) : (
+                profileInitials
+              )}
             </div>
 
             <div className="app-scheduler-business">
