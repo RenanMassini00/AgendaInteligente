@@ -1006,6 +1006,116 @@ input[type='checkbox'] {
   padding: 1.35rem;
 }
 
+.admin-dashboard-filter-card {
+  padding: 1rem;
+}
+
+.admin-dashboard-filter-shell {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 1.4fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-dashboard-filter-title {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.admin-dashboard-filter-title h3 {
+  margin: 0 0 0.25rem;
+}
+
+.admin-dashboard-filter-title p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.94rem;
+}
+
+.admin-dashboard-filter-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--accent-main, var(--primary));
+  background: color-mix(in srgb, var(--accent-main, var(--primary)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-main, var(--primary)) 24%, var(--border));
+}
+
+.admin-dashboard-filter-controls {
+  display: grid;
+  grid-template-columns: auto minmax(170px, 220px) minmax(150px, auto) auto;
+  gap: 0.75rem;
+  align-items: end;
+  justify-content: end;
+}
+
+.admin-period-toggle {
+  display: inline-flex;
+  min-height: 44px;
+  padding: 0.25rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-soft) 90%, transparent);
+}
+
+.admin-period-toggle-button {
+  border: 0;
+  border-radius: 12px;
+  padding: 0.55rem 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-soft);
+  background: transparent;
+  font-weight: 800;
+}
+
+.admin-period-toggle-button.active {
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.18);
+}
+
+.admin-period-input-field {
+  min-width: 0;
+}
+
+.admin-selected-period-pill,
+.admin-metrics-period-badge {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-soft) 90%, transparent);
+  border-radius: 16px;
+  padding: 0.68rem 0.9rem;
+}
+
+.admin-selected-period-pill {
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.12rem;
+}
+
+.admin-selected-period-pill span {
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.admin-selected-period-pill strong {
+  line-height: 1;
+}
+
+.admin-filter-refresh-button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
 .admin-appointment-metrics-card {
   padding: 1.35rem;
 }
@@ -1028,9 +1138,10 @@ input[type='checkbox'] {
   color: var(--text-soft);
 }
 
-.admin-metrics-date-filter {
-  width: min(240px, 100%);
-  flex-shrink: 0;
+.admin-metrics-period-badge {
+  color: var(--text);
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .admin-metrics-summary-grid {
@@ -6685,6 +6796,22 @@ td {
     grid-template-columns: 1fr;
   }
 
+  .admin-dashboard-filter-shell,
+  .admin-dashboard-filter-controls {
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+  }
+
+  .admin-period-toggle,
+  .admin-filter-refresh-button {
+    width: 100%;
+  }
+
+  .admin-period-toggle-button {
+    flex: 1;
+    justify-content: center;
+  }
+
   .admin-accent-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -6706,7 +6833,8 @@ td {
     flex-direction: column;
   }
 
-  .admin-metrics-date-filter,
+  .admin-metrics-period-badge,
+  .admin-period-input-field,
   .professional-settings-account {
     width: 100%;
   }

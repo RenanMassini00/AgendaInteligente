@@ -27,8 +27,12 @@ export type AdminClientAppointmentMetric = {
   appointmentsCount: number
 }
 
+export type AdminPeriodFilterType = 'date' | 'month'
+
 export type AdminAppointmentAnalytics = {
-  date: string
+  date?: string
+  month?: string
+  periodType?: AdminPeriodFilterType
   totalAppointments: number
   totalClientsWithAppointments: number
   averageAppointmentsPerClient?: number | null

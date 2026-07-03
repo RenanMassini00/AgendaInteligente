@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { CalendarDays, CalendarRange, Filter, RefreshCw } from 'lucide-react'
 import PageCard from '../../components/ui/PageCard'
 import SectionHeader from '../../components/ui/SectionHeader'
 import { api } from '../../utils/api'
@@ -6,12 +7,17 @@ import type {
   AdminAppointmentAnalytics,
   AdminClientAppointmentMetric,
   AdminDashboardSummary,
+  AdminPeriodFilterType,
 } from '../../types/admin.types'
 
 function getTodayInputValue() {
   const now = new Date()
   const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60 * 1000)
   return localDate.toISOString().slice(0, 10)
+}
+
+function getCurrentMonthInputValue() {
+  return getTodayInputValue().slice(0, 7)
 }
 
 function formatInputDate(value: string) {
@@ -22,6 +28,24 @@ function formatInputDate(value: string) {
   }
 
   return `${day}/${month}/${year}`
+}
+
+function formatInputMonth(value: string) {
+  const [year, month] = value.split('-')
+
+  if (!year || !month) {
+    return value || 'mês selecionado'
+  }
+
+  return `${month}/${year}`
+}
+
+function getPeriodQuery(type: AdminPeriodFilterType, value: string) {
+  return `${type}=${encodeURIComponent(value)}`
+}
+
+function getPeriodLabel(type: AdminPeriodFilterType, value: string) {
+  return type === 'date' ? formatInputDate(value) : formatInputMonth(value)
 }
 
 function getClientMetricRows(analytics: AdminAppointmentAnalytics | null) {
@@ -38,11 +62,26 @@ export default function AdminDashboardPage() {
   const [summary, setSummary] = useState<AdminDashboardSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [analyticsDate, setAnalyticsDate] = useState(getTodayInputValue)
+  const [periodType, setPeriodType] = useState<AdminPeriodFilterType>('month')
+  const [selectedDate, setSelectedDate] = useState(getTodayInputValue)
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthInputValue)
   const [appointmentAnalytics, setAppointmentAnalytics] =
     useState<AdminAppointmentAnalytics | null>(null)
   const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(false)
   const [analyticsErrorMessage, setAnalyticsErrorMessage] = useState('')
+
+  const selectedPeriodValue =
+    (periodType === 'date' ? selectedDate : selectedMonth) ||
+    (periodType === 'date' ? getTodayInputValue() : getCurrentMonthInputValue())
+  const selectedPeriodQuery = useMemo(
+    () => getPeriodQuery(periodType, selectedPeriodValue),
+    [periodType, selectedPeriodValue]
+  )
+  const selectedPeriodLabel = useMemo(
+    () => getPeriodLabel(periodType, selectedPeriodValue),
+    [periodType, selectedPeriodValue]
+  )
+  const selectedPeriodName = periodType === 'date' ? 'dia' : 'mês'
 
   const clientMetricRows = useMemo(
     () => getClientMetricRows(appointmentAnalytics),
@@ -76,19 +115,28 @@ export default function AdminDashboardPage() {
   }, [appointmentAnalytics, clientsWithAppointments, totalAppointmentsForDate])
 
   useEffect(() => {
-    loadSummary()
-  }, [])
+    loadDashboardData(selectedPeriodQuery)
+  }, [selectedPeriodQuery])
 
-  useEffect(() => {
-    loadAppointmentAnalytics(analyticsDate)
-  }, [analyticsDate])
+  async function loadDashboardData(periodQuery: string) {
+    await Promise.all([
+      loadSummary(periodQuery),
+      loadAppointmentAnalytics(periodQuery),
+    ])
+  }
 
-  async function loadSummary() {
+  function handleRefresh() {
+    loadDashboardData(selectedPeriodQuery)
+  }
+
+  async function loadSummary(periodQuery: string) {
     try {
       setIsLoading(true)
       setErrorMessage('')
 
-      const response = await api.get<AdminDashboardSummary>('/api/admin/dashboard')
+      const response = await api.get<AdminDashboardSummary>(
+        `/api/admin/dashboard?${periodQuery}`
+      )
       setSummary(response)
     } catch (error) {
       setErrorMessage(
@@ -101,13 +149,13 @@ export default function AdminDashboardPage() {
     }
   }
 
-  async function loadAppointmentAnalytics(date: string) {
+  async function loadAppointmentAnalytics(periodQuery: string) {
     try {
       setIsAnalyticsLoading(true)
       setAnalyticsErrorMessage('')
 
       const response = await api.get<AdminAppointmentAnalytics>(
-        `/api/admin/appointments/client-summary?date=${encodeURIComponent(date)}`
+        `/api/admin/appointments/client-summary?${periodQuery}`
       )
 
       setAppointmentAnalytics(response)
@@ -123,11 +171,11 @@ export default function AdminDashboardPage() {
     }
   }
 
-  if (isLoading) {
+  if (isLoading && !summary) {
     return <div className="feedback-card">Carregando painel administrativo...</div>
   }
 
-  if (errorMessage) {
+  if (errorMessage && !summary) {
     return <div className="feedback-card error-box">{errorMessage}</div>
   }
 
@@ -141,6 +189,78 @@ export default function AdminDashboardPage() {
         title="Painel Administrativo"
         description="Acompanhe o uso e o financeiro geral da plataforma."
       />
+
+      {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
+
+      <PageCard className="admin-dashboard-filter-card">
+        <div className="admin-dashboard-filter-shell">
+          <div className="admin-dashboard-filter-title">
+            <span className="admin-dashboard-filter-icon">
+              <Filter size={18} />
+            </span>
+            <div>
+              <h3>Filtros do painel</h3>
+              <p>Alterne entre visão diária e mensal para revisar os indicadores.</p>
+            </div>
+          </div>
+
+          <div className="admin-dashboard-filter-controls">
+            <div className="admin-period-toggle" role="group" aria-label="Tipo de período">
+              <button
+                type="button"
+                className={`admin-period-toggle-button ${periodType === 'date' ? 'active' : ''}`}
+                onClick={() => setPeriodType('date')}
+              >
+                <CalendarDays size={16} />
+                Dia
+              </button>
+
+              <button
+                type="button"
+                className={`admin-period-toggle-button ${periodType === 'month' ? 'active' : ''}`}
+                onClick={() => setPeriodType('month')}
+              >
+                <CalendarRange size={16} />
+                Mês
+              </button>
+            </div>
+
+            <div className="form-field admin-period-input-field">
+              <label htmlFor="adminPeriodInput">
+                {periodType === 'date' ? 'Data' : 'Mês'}
+              </label>
+              <input
+                id="adminPeriodInput"
+                type={periodType}
+                className="form-input"
+                value={selectedPeriodValue}
+                onChange={(event) => {
+                  if (periodType === 'date') {
+                    setSelectedDate(event.target.value)
+                  } else {
+                    setSelectedMonth(event.target.value)
+                  }
+                }}
+              />
+            </div>
+
+            <div className="admin-selected-period-pill">
+              <span>Visualizando</span>
+              <strong>{selectedPeriodLabel}</strong>
+            </div>
+
+            <button
+              type="button"
+              className="secondary-button admin-filter-refresh-button"
+              onClick={handleRefresh}
+              disabled={isLoading || isAnalyticsLoading}
+            >
+              <RefreshCw size={16} />
+              Atualizar
+            </button>
+          </div>
+        </div>
+      </PageCard>
 
       <div className="dashboard-highlight-grid">
         <PageCard className="dashboard-highlight-card">
@@ -166,7 +286,7 @@ export default function AdminDashboardPage() {
         <PageCard className="dashboard-highlight-card">
           <div className="dashboard-highlight-head">
             <div>
-              <p className="dashboard-highlight-label">Recebido no mês</p>
+              <p className="dashboard-highlight-label">Recebido no {selectedPeriodName}</p>
               <h2 className="dashboard-highlight-number">{summary.receivedThisMonthFormatted}</h2>
             </div>
             <div className="dashboard-highlight-icon">💰</div>
@@ -176,7 +296,7 @@ export default function AdminDashboardPage() {
         <PageCard className="dashboard-highlight-card">
           <div className="dashboard-highlight-head">
             <div>
-              <p className="dashboard-highlight-label">Pendente no mês</p>
+              <p className="dashboard-highlight-label">Pendente no {selectedPeriodName}</p>
               <h2 className="dashboard-highlight-number">{summary.pendingThisMonthFormatted}</h2>
             </div>
             <div className="dashboard-highlight-icon">📌</div>
@@ -191,21 +311,14 @@ export default function AdminDashboardPage() {
             <p>Resumo numérico por cliente, sem exibir dados pessoais.</p>
           </div>
 
-          <div className="form-field admin-metrics-date-filter">
-            <label htmlFor="adminAppointmentDate">Filtrar por dia</label>
-            <input
-              id="adminAppointmentDate"
-              type="date"
-              className="form-input"
-              value={analyticsDate}
-              onChange={(event) => setAnalyticsDate(event.target.value)}
-            />
+          <div className="admin-metrics-period-badge">
+            {periodType === 'date' ? 'Dia' : 'Mês'}: {selectedPeriodLabel}
           </div>
         </div>
 
         <div className="admin-metrics-summary-grid">
           <div className="admin-metrics-summary-item">
-            <span>Total no dia</span>
+            <span>Total no {selectedPeriodName}</span>
             <strong>{totalAppointmentsForDate}</strong>
           </div>
 
@@ -226,11 +339,11 @@ export default function AdminDashboardPage() {
           </div>
         ) : isAnalyticsLoading ? (
           <div className="feedback-card admin-metrics-feedback">
-            Carregando resumo de {formatInputDate(analyticsDate)}...
+            Carregando resumo de {selectedPeriodLabel}...
           </div>
         ) : clientMetricRows.length === 0 ? (
           <div className="feedback-card admin-metrics-feedback">
-            Nenhum agendamento encontrado para {formatInputDate(analyticsDate)}.
+            Nenhum agendamento encontrado para {selectedPeriodLabel}.
           </div>
         ) : (
           <div className="admin-client-count-list">
@@ -260,12 +373,12 @@ export default function AdminDashboardPage() {
 
           <div className="finance-indicator-stack">
             <div className="finance-indicator-box">
-              <span className="muted-text">Novas empresas no mês</span>
+              <span className="muted-text">Novas empresas no {selectedPeriodName}</span>
               <strong>{summary.newCompaniesThisMonth}</strong>
             </div>
 
             <div className="finance-indicator-box">
-              <span className="muted-text">Agendamentos do mês</span>
+              <span className="muted-text">Agendamentos do {selectedPeriodName}</span>
               <strong>{summary.totalAppointmentsThisMonth}</strong>
             </div>
 
