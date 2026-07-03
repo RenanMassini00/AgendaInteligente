@@ -18,6 +18,7 @@ export default function CatalogPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [publicSlug, setPublicSlug] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [deletingProductId, setDeletingProductId] = useState<number | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -58,12 +59,15 @@ export default function CatalogPage() {
     try {
       setErrorMessage('')
       setSuccessMessage('')
+      setDeletingProductId(id)
 
       await api.delete(`/api/products/${id}?userId=${getCurrentUserId()}`)
+      setProducts((current) => current.filter((product) => product.id !== id))
       setSuccessMessage('Produto removido com sucesso.')
-      await loadPage()
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Não foi possível remover o produto.')
+    } finally {
+      setDeletingProductId(null)
     }
   }
 
@@ -235,8 +239,9 @@ export default function CatalogPage() {
                     type="button"
                     className="danger-button small-button"
                     onClick={() => handleDelete(product.id)}
+                    disabled={deletingProductId === product.id}
                   >
-                    Excluir
+                    {deletingProductId === product.id ? 'Excluindo...' : 'Excluir'}
                   </button>
                 </div>
               </div>
