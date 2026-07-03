@@ -13,6 +13,14 @@ import {
   Tag,
 } from 'lucide-react'
 import { api } from '../utils/api'
+import {
+  applyAccentColor,
+  applyTheme,
+  getStoredAccentColor,
+  getStoredTheme,
+} from '../utils/theme'
+import { applyVisualSettings } from '../utils/visualSettings'
+import type { Settings } from '../types/settings.types'
 import type { PublicCatalog, PublicCatalogProduct } from '../types/product.types'
 
 type SortOption = 'featured' | 'name-asc' | 'price-asc' | 'price-desc'
@@ -62,7 +70,14 @@ export default function PublicCatalogPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   useEffect(() => {
-    if (!slug) return
+    let isMounted = true
+
+    if (!slug) {
+      setIsLoading(false)
+      return () => {
+        isMounted = false
+      }
+    }
 
     async function loadCatalog() {
       try {
@@ -70,17 +85,40 @@ export default function PublicCatalogPage() {
         setErrorMessage('')
 
         const response = await api.get<PublicCatalog>(`/api/public/catalog/${slug}`)
-        setCatalog(response)
+        let visualSettings: PublicCatalog | Settings = response
+
+        if (!response.theme || !response.accentColor) {
+          try {
+            visualSettings = await api.get<Settings>(`/api/settings?userId=${response.userId}`)
+          } catch {
+            visualSettings = response
+          }
+        }
+
+        if (isMounted) {
+          applyVisualSettings(visualSettings, { includeLogo: false, fallback: true })
+          setCatalog(response)
+        }
       } catch (error) {
-        setErrorMessage(
-          error instanceof Error ? error.message : 'Não foi possível carregar o catálogo.'
-        )
+        if (isMounted) {
+          setErrorMessage(
+            error instanceof Error ? error.message : 'Não foi possível carregar o catálogo.'
+          )
+        }
       } finally {
-        setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
     }
 
     loadCatalog()
+
+    return () => {
+      isMounted = false
+      applyTheme(getStoredTheme())
+      applyAccentColor(getStoredAccentColor())
+    }
   }, [slug])
 
   const newestIds = useMemo(() => {
@@ -276,8 +314,16 @@ export default function PublicCatalogPage() {
               <div className="public-catalog-hero-main">
                 <div className="public-catalog-title-block">
                   <div className="public-catalog-brand-row">
-                    <div className="public-catalog-brand-mark">
-                      <Store size={22} />
+                    <div
+                      className={`public-catalog-brand-mark ${
+                        catalog.companyLogoUrl ? 'public-catalog-brand-mark--logo' : ''
+                      }`.trim()}
+                    >
+                      {catalog.companyLogoUrl ? (
+                        <img src={catalog.companyLogoUrl} alt="" />
+                      ) : (
+                        <Store size={22} aria-hidden="true" />
+                      )}
                     </div>
 
                     <div>

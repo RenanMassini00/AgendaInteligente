@@ -1,3 +1,5 @@
+import type { AccentColor, ThemeMode } from './settings.types'
+
 export type Product = {
   id: number
   name: string
@@ -48,5 +50,8 @@ export type PublicCatalog = {
   specialty?: string | null
   publicSlug?: string | null
   phone?: string | null
+  theme?: ThemeMode | null
+  accentColor?: AccentColor | null
+  companyLogoUrl?: string | null
   products: PublicCatalogProduct[]
 }
