@@ -6678,6 +6678,17 @@ td {
   object-fit: contain;
 }
 
+.admin-logo-file-note {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--text-soft);
+  word-break: break-word;
+}
+
+.admin-logo-clear-button {
+  width: fit-content;
+}
+
 .admin-branding-actions {
   margin-top: 1.5rem;
   display: flex;

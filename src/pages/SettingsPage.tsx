@@ -1,4 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react'
+import { Trash2 } from 'lucide-react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { api } from '../utils/api'
@@ -36,13 +37,119 @@ const initialPasswordForm: PasswordForm = {
   confirmPassword: '',
 }
 
-async function fileToDataUrl(file: File) {
-  return await new Promise<string>((resolve, reject) => {
+const maxLogoFileSize = 5 * 1024 * 1024
+const maxLogoDataUrlLength = 85_000
+const logoImageEdges = [640, 512, 384, 320, 256]
+const logoImageQualities = [0.82, 0.72, 0.62, 0.52]
+
+function isEmbeddedImageUrl(value: string) {
+  return value.trim().startsWith('data:image/')
+}
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result))
-    reader.onerror = reject
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result)
+        return
+      }
+
+      reject(new Error('Não foi possível ler a imagem selecionada.'))
+    }
+    reader.onerror = () => reject(new Error('Não foi possível ler a imagem selecionada.'))
     reader.readAsDataURL(file)
   })
+}
+
+function loadImage(dataUrl: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error('Não foi possível preparar a imagem selecionada.'))
+    image.src = dataUrl
+  })
+}
+
+function canvasToCompressedDataUrl(
+  canvas: HTMLCanvasElement,
+  image: HTMLImageElement,
+  width: number,
+  height: number,
+  quality: number
+) {
+  const webpDataUrl = canvas.toDataURL('image/webp', quality)
+
+  if (webpDataUrl.startsWith('data:image/webp')) {
+    return webpDataUrl
+  }
+
+  const fallbackCanvas = document.createElement('canvas')
+  const fallbackContext = fallbackCanvas.getContext('2d')
+
+  if (!fallbackContext) {
+    return canvas.toDataURL('image/jpeg', quality)
+  }
+
+  fallbackCanvas.width = width
+  fallbackCanvas.height = height
+  fallbackContext.fillStyle = '#ffffff'
+  fallbackContext.fillRect(0, 0, width, height)
+  fallbackContext.drawImage(image, 0, 0, width, height)
+
+  return fallbackCanvas.toDataURL('image/jpeg', quality)
+}
+
+async function fileToLogoDataUrl(file: File) {
+  const originalDataUrl = await readFileAsDataUrl(file)
+
+  if (file.type === 'image/svg+xml') {
+    if (originalDataUrl.length <= maxLogoDataUrlLength) {
+      return originalDataUrl
+    }
+
+    throw new Error('O SVG selecionado é muito grande. Envie um SVG menor ou uma imagem PNG/JPG.')
+  }
+
+  const image = await loadImage(originalDataUrl)
+  const originalWidth = image.naturalWidth || image.width
+  const originalHeight = image.naturalHeight || image.height
+  let bestResult = originalDataUrl.length <= maxLogoDataUrlLength ? originalDataUrl : ''
+
+  for (const maxEdge of logoImageEdges) {
+    const scale = Math.min(1, maxEdge / Math.max(originalWidth, originalHeight))
+    const width = Math.max(1, Math.round(originalWidth * scale))
+    const height = Math.max(1, Math.round(originalHeight * scale))
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+
+    if (!context) {
+      break
+    }
+
+    canvas.width = width
+    canvas.height = height
+    context.clearRect(0, 0, width, height)
+    context.drawImage(image, 0, 0, width, height)
+
+    for (const quality of logoImageQualities) {
+      const dataUrl = canvasToCompressedDataUrl(canvas, image, width, height, quality)
+
+      if (!bestResult || dataUrl.length < bestResult.length) {
+        bestResult = dataUrl
+      }
+
+      if (dataUrl.length <= maxLogoDataUrlLength) {
+        return dataUrl
+      }
+    }
+  }
+
+  if (bestResult && bestResult.length <= maxLogoDataUrlLength) {
+    return bestResult
+  }
+
+  throw new Error('Não foi possível reduzir essa imagem. Envie um logo menor ou em outro formato.')
 }
 
 function AdminSettingsPage() {
@@ -52,7 +159,9 @@ function AdminSettingsPage() {
   const [theme, setTheme] = useState<ThemeMode>('light')
   const [accentColor, setAccentColor] = useState<AccentColor>('blue')
   const [companyLogoUrl, setCompanyLogoUrl] = useState('')
+  const [logoUrlInput, setLogoUrlInput] = useState('')
   const [logoPreview, setLogoPreview] = useState('')
+  const [logoFileName, setLogoFileName] = useState('')
 
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -83,7 +192,9 @@ function AdminSettingsPage() {
       } else {
         setSelectedUserId(null)
         setCompanyLogoUrl('')
+        setLogoUrlInput('')
         setLogoPreview('')
+        setLogoFileName('')
       }
     } catch (error) {
       setErrorMessage(
@@ -97,10 +208,14 @@ function AdminSettingsPage() {
   }
 
   function applyUserToForm(user: AdminBrandingUser) {
+    const logoUrl = user.companyLogoUrl || ''
+
     setTheme(user.theme)
     setAccentColor(user.accentColor)
-    setCompanyLogoUrl(user.companyLogoUrl || '')
-    setLogoPreview(user.companyLogoUrl || '')
+    setCompanyLogoUrl(logoUrl)
+    setLogoUrlInput(isEmbeddedImageUrl(logoUrl) ? '' : logoUrl)
+    setLogoPreview(logoUrl)
+    setLogoFileName(isEmbeddedImageUrl(logoUrl) ? 'Logo cadastrado' : '')
   }
 
   function handleSelectUser(user: AdminBrandingUser) {
@@ -116,21 +231,56 @@ function AdminSettingsPage() {
 
     if (!file.type.startsWith('image/')) {
       setErrorMessage('Selecione um arquivo de imagem válido.')
+      event.target.value = ''
       return
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      setErrorMessage('A imagem deve ter no máximo 2MB.')
+    if (file.size > maxLogoFileSize) {
+      setErrorMessage('A imagem deve ter no máximo 5MB.')
+      event.target.value = ''
       return
     }
 
-    const dataUrl = await fileToDataUrl(file)
-    setCompanyLogoUrl(dataUrl)
-    setLogoPreview(dataUrl)
+    try {
+      setErrorMessage('')
+      const dataUrl = await fileToLogoDataUrl(file)
+      setCompanyLogoUrl(dataUrl)
+      setLogoUrlInput('')
+      setLogoPreview(dataUrl)
+      setLogoFileName(file.name)
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível anexar a imagem.')
+    } finally {
+      event.target.value = ''
+    }
+  }
+
+  function handleLogoUrlChange(value: string) {
+    setLogoUrlInput(value)
+    setCompanyLogoUrl(value)
+    setLogoPreview(value)
+    setLogoFileName('')
+  }
+
+  function handleClearLogo() {
+    setCompanyLogoUrl('')
+    setLogoUrlInput('')
+    setLogoPreview('')
+    setLogoFileName('')
   }
 
   async function handleSave() {
     if (!selectedUserId) return
+    const normalizedCompanyLogoUrl = companyLogoUrl.trim()
+
+    if (
+      isEmbeddedImageUrl(normalizedCompanyLogoUrl) &&
+      normalizedCompanyLogoUrl.length > maxLogoDataUrlLength
+    ) {
+      setErrorMessage('O logo anexado ficou muito grande. Escolha um arquivo menor.')
+      setSuccessMessage('')
+      return
+    }
 
     try {
       setIsSaving(true)
@@ -140,7 +290,7 @@ function AdminSettingsPage() {
       await api.put(`/api/admin/settings/users/${selectedUserId}`, {
         theme,
         accentColor,
-        companyLogoUrl: companyLogoUrl || null,
+        companyLogoUrl: normalizedCompanyLogoUrl || null,
       })
 
       setSuccessMessage('Configurações visuais salvas com sucesso.')
@@ -285,11 +435,8 @@ function AdminSettingsPage() {
                         <input
                           id="companyLogoUrl"
                           className="form-input"
-                          value={companyLogoUrl}
-                          onChange={(event) => {
-                            setCompanyLogoUrl(event.target.value)
-                            setLogoPreview(event.target.value)
-                          }}
+                          value={logoUrlInput}
+                          onChange={(event) => handleLogoUrlChange(event.target.value)}
                           placeholder="https://..."
                         />
                       </div>
@@ -303,7 +450,23 @@ function AdminSettingsPage() {
                           className="form-input"
                           onChange={handleLogoFileChange}
                         />
+                        {logoFileName ? (
+                          <small className="admin-logo-file-note">
+                            Arquivo anexado: {logoFileName}
+                          </small>
+                        ) : null}
                       </div>
+
+                      {logoPreview ? (
+                        <button
+                          type="button"
+                          className="secondary-button small-button admin-logo-clear-button"
+                          onClick={handleClearLogo}
+                        >
+                          <Trash2 size={15} />
+                          Remover logo
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 </div>
