@@ -80,8 +80,8 @@ export default function CreateProductPage() {
   const [price, setPrice] = useState('')
   const [originalPrice, setOriginalPrice] = useState('')
   const [promotionalPrice, setPromotionalPrice] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [imageFileName, setImageFileName] = useState('')
+  const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [imageFileNames, setImageFileNames] = useState<string[]>([])
   const [stockQuantity, setStockQuantity] = useState('0')
   const [whatsAppMessage, setWhatsAppMessage] = useState('')
   const [isActive, setIsActive] = useState(true)
@@ -108,8 +108,13 @@ export default function CreateProductPage() {
         setPrice(String(response.price))
         setOriginalPrice(response.originalPrice != null ? String(response.originalPrice) : '')
         setPromotionalPrice(response.promotionalPrice != null ? String(response.promotionalPrice) : '')
-        setImageUrl(response.imageUrl ?? '')
-        setImageFileName(response.imageUrl ? 'Imagem cadastrada' : '')
+        const loadedImages = response.imageUrls?.length
+          ? response.imageUrls
+          : response.imageUrl
+            ? [response.imageUrl]
+            : []
+        setImageUrls(loadedImages)
+        setImageFileNames(loadedImages.map(() => 'Imagem cadastrada'))
         setStockQuantity(String(response.stockQuantity))
         setWhatsAppMessage(response.whatsAppMessage ?? '')
         setIsActive(response.isActive)
@@ -140,7 +145,8 @@ export default function CreateProductPage() {
         price: Number(price),
         originalPrice: originalPrice ? Number(originalPrice) : null,
         promotionalPrice: promotionalPrice ? Number(promotionalPrice) : null,
-        imageUrl: imageUrl || null,
+        imageUrl: imageUrls[0] || null,
+        imageUrls,
         stockQuantity: Number(stockQuantity),
         isActive,
         isSold,
@@ -163,20 +169,18 @@ export default function CreateProductPage() {
   }
 
   async function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    if (!file.type.startsWith('image/')) {
-      setErrorMessage('Selecione um arquivo de imagem válido.')
-      event.target.value = ''
-      return
-    }
-
     try {
       setErrorMessage('')
-      const imageDataUrl = await readImageFile(file)
-      setImageUrl(imageDataUrl)
-      setImageFileName(file.name)
+      const files = Array.from(event.target.files ?? [])
+      if (files.length === 0) return
+      if (files.some((file) => !file.type.startsWith('image/'))) {
+        setErrorMessage('Selecione apenas arquivos de imagem válidos.')
+        return
+      }
+
+      const selectedImages = await Promise.all(files.map(readImageFile))
+      setImageUrls((current) => [...current, ...selectedImages])
+      setImageFileNames((current) => [...current, ...files.map((file) => file.name)])
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Não foi possível anexar a imagem.')
     } finally {
@@ -184,9 +188,9 @@ export default function CreateProductPage() {
     }
   }
 
-  function handleRemoveImage() {
-    setImageUrl('')
-    setImageFileName('')
+  function handleRemoveImage(index: number) {
+    setImageUrls((current) => current.filter((_, imageIndex) => imageIndex !== index))
+    setImageFileNames((current) => current.filter((_, imageIndex) => imageIndex !== index))
   }
 
   return (
@@ -304,6 +308,7 @@ export default function CreateProductPage() {
                     id="productImage"
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleImageChange}
                   />
 
@@ -312,25 +317,33 @@ export default function CreateProductPage() {
                   </span>
 
                   <span>
-                    <strong>{imageFileName || 'Anexar imagem'}</strong>
-                    <small>PNG, JPG ou WEBP direto do computador.</small>
+                    <strong>
+                      {imageUrls.length > 0
+                        ? `${imageUrls.length} imagem(ns) selecionada(s)`
+                        : 'Anexar imagens'}
+                    </strong>
+                    <small>Você pode selecionar várias imagens PNG, JPG ou WEBP.</small>
                   </span>
                 </label>
 
-                {imageUrl ? (
+                {imageUrls.length > 0 ? (
                   <div className="product-image-preview-card">
-                    <div className="product-image-preview">
-                      <img src={imageUrl} alt="Prévia do produto" />
+                    <div className="product-image-preview-grid">
+                      {imageUrls.map((image, index) => (
+                        <div className="product-image-preview" key={`${image}-${index}`}>
+                          <img src={image} alt={`Prévia ${index + 1} do produto`} />
+                          <button
+                            type="button"
+                            className="product-image-preview-remove"
+                            onClick={() => handleRemoveImage(index)}
+                            aria-label={`Remover imagem ${index + 1}`}
+                          >
+                            <X size={15} />
+                          </button>
+                          <small>{imageFileNames[index]}</small>
+                        </div>
+                      ))}
                     </div>
-
-                    <button
-                      type="button"
-                      className="secondary-button small-button"
-                      onClick={handleRemoveImage}
-                    >
-                      <X size={15} />
-                      Remover
-                    </button>
                   </div>
                 ) : (
                   <div className="product-image-empty-preview">

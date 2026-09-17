@@ -22,6 +22,7 @@ import {
 import { applyVisualSettings } from '../utils/visualSettings'
 import type { Settings } from '../types/settings.types'
 import type { PublicCatalog, PublicCatalogProduct } from '../types/product.types'
+import ProductImageCarousel from '../components/products/ProductImageCarousel'
 
 type SortOption = 'featured' | 'name-asc' | 'price-asc' | 'price-desc'
 type CatalogFilter = 'all' | 'featured' | 'new' | 'under-100' | 'over-100' | 'low-stock'
@@ -506,21 +507,19 @@ export default function PublicCatalogPage() {
                       product.stockQuantity > 0 && product.stockQuantity <= 3 ? 'low-stock' : ''
                     }`}
                   >
-                    <div className="public-catalog-image-wrap premium">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          loading="lazy"
-                          className="public-catalog-image"
-                        />
-                      ) : (
-                        <div className="public-catalog-image-placeholder">
+                    <ProductImageCarousel
+                      imageUrl={product.imageUrl}
+                      imageUrls={product.imageUrls}
+                      alt={product.name}
+                      className="public-catalog-image-wrap premium"
+                      loading="lazy"
+                      placeholder={
+                        <>
                           <ShoppingBag size={24} />
                           <span>Sem imagem</span>
-                        </div>
-                      )}
-                    </div>
+                        </>
+                      }
+                    />
 
                     <div className="public-catalog-card-body premium">
                       <div className="public-catalog-card-badges">

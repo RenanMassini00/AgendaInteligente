@@ -6,6 +6,7 @@ import { ROUTE_PATHS } from '../routes/routePaths'
 import { getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
 import type { Product } from '../types/product.types'
+import ProductImageCarousel from '../components/products/ProductImageCarousel'
 
 type ProfileResponse = {
   id: number
@@ -179,13 +180,13 @@ export default function CatalogPage() {
         ) : (
           products.map((product) => (
             <article key={product.id} className="public-catalog-card premium catalog-management-card">
-              <div className="public-catalog-image-wrap premium">
-                {product.imageUrl ? (
-                  <img src={product.imageUrl} alt={product.name} className="public-catalog-image" />
-                ) : (
-                  <div className="public-catalog-image-placeholder">Sem imagem</div>
-                )}
-              </div>
+              <ProductImageCarousel
+                imageUrl={product.imageUrl}
+                imageUrls={product.imageUrls}
+                alt={product.name}
+                className="public-catalog-image-wrap premium"
+                placeholder="Sem imagem"
+              />
 
               <div className="public-catalog-card-body premium">
                 <div className="public-catalog-card-badges">
