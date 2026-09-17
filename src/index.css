@@ -9189,6 +9189,32 @@ html[data-theme='dark'] .public-catalog-shell.premium {
   border-color: #1f2937;
 }
 
+.app-entry-whatsapp {
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid #22c55e;
+  border-radius: 8px;
+  color: #166534;
+  background: rgba(240, 253, 244, 0.9);
+  font-weight: 800;
+  transition: 0.2s ease;
+}
+
+.app-entry-whatsapp:hover {
+  color: #14532d;
+  background: #dcfce7;
+  border-color: #16a34a;
+  transform: translateY(-1px);
+}
+
+.app-entry-whatsapp svg {
+  color: #16a34a;
+}
+
 .app-entry-systems {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

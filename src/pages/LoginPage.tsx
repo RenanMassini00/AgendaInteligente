@@ -4,6 +4,7 @@ import {
   BarChart3,
   CalendarCheck,
   ClipboardList,
+  MessageCircle,
   ShoppingBag,
   Users,
   X,
@@ -63,6 +64,9 @@ const systemCards = [
 ]
 
 const flowItems = ['Clientes', 'Agenda', 'Catálogo', 'Resultados']
+const contactWhatsAppUrl =
+  'https://wa.me/5511988010228?text=' +
+  encodeURIComponent('Olá! Tenho interesse em conhecer o sistema Agenda Inteligente.')
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -162,6 +166,16 @@ export default function LoginPage() {
               <span>Acessar</span>
               <ArrowRight size={20} aria-hidden="true" />
             </button>
+
+            <a
+              href={contactWhatsAppUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="app-entry-whatsapp"
+            >
+              <MessageCircle size={20} aria-hidden="true" />
+              <span>Falar no WhatsApp</span>
+            </a>
           </div>
 
           <div className="app-entry-systems" aria-label="Sistemas disponíveis">
