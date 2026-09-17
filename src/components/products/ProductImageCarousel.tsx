@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronLeft, ChevronRight, Images, X } from 'lucide-react'
 
 type ProductImageCarouselProps = {
@@ -42,7 +43,13 @@ export default function ProductImageCarousel({
     }
 
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
   }, [images.length, isOpen])
 
   function goToImage(index: number) {
@@ -75,10 +82,17 @@ export default function ProductImageCarousel({
       <div className={`product-image-carousel ${className}`.trim()}>
         {images.length > 0 ? (
           <>
-            <button
-              type="button"
+            <div
+              role="button"
+              tabIndex={0}
               className="product-image-carousel-main"
               onClick={() => setIsOpen(true)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  setIsOpen(true)
+                }
+              }}
               aria-label={`Abrir imagens de ${alt}`}
             >
               <img src={images[currentIndex]} alt={alt} loading={loading} />
@@ -90,7 +104,7 @@ export default function ProductImageCarousel({
                   {currentIndex + 1}/{images.length}
                 </span>
               ) : null}
-            </button>
+            </div>
 
             {images.length > 1 ? (
               <div className="product-image-carousel-thumbnails" aria-label="Miniaturas das imagens">
@@ -113,7 +127,8 @@ export default function ProductImageCarousel({
         )}
       </div>
 
-      {isOpen && images.length > 0 ? (
+      {isOpen && images.length > 0
+        ? createPortal(
         <div className="product-image-lightbox" role="dialog" aria-modal="true" aria-label={alt} onClick={() => setIsOpen(false)}>
           <div className="product-image-lightbox-content" onClick={(event) => event.stopPropagation()}>
             <button
@@ -131,8 +146,10 @@ export default function ProductImageCarousel({
               {currentIndex + 1} de {images.length}
             </span>
           </div>
-        </div>
-      ) : null}
+        </div>,
+        document.body
+      )
+        : null}
     </>
   )
 }

@@ -307,6 +307,11 @@ textarea:focus {
   cursor: zoom-in;
 }
 
+.product-image-carousel-main:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
 .product-image-carousel-main > img {
   display: block;
   width: 100%;
@@ -411,7 +416,7 @@ textarea:focus {
   inset: 0;
   display: grid;
   place-items: center;
-  padding: 2rem;
+  padding: clamp(0.75rem, 4vw, 2.5rem);
   background: rgba(2, 6, 23, 0.82);
 }
 
@@ -420,7 +425,9 @@ textarea:focus {
   display: grid;
   place-items: center;
   width: min(92vw, 1000px);
-  height: min(88vh, 800px);
+  height: min(88dvh, 800px);
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .product-image-lightbox-content > img {
@@ -444,8 +451,8 @@ textarea:focus {
 }
 
 .product-image-lightbox-close {
-  top: -1rem;
-  right: -1rem;
+  top: clamp(-0.5rem, -2vw, -1rem);
+  right: clamp(-0.5rem, -2vw, -1rem);
 }
 
 .product-image-lightbox-counter {
@@ -496,6 +503,51 @@ textarea:focus {
   font-size: 0.62rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .product-image-carousel-main {
+    min-height: 150px;
+  }
+
+  .product-image-carousel-arrow {
+    width: 30px;
+    height: 30px;
+  }
+
+  .product-image-carousel-arrow.previous {
+    left: 0.4rem;
+  }
+
+  .product-image-carousel-arrow.next {
+    right: 0.4rem;
+  }
+
+  .product-image-lightbox {
+    padding: 0.75rem;
+  }
+
+  .product-image-lightbox-content {
+    width: 100%;
+    height: min(82dvh, 680px);
+  }
+
+  .product-image-lightbox-content .product-image-carousel-arrow.previous {
+    left: 0.35rem;
+  }
+
+  .product-image-lightbox-content .product-image-carousel-arrow.next {
+    right: 0.35rem;
+  }
+
+  .product-image-lightbox-close {
+    top: 0.35rem;
+    right: 0.35rem;
+  }
+
+  .product-image-lightbox-counter {
+    bottom: 0.35rem;
+  }
 }
 
 .sidebar-brand p {
