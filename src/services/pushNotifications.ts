@@ -9,7 +9,10 @@ type PublicKeyResponse = {
 type PushSubscriptionPayload = {
   endpoint: string
   expirationTime: number | null
-  keys?: PushSubscriptionJSON['keys']
+  keys: {
+    p256dh: string
+    auth: string
+  }
   userAgent: string
   deviceName: string
 }
@@ -57,16 +60,25 @@ export async function enablePushNotifications(): Promise<PushEnableResult> {
       applicationServerKey: urlBase64ToUint8Array(keyResponse.publicKey),
     }))
   const subscriptionJson = subscription.toJSON()
-  const keys = subscriptionJson.keys ?? (() => {
-    const p256dh = arrayBufferToBase64(subscription.getKey('p256dh'))
-    const auth = arrayBufferToBase64(subscription.getKey('auth'))
+  const subscriptionKeys = subscriptionJson.keys
+  const keys: PushSubscriptionPayload['keys'] =
+    subscriptionKeys &&
+    typeof subscriptionKeys.p256dh === 'string' &&
+    typeof subscriptionKeys.auth === 'string'
+      ? {
+          p256dh: subscriptionKeys.p256dh,
+          auth: subscriptionKeys.auth,
+        }
+      : (() => {
+          const p256dh = arrayBufferToBase64(subscription.getKey('p256dh'))
+          const auth = arrayBufferToBase64(subscription.getKey('auth'))
 
-    if (!p256dh || !auth) {
-      throw new Error('Push subscription keys are unavailable')
-    }
+          if (!p256dh || !auth) {
+            throw new Error('Push subscription keys are unavailable')
+          }
 
-    return { p256dh, auth }
-  })()
+          return { p256dh, auth }
+        })()
 
   await api.post(
     `/api/push/subscriptions?userId=${getCurrentUserId()}`,
@@ -92,14 +104,9 @@ function arrayBufferToBase64(value: ArrayBuffer | null) {
   })
 
   return window.btoa(binary)
-}
-
-export async function sendPushTestNotification() {
-  await api.post(`/api/push/test?userId=${getCurrentUserId()}`, {
-    title: 'Teste de notificação',
-    body: 'Seu celular está conectado ao Agenda Inteligente.',
-    url: '/dashboard',
-  })
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '')
 }
 
 export async function removePushSubscription() {
