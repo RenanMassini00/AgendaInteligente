@@ -6,6 +6,10 @@ import {
   enablePushNotifications,
   sendPushTestNotification,
 } from '../../services/pushNotifications'
+import {
+  getPushSubscriptionState,
+  showLocalPushTest,
+} from '../../services/pushDiagnostics'
 
 type NotificationKind = 'appointment' | 'system'
 
@@ -71,6 +75,7 @@ export default function NotificationCenter() {
   const [isMarkingAll, setIsMarkingAll] = useState(false)
   const [isEnablingPush, setIsEnablingPush] = useState(false)
   const [isSendingPushTest, setIsSendingPushTest] = useState(false)
+  const [pushState, setPushState] = useState<'unknown' | 'subscribed' | 'not-subscribed' | 'unsupported'>('unknown')
   const [pushMessage, setPushMessage] = useState('')
 
   const loadNotifications = useCallback(async () => {
@@ -171,6 +176,9 @@ export default function NotificationCenter() {
 
     try {
       const result = await enablePushNotifications()
+      if (result.status === 'enabled') {
+        setPushState('subscribed')
+      }
       setPushMessage(
         result.status === 'enabled'
           ? `Celular ativado para receber notificações (usuário ${getCurrentUserId()}).`
@@ -191,6 +199,23 @@ export default function NotificationCenter() {
     }
   }
 
+  async function handleLocalPushTest() {
+    try {
+      await showLocalPushTest()
+      setPushMessage('Teste local exibido. O navegador consegue mostrar notificações neste dispositivo.')
+    } catch (error) {
+      setPushMessage(error instanceof Error ? error.message : 'Não foi possível exibir o teste local.')
+    }
+  }
+
+  async function refreshPushState() {
+    try {
+      setPushState(await getPushSubscriptionState())
+    } catch {
+      setPushState('unknown')
+    }
+  }
+
   async function handleSendPushTest() {
     setIsSendingPushTest(true)
     setPushMessage('')
@@ -208,6 +233,12 @@ export default function NotificationCenter() {
       setIsSendingPushTest(false)
     }
   }
+
+  useEffect(() => {
+    if (isOpen) {
+      void refreshPushState()
+    }
+  }, [isOpen])
 
   return (
     <div className="notification-center" ref={containerRef}>
@@ -277,6 +308,23 @@ export default function NotificationCenter() {
             >
               <Smartphone size={15} />
               {isEnablingPush ? 'Ativando celular...' : 'Ativar notificações no celular'}
+            </button>
+            <p className="notification-push-message">
+              Estado do dispositivo:{' '}
+              {pushState === 'subscribed'
+                ? 'inscrito'
+                : pushState === 'not-subscribed'
+                  ? 'não inscrito'
+                  : pushState === 'unsupported'
+                    ? 'não suportado'
+                    : 'verificando...'}
+            </p>
+            <button
+              type="button"
+              className="notification-mark-read"
+              onClick={handleLocalPushTest}
+            >
+              Testar aviso neste dispositivo
             </button>
             {pushMessage ? <p className="notification-push-message">{pushMessage}</p> : null}
             <button
