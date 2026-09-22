@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Bell, CalendarDays, Check, ExternalLink, Info, X } from 'lucide-react'
+import { Bell, CalendarDays, Check, ExternalLink, Info, Smartphone, X } from 'lucide-react'
 import { api } from '../../utils/api'
 import { getCurrentUserId } from '../../utils/auth'
+import { enablePushNotifications } from '../../services/pushNotifications'
 
 type NotificationKind = 'appointment' | 'system'
 
@@ -65,6 +66,8 @@ export default function NotificationCenter() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [hasLoadError, setHasLoadError] = useState(false)
   const [isMarkingAll, setIsMarkingAll] = useState(false)
+  const [isEnablingPush, setIsEnablingPush] = useState(false)
+  const [pushMessage, setPushMessage] = useState('')
 
   const loadNotifications = useCallback(async () => {
     try {
@@ -156,6 +159,32 @@ export default function NotificationCenter() {
     } finally {
       setIsMarkingAll(false)
     }
+
+    async function handleEnablePush() {
+      setIsEnablingPush(true)
+      setPushMessage('')
+
+      try {
+        const result = await enablePushNotifications()
+        setPushMessage(
+          result.status === 'enabled'
+            ? 'Celular ativado para receber notificações.'
+            : result.status === 'denied'
+              ? 'Permissão bloqueada. Libere as notificações nas configurações do navegador.'
+              : result.status === 'unsupported'
+                ? 'Este navegador não oferece suporte a notificações push.'
+                : 'O serviço de notificações não está disponível no momento.'
+        )
+      } catch (error) {
+        setPushMessage(
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível ativar as notificações no celular.'
+        )
+      } finally {
+        setIsEnablingPush(false)
+      }
+    }
   }
 
   return (
@@ -218,6 +247,16 @@ export default function NotificationCenter() {
           </div>
 
           <div className="notification-panel-footer">
+            <button
+              type="button"
+              className="notification-push-button"
+              onClick={handleEnablePush}
+              disabled={isEnablingPush}
+            >
+              <Smartphone size={15} />
+              {isEnablingPush ? 'Ativando celular...' : 'Ativar notificações no celular'}
+            </button>
+            {pushMessage ? <p className="notification-push-message">{pushMessage}</p> : null}
             <button type="button" className="notification-mark-read" onClick={markAllAsRead} disabled={isMarkingAll || unreadCount === 0}>
               <Check size={15} />
               {isMarkingAll ? 'Atualizando...' : 'Marcar todas como lidas'}
