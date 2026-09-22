@@ -57,10 +57,16 @@ export async function enablePushNotifications(): Promise<PushEnableResult> {
       applicationServerKey: urlBase64ToUint8Array(keyResponse.publicKey),
     }))
   const subscriptionJson = subscription.toJSON()
-  const keys = subscriptionJson.keys ?? {
-    p256dh: arrayBufferToBase64(subscription.getKey('p256dh')),
-    auth: arrayBufferToBase64(subscription.getKey('auth')),
-  }
+  const keys = subscriptionJson.keys ?? (() => {
+    const p256dh = arrayBufferToBase64(subscription.getKey('p256dh'))
+    const auth = arrayBufferToBase64(subscription.getKey('auth'))
+
+    if (!p256dh || !auth) {
+      throw new Error('Push subscription keys are unavailable')
+    }
+
+    return { p256dh, auth }
+  })()
 
   await api.post(
     `/api/push/subscriptions?userId=${getCurrentUserId()}`,
