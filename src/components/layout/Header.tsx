@@ -4,6 +4,7 @@ import { MASSINI_BRANDING } from '../../config/branding'
 import { getCurrentUser } from '../../utils/auth'
 import { getBrandingEventName, getCompanyLogo } from '../../utils/branding'
 import { getWorkspaceModuleCopy } from '../../utils/navigation'
+import NotificationCenter from './NotificationCenter'
 
 type HeaderProps = {
   title: string
@@ -97,6 +98,8 @@ export default function Header({ title, onOpenSidebar }: HeaderProps) {
           <CalendarDays size={17} />
           <span>{todayLabel}</span>
         </div>
+
+        <NotificationCenter />
 
         <div className={`header-profile ${isAdmin ? 'header-profile--admin' : ''}`}>
           <div>
