@@ -9826,12 +9826,12 @@ html[data-theme='dark'] .public-catalog-shell.premium {
 }
 
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-grid.premium {
-  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
-  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
 }
 
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-grid.premium.single-product {
-  grid-template-columns: minmax(176px, 260px);
+  grid-template-columns: minmax(240px, 320px);
   justify-content: start;
 }
 
@@ -9881,10 +9881,10 @@ html[data-theme='dark'] .public-catalog-shell.premium {
 .marketplace-catalog-shell.public-catalog-shell.premium .catalog-badge,
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-card-badges .soft-pill,
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-meta-row.premium .soft-pill {
-  min-height: 21px;
-  padding: 0.2rem 0.42rem;
-  font-size: 0.64rem;
-  line-height: 1.08;
+  min-height: 26px;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.75rem;
+  line-height: 1.15;
 }
 
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-card-head.premium {
@@ -9893,10 +9893,10 @@ html[data-theme='dark'] .public-catalog-shell.premium {
 
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-card-head.premium h3 {
   display: -webkit-box;
-  min-height: 2.35em;
+  min-height: 2.4em;
   margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.18;
+  font-size: 1.05rem;
+  line-height: 1.25;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
@@ -9907,19 +9907,19 @@ html[data-theme='dark'] .public-catalog-shell.premium {
 }
 
 .marketplace-catalog-shell.public-catalog-shell.premium .catalog-current-price {
-  font-size: 1.18rem;
+  font-size: 1.35rem;
   line-height: 1.08;
 }
 
 .marketplace-catalog-shell.public-catalog-shell.premium .catalog-old-price {
-  font-size: 0.76rem;
+  font-size: 0.84rem;
 }
 
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-description {
   display: -webkit-box;
-  min-height: 2.55em;
-  font-size: 0.76rem;
-  line-height: 1.28;
+  min-height: 2.7em;
+  font-size: 0.9rem;
+  line-height: 1.4;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
@@ -9935,11 +9935,11 @@ html[data-theme='dark'] .public-catalog-shell.premium {
 
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-action {
   width: 100%;
-  min-height: 36px;
+  min-height: 42px;
   border-radius: 7px;
-  padding: 0.48rem 0.55rem;
-  font-size: 0.78rem;
-  line-height: 1.1;
+  padding: 0.58rem 0.7rem;
+  font-size: 0.88rem;
+  line-height: 1.2;
 }
 
 .product-editor-card.card {
@@ -10113,7 +10113,7 @@ html[data-theme='dark'] .public-catalog-shell.premium {
   }
 
   .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-grid.premium:not(.single-product) {
-    grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   }
 
   .services-market-page .compact-entity-grid.cards-grid.three-cols {
