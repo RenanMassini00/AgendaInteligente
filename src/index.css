@@ -7805,23 +7805,23 @@ td {
 
 html[data-theme='light'] .public-catalog-shell.premium {
   --catalog-bg: var(--bg, #f8fafc);
-  --catalog-panel: color-mix(in srgb, var(--surface-solid, #ffffff) 84%, transparent);
-  --catalog-panel-strong: color-mix(in srgb, var(--surface-solid, #ffffff) 96%, transparent);
+  --catalog-panel: #ffffff;
+  --catalog-panel-strong: #ffffff;
   --catalog-panel-soft: color-mix(in srgb, var(--accent-soft, rgba(37, 99, 235, 0.12)) 72%, transparent);
-  --catalog-line: color-mix(in srgb, var(--border, #e2e8f0) 92%, transparent);
-  --catalog-line-strong: var(--border-strong, #cbd5e1);
-  --catalog-text: var(--text, #0f172a);
-  --catalog-muted: var(--text-soft, #475569);
-  --catalog-faint: var(--text-faint, #94a3b8);
+  --catalog-line: #cbd5e1;
+  --catalog-line-strong: #94a3b8;
+  --catalog-text: #0f172a;
+  --catalog-muted: #334155;
+  --catalog-faint: #475569;
   --catalog-gold: var(--accent, #2563eb);
   --catalog-cyan: var(--layout-accent-2, var(--accent, #2563eb));
   --catalog-rose: var(--layout-accent-3, var(--accent, #2563eb));
   --catalog-green: var(--success, #16a34a);
   --catalog-active-contrast: #0f172a;
   --catalog-shell-bg:
-    linear-gradient(118deg, color-mix(in srgb, var(--accent, #2563eb) 12%, transparent), transparent 34%),
-    linear-gradient(302deg, color-mix(in srgb, var(--layout-accent-2, var(--accent, #2563eb)) 10%, transparent), transparent 42%),
-    linear-gradient(180deg, color-mix(in srgb, var(--accent-soft, rgba(37, 99, 235, 0.12)) 64%, var(--bg, #f8fafc)) 0%, var(--bg, #f8fafc) 58%, var(--surface-solid, #ffffff) 100%);
+    linear-gradient(118deg, rgba(37, 99, 235, 0.08), transparent 34%),
+    linear-gradient(302deg, rgba(14, 116, 144, 0.07), transparent 42%),
+    linear-gradient(180deg, #eaf0f8 0%, #f4f7fb 58%, #e2e8f0 100%);
   --catalog-hero-bg:
     linear-gradient(135deg, color-mix(in srgb, var(--surface-solid, #ffffff) 92%, transparent), color-mix(in srgb, var(--accent-soft, rgba(37, 99, 235, 0.12)) 42%, transparent)),
     linear-gradient(140deg, color-mix(in srgb, var(--accent-soft, rgba(37, 99, 235, 0.12)) 68%, var(--surface-solid, #ffffff)), var(--surface-solid, #ffffff));
@@ -7833,9 +7833,7 @@ html[data-theme='light'] .public-catalog-shell.premium {
   --catalog-chip-bg: color-mix(in srgb, var(--surface-solid, #ffffff) 88%, transparent);
   --catalog-chip-hover-bg: color-mix(in srgb, var(--accent-soft, rgba(37, 99, 235, 0.12)) 74%, var(--surface-solid, #ffffff));
   --catalog-pill-bg: color-mix(in srgb, var(--accent-soft, rgba(37, 99, 235, 0.12)) 46%, var(--surface-solid, #ffffff));
-  --catalog-card-bg:
-    linear-gradient(180deg, color-mix(in srgb, var(--surface-solid, #ffffff) 94%, transparent), color-mix(in srgb, var(--accent-soft, rgba(37, 99, 235, 0.12)) 32%, transparent)),
-    var(--catalog-panel-strong);
+  --catalog-card-bg: #ffffff;
   --catalog-active-bg: linear-gradient(135deg, var(--accent, #2563eb), color-mix(in srgb, var(--accent, #2563eb) 72%, #ffffff));
   --catalog-hero-shadow: 0 24px 70px rgba(15, 23, 42, 0.1);
   --catalog-card-shadow: 0 18px 46px rgba(15, 23, 42, 0.09);
@@ -9826,12 +9824,12 @@ html[data-theme='dark'] .public-catalog-shell.premium {
 }
 
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-grid.premium {
-  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
-  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
 }
 
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-grid.premium.single-product {
-  grid-template-columns: minmax(176px, 260px);
+  grid-template-columns: minmax(240px, 320px);
   justify-content: start;
 }
 
@@ -9843,6 +9841,9 @@ html[data-theme='dark'] .public-catalog-shell.premium {
   min-height: 0;
   padding: 0;
   border-radius: 8px;
+  color: var(--catalog-text);
+  background: var(--catalog-card-bg);
+  border: 1px solid var(--catalog-line);
   box-shadow: var(--catalog-card-shadow);
 }
 
@@ -9940,6 +9941,40 @@ html[data-theme='dark'] .public-catalog-shell.premium {
   padding: 0.58rem 0.7rem;
   font-size: 0.88rem;
   line-height: 1.2;
+}
+
+html[data-theme='light'] .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-card.premium {
+  border-color: #b8c4d4;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+html[data-theme='light'] .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-description {
+  color: #334155;
+}
+
+html[data-theme='light'] .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-card-badges .soft-pill,
+html[data-theme='light'] .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-meta-row.premium .soft-pill {
+  color: #334155;
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+html[data-theme='light'] .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-meta-row.premium .public-catalog-pill-success {
+  color: #166534;
+  border-color: #86efac;
+  background: #dcfce7;
+}
+
+html[data-theme='light'] .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-meta-row.premium .public-catalog-pill-warning {
+  color: #9a3412;
+  border-color: #fdba74;
+  background: #ffedd5;
+}
+
+html[data-theme='light'] .marketplace-catalog-shell.public-catalog-shell.premium .badge-warning {
+  color: #9a3412;
+  border-color: #fdba74;
+  background: #ffedd5;
 }
 
 .product-editor-card.card {
