@@ -159,31 +159,31 @@ export default function NotificationCenter() {
     } finally {
       setIsMarkingAll(false)
     }
+  }
 
-    async function handleEnablePush() {
-      setIsEnablingPush(true)
-      setPushMessage('')
+  async function handleEnablePush() {
+    setIsEnablingPush(true)
+    setPushMessage('')
 
-      try {
-        const result = await enablePushNotifications()
-        setPushMessage(
-          result.status === 'enabled'
-            ? 'Celular ativado para receber notificações.'
-            : result.status === 'denied'
-              ? 'Permissão bloqueada. Libere as notificações nas configurações do navegador.'
-              : result.status === 'unsupported'
-                ? 'Este navegador não oferece suporte a notificações push.'
-                : 'O serviço de notificações não está disponível no momento.'
-        )
-      } catch (error) {
-        setPushMessage(
-          error instanceof Error
-            ? error.message
-            : 'Não foi possível ativar as notificações no celular.'
-        )
-      } finally {
-        setIsEnablingPush(false)
-      }
+    try {
+      const result = await enablePushNotifications()
+      setPushMessage(
+        result.status === 'enabled'
+          ? 'Celular ativado para receber notificações.'
+          : result.status === 'denied'
+            ? 'Permissão bloqueada. Libere as notificações nas configurações do navegador.'
+            : result.status === 'unsupported'
+              ? 'Este navegador não oferece suporte a notificações push.'
+              : 'O serviço de notificações não está disponível no momento.'
+      )
+    } catch (error) {
+      setPushMessage(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível ativar as notificações no celular.'
+      )
+    } finally {
+      setIsEnablingPush(false)
     }
   }
 
