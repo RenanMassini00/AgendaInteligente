@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Bell, CalendarDays, Check, ExternalLink, Info, X } from 'lucide-react'
 import { api } from '../../utils/api'
 import { getCurrentUserId } from '../../utils/auth'
@@ -66,7 +66,7 @@ export default function NotificationCenter() {
   const [hasLoadError, setHasLoadError] = useState(false)
   const [isMarkingAll, setIsMarkingAll] = useState(false)
 
-  async function loadNotifications() {
+  const loadNotifications = useCallback(async () => {
     try {
       setHasLoadError(false)
       const response = await api.get<ApiNotification[]>(
@@ -76,30 +76,32 @@ export default function NotificationCenter() {
     } catch {
       setHasLoadError(true)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    let isMounted = true
+    void loadNotifications()
 
-    async function load() {
-      try {
-        const response = await api.get<ApiNotification[]>(
-          `/api/notifications?userId=${getCurrentUserId()}`
-        )
-        if (isMounted) {
-          setNotifications((response || []).map(normalizeNotification))
-          setHasLoadError(false)
-        }
-      } catch {
-        if (isMounted) setHasLoadError(true)
+    const refreshInterval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        void loadNotifications()
+      }
+    }, 30_000)
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') {
+        void loadNotifications()
       }
     }
 
-    load()
+    window.addEventListener('focus', loadNotifications)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
     return () => {
-      isMounted = false
+      window.clearInterval(refreshInterval)
+      window.removeEventListener('focus', loadNotifications)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [])
+  }, [loadNotifications])
 
   useEffect(() => {
     function handleOutsideClick(event: MouseEvent) {
@@ -165,7 +167,7 @@ export default function NotificationCenter() {
         aria-expanded={isOpen}
         onClick={() => {
           setIsOpen((current) => !current)
-          if (!isOpen) loadNotifications()
+          if (!isOpen) void loadNotifications()
         }}
       >
         <Bell size={19} aria-hidden="true" />
