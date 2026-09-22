@@ -189,23 +189,23 @@ export default function NotificationCenter() {
     } finally {
       setIsEnablingPush(false)
     }
+  }
 
-    async function handleSendPushTest() {
-      setIsSendingPushTest(true)
-      setPushMessage('')
+  async function handleSendPushTest() {
+    setIsSendingPushTest(true)
+    setPushMessage('')
 
-      try {
-        await sendPushTestNotification()
-        setPushMessage('Teste enviado. Verifique o celular em alguns segundos.')
-      } catch (error) {
-        setPushMessage(
-          error instanceof Error
-            ? error.message
-            : 'Não foi possível enviar o teste para o celular.'
-        )
-      } finally {
-        setIsSendingPushTest(false)
-      }
+    try {
+      await sendPushTestNotification()
+      setPushMessage('Teste enviado. Verifique o celular em alguns segundos.')
+    } catch (error) {
+      setPushMessage(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível enviar o teste para o celular.'
+      )
+    } finally {
+      setIsSendingPushTest(false)
     }
   }
 
