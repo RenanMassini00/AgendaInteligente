@@ -46,7 +46,8 @@ export async function enablePushNotifications(): Promise<PushEnableResult> {
     return { status: 'unavailable' }
   }
 
-  const registration = await navigator.serviceWorker.register('/push-sw.js', { scope: '/' })
+  await navigator.serviceWorker.register('/push-sw.js', { scope: '/' })
+  const registration = await navigator.serviceWorker.ready
   await registration.update()
   const existingSubscription = await registration.pushManager.getSubscription()
   const subscription =
@@ -56,19 +57,35 @@ export async function enablePushNotifications(): Promise<PushEnableResult> {
       applicationServerKey: urlBase64ToUint8Array(keyResponse.publicKey),
     }))
   const subscriptionJson = subscription.toJSON()
+  const keys = subscriptionJson.keys ?? {
+    p256dh: arrayBufferToBase64(subscription.getKey('p256dh')),
+    auth: arrayBufferToBase64(subscription.getKey('auth')),
+  }
 
   await api.post(
     `/api/push/subscriptions?userId=${getCurrentUserId()}`,
     {
       endpoint: subscription.endpoint,
       expirationTime: subscription.expirationTime,
-      keys: subscriptionJson.keys,
+      keys,
       userAgent: navigator.userAgent,
       deviceName: navigator.platform,
     } satisfies PushSubscriptionPayload
   )
 
   return { status: 'enabled' }
+}
+
+function arrayBufferToBase64(value: ArrayBuffer | null) {
+  if (!value) return undefined
+
+  const bytes = new Uint8Array(value)
+  let binary = ''
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte)
+  })
+
+  return window.btoa(binary)
 }
 
 export async function sendPushTestNotification() {

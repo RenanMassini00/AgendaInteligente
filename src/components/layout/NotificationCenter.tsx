@@ -173,7 +173,7 @@ export default function NotificationCenter() {
       const result = await enablePushNotifications()
       setPushMessage(
         result.status === 'enabled'
-          ? 'Celular ativado para receber notificações.'
+          ? `Celular ativado para receber notificações (usuário ${getCurrentUserId()}).`
           : result.status === 'denied'
             ? 'Permissão bloqueada. Libere as notificações nas configurações do navegador.'
             : result.status === 'unsupported'
