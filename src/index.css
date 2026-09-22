@@ -9826,12 +9826,12 @@ html[data-theme='dark'] .public-catalog-shell.premium {
 }
 
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-grid.premium {
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+  gap: 0.7rem;
 }
 
 .marketplace-catalog-shell.public-catalog-shell.premium .public-catalog-grid.premium.single-product {
-  grid-template-columns: minmax(240px, 320px);
+  grid-template-columns: minmax(176px, 260px);
   justify-content: start;
 }
 
