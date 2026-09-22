@@ -7574,16 +7574,20 @@ td {
   display: grid;
   gap: 0.2rem;
   flex: 1;
+  overflow-wrap: anywhere;
 }
 
 .notification-item-content strong {
   font-size: 0.85rem;
+  line-height: 1.35;
 }
 
 .notification-item-content span,
 .notification-item-content small {
   color: var(--text-soft);
   font-size: 0.78rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .notification-item-content small {
@@ -7811,6 +7815,57 @@ td {
   .sidebar-brand h2,
   .sidebar-brand small {
     max-width: 168px;
+  }
+
+  .notification-center {
+    position: static;
+  }
+
+  .notification-panel {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 4.75rem);
+    right: 0.5rem;
+    left: 0.5rem;
+    width: auto;
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 5.25rem);
+    display: flex;
+    flex-direction: column;
+    border-radius: 18px;
+  }
+
+  .notification-list {
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .notification-panel-header,
+  .notification-panel-footer {
+    flex: 0 0 auto;
+    padding: 0.9rem;
+  }
+
+  .notification-item {
+    padding: 0.85rem 0.9rem;
+  }
+
+  .notification-item-main {
+    gap: 0.6rem;
+  }
+
+  .notification-item-icon {
+    width: 1.85rem;
+    height: 1.85rem;
+  }
+
+  .notification-calendar-link {
+    width: 1.85rem;
+    height: 1.85rem;
+  }
+
+  .notification-feedback {
+    padding: 0.85rem 0.9rem;
   }
 }
 
