@@ -1,19 +1,29 @@
 self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {}
-
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Agenda Inteligente', {
-      body: data.body || '',
-      icon: data.icon || '/favicon.svg',
-      badge: data.badge || '/favicon.svg',
-      tag: data.tag || 'agenda-notification',
-      renotify: true,
-      vibrate: [200, 100, 200],
-      data: {
-        url: data.url || '/',
-        appointmentId: data.appointmentId || null,
-      },
-    })
+    (async () => {
+      let data = {}
+
+      if (event.data) {
+        try {
+          data = event.data.json()
+        } catch {
+          data = { body: event.data.text() }
+        }
+      }
+
+      await self.registration.showNotification(data.title || 'Agenda Inteligente', {
+        body: data.body || data.message || '',
+        icon: data.icon || '/favicon.svg',
+        badge: data.badge || '/favicon.svg',
+        tag: data.tag || 'agenda-notification',
+        renotify: true,
+        vibrate: [200, 100, 200],
+        data: {
+          url: data.url || '/',
+          appointmentId: data.appointmentId || null,
+        },
+      })
+    })()
   )
 })
 

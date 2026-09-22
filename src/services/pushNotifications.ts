@@ -47,6 +47,7 @@ export async function enablePushNotifications(): Promise<PushEnableResult> {
   }
 
   const registration = await navigator.serviceWorker.register('/push-sw.js', { scope: '/' })
+  await registration.update()
   const existingSubscription = await registration.pushManager.getSubscription()
   const subscription =
     existingSubscription ||
@@ -68,6 +69,14 @@ export async function enablePushNotifications(): Promise<PushEnableResult> {
   )
 
   return { status: 'enabled' }
+}
+
+export async function sendPushTestNotification() {
+  await api.post(`/api/push/test?userId=${getCurrentUserId()}`, {
+    title: 'Teste de notificação',
+    body: 'Seu celular está conectado ao Agenda Inteligente.',
+    url: '/dashboard',
+  })
 }
 
 export async function removePushSubscription() {

@@ -2,7 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Bell, CalendarDays, Check, ExternalLink, Info, Smartphone, X } from 'lucide-react'
 import { api } from '../../utils/api'
 import { getCurrentUserId } from '../../utils/auth'
-import { enablePushNotifications } from '../../services/pushNotifications'
+import {
+  enablePushNotifications,
+  sendPushTestNotification,
+} from '../../services/pushNotifications'
 
 type NotificationKind = 'appointment' | 'system'
 
@@ -67,6 +70,7 @@ export default function NotificationCenter() {
   const [hasLoadError, setHasLoadError] = useState(false)
   const [isMarkingAll, setIsMarkingAll] = useState(false)
   const [isEnablingPush, setIsEnablingPush] = useState(false)
+  const [isSendingPushTest, setIsSendingPushTest] = useState(false)
   const [pushMessage, setPushMessage] = useState('')
 
   const loadNotifications = useCallback(async () => {
@@ -185,6 +189,24 @@ export default function NotificationCenter() {
     } finally {
       setIsEnablingPush(false)
     }
+
+    async function handleSendPushTest() {
+      setIsSendingPushTest(true)
+      setPushMessage('')
+
+      try {
+        await sendPushTestNotification()
+        setPushMessage('Teste enviado. Verifique o celular em alguns segundos.')
+      } catch (error) {
+        setPushMessage(
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível enviar o teste para o celular.'
+        )
+      } finally {
+        setIsSendingPushTest(false)
+      }
+    }
   }
 
   return (
@@ -257,6 +279,14 @@ export default function NotificationCenter() {
               {isEnablingPush ? 'Ativando celular...' : 'Ativar notificações no celular'}
             </button>
             {pushMessage ? <p className="notification-push-message">{pushMessage}</p> : null}
+            <button
+              type="button"
+              className="notification-mark-read"
+              onClick={handleSendPushTest}
+              disabled={isSendingPushTest || isEnablingPush}
+            >
+              {isSendingPushTest ? 'Enviando teste...' : 'Enviar notificação de teste'}
+            </button>
             <button type="button" className="notification-mark-read" onClick={markAllAsRead} disabled={isMarkingAll || unreadCount === 0}>
               <Check size={15} />
               {isMarkingAll ? 'Atualizando...' : 'Marcar todas como lidas'}
