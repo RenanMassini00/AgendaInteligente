@@ -7517,6 +7517,34 @@ td {
   cursor: pointer;
 }
 
+.notification-item-main {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notification-calendar-link {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 10px;
+  color: var(--accent);
+}
+
+.notification-calendar-link:hover {
+  background: var(--accent-soft);
+}
+
 .notification-item:hover,
 .notification-item--unread {
   background: color-mix(in srgb, var(--accent-soft) 42%, var(--surface-solid));
@@ -7592,6 +7620,25 @@ td {
   font-size: 0.78rem;
   font-weight: 800;
   cursor: pointer;
+}
+
+.notification-mark-read:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.client-appointment-response-actions {
+  display: flex;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.client-appointment-response-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.62rem 0.8rem;
+  border-radius: 12px;
 }
 
 .header-profile {

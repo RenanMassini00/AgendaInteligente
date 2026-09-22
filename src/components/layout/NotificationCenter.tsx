@@ -1,119 +1,101 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-  Bell,
-  CalendarDays,
-  Check,
-  Info,
-  X,
-} from 'lucide-react'
+import { Bell, CalendarDays, Check, ExternalLink, Info, X } from 'lucide-react'
 import { api } from '../../utils/api'
 import { getCurrentUserId } from '../../utils/auth'
 
 type NotificationKind = 'appointment' | 'system'
 
+type ApiNotification = {
+  id: number
+  title?: string
+  message?: string
+  description?: string
+  type?: string
+  category?: string
+  isRead?: boolean
+  read?: boolean
+  createdAt?: string
+  calendarUrl?: string | null
+}
+
 type NotificationItem = {
-  id: string
+  id: number
   kind: NotificationKind
   title: string
   description: string
-  dateLabel?: string
+  createdAt?: string
+  calendarUrl?: string | null
+  isRead: boolean
 }
 
-type AppointmentNotification = {
-  id: number
-  clientName?: string
-  clientFullName?: string
-  serviceName?: string
-  appointmentDate?: string
-  date?: string
-  startTime?: string
-  time?: string
-  status?: string
+function normalizeNotification(item: ApiNotification): NotificationItem {
+  const kind: NotificationKind =
+    item.type?.toLowerCase().includes('system') ||
+    item.category?.toLowerCase().includes('system')
+      ? 'system'
+      : 'appointment'
+
+  return {
+    id: item.id,
+    kind,
+    title: item.title || (kind === 'appointment' ? 'Atualização de agendamento' : 'Atualização do sistema'),
+    description: item.message || item.description || 'Você tem uma nova notificação.',
+    createdAt: item.createdAt,
+    calendarUrl: item.calendarUrl,
+    isRead: item.isRead ?? item.read ?? false,
+  }
 }
 
-function getReadNotificationsKey() {
-  return `scheduler_read_notifications_${getCurrentUserId()}`
-}
-
-function formatAppointmentDate(date: string) {
-  const parsed = new Date(`${date}T00:00:00`)
-
-  if (Number.isNaN(parsed.getTime())) return date
+function formatCreatedAt(value?: string) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
 
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: 'short',
-  }).format(parsed)
-}
-
-function isUpcomingAppointment(item: AppointmentNotification) {
-  const date = item.date || item.appointmentDate
-  if (!date) return false
-
-  const appointmentDate = new Date(`${date}T${item.startTime || item.time || '23:59'}:00`)
-  return !Number.isNaN(appointmentDate.getTime()) && appointmentDate >= new Date()
-}
-
-function readStoredIds() {
-  try {
-    const value = JSON.parse(localStorage.getItem(getReadNotificationsKey()) || '[]')
-    return Array.isArray(value) && value.every((item) => typeof item === 'string')
-      ? value
-      : []
-  } catch {
-    return []
-  }
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
 }
 
 export default function NotificationCenter() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isOpen, setIsOpen] = useState(false)
-  const [appointments, setAppointments] = useState<NotificationItem[]>([])
-  const [readIds, setReadIds] = useState<string[]>(readStoredIds)
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [hasLoadError, setHasLoadError] = useState(false)
+  const [isMarkingAll, setIsMarkingAll] = useState(false)
+
+  async function loadNotifications() {
+    try {
+      setHasLoadError(false)
+      const response = await api.get<ApiNotification[]>(
+        `/api/notifications?userId=${getCurrentUserId()}`
+      )
+      setNotifications((response || []).map(normalizeNotification))
+    } catch {
+      setHasLoadError(true)
+    }
+  }
 
   useEffect(() => {
     let isMounted = true
 
-    async function loadNotifications() {
+    async function load() {
       try {
-        const response = await api.get<AppointmentNotification[]>(
-          `/api/appointments?userId=${getCurrentUserId()}`
+        const response = await api.get<ApiNotification[]>(
+          `/api/notifications?userId=${getCurrentUserId()}`
         )
-
-        if (!isMounted) return
-
-        const upcoming = response
-          .filter(isUpcomingAppointment)
-          .sort((first, second) => {
-            const firstValue = first.date || first.appointmentDate || ''
-            const secondValue = second.date || second.appointmentDate || ''
-            return `${firstValue}${first.startTime || first.time || ''}`.localeCompare(
-              `${secondValue}${second.startTime || second.time || ''}`
-            )
-          })
-          .slice(0, 3)
-          .map((item) => {
-            const date = item.date || item.appointmentDate || ''
-            const time = (item.startTime || item.time || '').slice(0, 5)
-
-            return {
-              id: `appointment-${item.id}`,
-              kind: 'appointment' as const,
-              title: `Agendamento com ${item.clientName || item.clientFullName || 'cliente'}`,
-              description: `${item.serviceName || 'Atendimento'}${time ? ` às ${time}` : ''}`,
-              dateLabel: formatAppointmentDate(date),
-            }
-          })
-
-        setAppointments(upcoming)
+        if (isMounted) {
+          setNotifications((response || []).map(normalizeNotification))
+          setHasLoadError(false)
+        }
       } catch {
         if (isMounted) setHasLoadError(true)
       }
     }
 
-    loadNotifications()
-
+    load()
     return () => {
       isMounted = false
     }
@@ -121,9 +103,7 @@ export default function NotificationCenter() {
 
   useEffect(() => {
     function handleOutsideClick(event: MouseEvent) {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
+      if (!containerRef.current?.contains(event.target as Node)) setIsOpen(false)
     }
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -132,40 +112,48 @@ export default function NotificationCenter() {
 
     document.addEventListener('mousedown', handleOutsideClick)
     document.addEventListener('keydown', handleKeyDown)
-
     return () => {
       document.removeEventListener('mousedown', handleOutsideClick)
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [])
 
-  const notifications = useMemo<NotificationItem[]>(
-    () => [
-      {
-        id: 'system-welcome',
-        kind: 'system',
-        title: 'Central de notificações ativa',
-        description: 'Você receberá aqui avisos da agenda e atualizações do sistema.',
-      },
-      ...appointments,
-    ],
-    [appointments]
+  const unreadCount = useMemo(
+    () => notifications.filter((item) => !item.isRead).length,
+    [notifications]
   )
 
-  const unreadCount = notifications.filter((item) => !readIds.includes(item.id)).length
+  async function markAsRead(item: NotificationItem) {
+    if (item.isRead) return
 
-  function persistReadIds(nextIds: string[]) {
-    setReadIds(nextIds)
-    localStorage.setItem(getReadNotificationsKey(), JSON.stringify(nextIds))
+    try {
+      await api.patch(`/api/notifications/${item.id}/read?userId=${getCurrentUserId()}`)
+      setNotifications((current) =>
+        current.map((notification) =>
+          notification.id === item.id ? { ...notification, isRead: true } : notification
+        )
+      )
+    } catch {
+      setHasLoadError(true)
+    }
   }
 
-  function markAsRead(id: string) {
-    if (readIds.includes(id)) return
-    persistReadIds([...readIds, id])
-  }
-
-  function markAllAsRead() {
-    persistReadIds([...new Set([...readIds, ...notifications.map((item) => item.id)])])
+  async function markAllAsRead() {
+    setIsMarkingAll(true)
+    try {
+      await Promise.all(
+        notifications
+          .filter((item) => !item.isRead)
+          .map((item) =>
+            api.patch(`/api/notifications/${item.id}/read?userId=${getCurrentUserId()}`)
+          )
+      )
+      setNotifications((current) => current.map((item) => ({ ...item, isRead: true })))
+    } catch {
+      setHasLoadError(true)
+    } finally {
+      setIsMarkingAll(false)
+    }
   }
 
   return (
@@ -175,7 +163,10 @@ export default function NotificationCenter() {
         className={`notification-trigger ${isOpen ? 'notification-trigger--active' : ''}`}
         aria-label={`Notificações${unreadCount ? `, ${unreadCount} não lidas` : ''}`}
         aria-expanded={isOpen}
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={() => {
+          setIsOpen((current) => !current)
+          if (!isOpen) loadNotifications()
+        }}
       >
         <Bell size={19} aria-hidden="true" />
         {unreadCount ? <span className="notification-count">{unreadCount > 9 ? '9+' : unreadCount}</span> : null}
@@ -194,38 +185,40 @@ export default function NotificationCenter() {
           </div>
 
           <div className="notification-list">
-            {notifications.map((item) => {
-              const isUnread = !readIds.includes(item.id)
+            {notifications.length === 0 && !hasLoadError ? (
+              <p className="notification-feedback">Nenhuma notificação no momento.</p>
+            ) : null}
 
-              return (
-                <button
-                  type="button"
-                  className={`notification-item ${isUnread ? 'notification-item--unread' : ''}`}
-                  key={item.id}
-                  onClick={() => markAsRead(item.id)}
-                >
+            {notifications.map((item) => (
+              <div className={`notification-item ${!item.isRead ? 'notification-item--unread' : ''}`} key={item.id}>
+                <button type="button" className="notification-item-main" onClick={() => markAsRead(item)}>
                   <span className={`notification-item-icon notification-item-icon--${item.kind}`}>
                     {item.kind === 'appointment' ? <CalendarDays size={17} /> : <Info size={17} />}
                   </span>
                   <span className="notification-item-content">
                     <strong>{item.title}</strong>
                     <span>{item.description}</span>
-                    {item.dateLabel ? <small>{item.dateLabel}</small> : null}
+                    {item.createdAt ? <small>{formatCreatedAt(item.createdAt)}</small> : null}
                   </span>
-                  {isUnread ? <span className="notification-unread-dot" aria-label="Não lida" /> : null}
+                  {!item.isRead ? <span className="notification-unread-dot" aria-label="Não lida" /> : null}
                 </button>
-              )
-            })}
+                {item.calendarUrl ? (
+                  <a className="notification-calendar-link" href={item.calendarUrl} target="_blank" rel="noreferrer" aria-label="Adicionar ao Google Agenda">
+                    <ExternalLink size={15} />
+                  </a>
+                ) : null}
+              </div>
+            ))}
 
             {hasLoadError ? (
-              <p className="notification-feedback">Não foi possível atualizar os avisos da agenda agora.</p>
+              <p className="notification-feedback">Não foi possível atualizar as notificações agora.</p>
             ) : null}
           </div>
 
           <div className="notification-panel-footer">
-            <button type="button" className="notification-mark-read" onClick={markAllAsRead}>
+            <button type="button" className="notification-mark-read" onClick={markAllAsRead} disabled={isMarkingAll || unreadCount === 0}>
               <Check size={15} />
-              Marcar todas como lidas
+              {isMarkingAll ? 'Atualizando...' : 'Marcar todas como lidas'}
             </button>
           </div>
         </section>
