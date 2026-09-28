@@ -1,5 +1,6 @@
 export type Service = {
   id: number
+  userId?: number
   name: string
   description?: string | null
   durationMinutes: number

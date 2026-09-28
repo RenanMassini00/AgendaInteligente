@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { CalendarDays, Clock3, Layers3, RotateCcw, Save, X } from 'lucide-react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { api } from '../utils/api'
 import { getCurrentUserId } from '../utils/auth'
+import { getProfessionalTeamEmployees } from '../utils/professionalTeam'
+import type { ProfessionalTeamEmployee } from '../types/professional-team.types'
 
 type AvailabilityResponse = {
   id: number
@@ -34,10 +36,20 @@ const WEEKDAYS = [
 ]
 
 export default function CreateAvailabilityPage() {
-  const userId = getCurrentUserId()
+  const ownerUserId = getCurrentUserId()
+  const [searchParams] = useSearchParams()
+  const requestedUserId = Number(searchParams.get('userId'))
+  const initialUserId =
+    Number.isInteger(requestedUserId) && requestedUserId > 0
+      ? requestedUserId
+      : ownerUserId
 
   const [recurringItems, setRecurringItems] = useState<AvailabilityResponse[]>([])
   const [dateItems, setDateItems] = useState<AvailabilityDateResponse[]>([])
+  const [employees, setEmployees] = useState<ProfessionalTeamEmployee[]>([])
+  const [selectedUserId, setSelectedUserId] = useState(initialUserId)
+  const [isTeamLoaded, setIsTeamLoaded] = useState(false)
+  const [teamLoadFailed, setTeamLoadFailed] = useState(false)
 
   const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>([1, 2, 3, 4, 5])
   const [recurringStartTime, setRecurringStartTime] = useState('08:00')
@@ -64,10 +76,41 @@ export default function CreateAvailabilityPage() {
   }, [selectedWeekdays])
 
   useEffect(() => {
-    loadData()
-  }, [])
+    let isMounted = true
 
-  async function loadData() {
+    async function loadTeam() {
+      try {
+        const response = await getProfessionalTeamEmployees(ownerUserId)
+        if (!isMounted) return
+        const activeEmployees = response.filter((employee) => employee.isActive)
+        setEmployees(activeEmployees)
+        if (
+          activeEmployees.length > 0 &&
+          !activeEmployees.some((employee) => employee.userId === selectedUserId)
+        ) {
+          setSelectedUserId(activeEmployees[0].userId)
+        }
+      } catch (error) {
+        if (isMounted) {
+          setTeamLoadFailed(true)
+          setErrorMessage(error instanceof Error ? error.message : 'Não foi possível carregar a equipe.')
+        }
+      } finally {
+        if (isMounted) setIsTeamLoaded(true)
+      }
+    }
+
+    void loadTeam()
+    return () => {
+      isMounted = false
+    }
+  }, [ownerUserId])
+
+  useEffect(() => {
+    if (isTeamLoaded) void loadData(selectedUserId)
+  }, [isTeamLoaded, selectedUserId])
+
+  async function loadData(userId = selectedUserId) {
     try {
       setIsLoading(true)
       setErrorMessage('')
@@ -125,6 +168,11 @@ export default function CreateAvailabilityPage() {
     try {
       clearMessages()
 
+      if (teamLoadFailed) {
+        setErrorMessage('Carregue a equipe antes de alterar a disponibilidade.')
+        return
+      }
+
       if (!recurringStartTime || !recurringEndTime) {
         setErrorMessage('Informe a hora inicial e a hora final.')
         return
@@ -162,7 +210,7 @@ export default function CreateAvailabilityPage() {
         await Promise.all(
           selectedWeekdays.map((weekday) =>
             api.post('/api/availability', {
-              userId,
+              userId: selectedUserId,
               weekday,
               startTime: recurringStartTime,
               endTime: recurringEndTime,
@@ -210,6 +258,11 @@ export default function CreateAvailabilityPage() {
     try {
       clearMessages()
 
+      if (teamLoadFailed) {
+        setErrorMessage('Carregue a equipe antes de alterar a disponibilidade.')
+        return
+      }
+
       if (!specificDate) {
         setErrorMessage('Informe a data específica.')
         return
@@ -236,7 +289,7 @@ export default function CreateAvailabilityPage() {
 
         setSuccessMessage('Data específica atualizada com sucesso.')
       } else {
-        await api.post(`/api/availability/dates?userId=${userId}`, {
+        await api.post(`/api/availability/dates?userId=${selectedUserId}`, {
           availableDate: specificDate,
           startTime: specificStartTime,
           endTime: specificEndTime,
@@ -291,6 +344,29 @@ export default function CreateAvailabilityPage() {
 
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
       {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
+
+      {employees.length > 0 ? (
+        <div className="form-field">
+          <label htmlFor="availability-editor-employee">Profissional</label>
+          <select
+            id="availability-editor-employee"
+            className="form-input"
+            value={selectedUserId}
+            onChange={(event) => {
+              clearMessages()
+              setSelectedUserId(Number(event.target.value))
+              resetRecurringForm()
+              resetDateForm()
+            }}
+          >
+            {employees.map((employee) => (
+              <option key={employee.id} value={employee.userId}>
+                {employee.fullName}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
 
       <div className="availability-editor-grid availability-editor-grid--forms">
         <PageCard className="availability-editor-card">

@@ -14,6 +14,7 @@ const appointmentModuleKeys = new Set([
   'clients',
   'services',
   'availability',
+  'team',
   'finance',
 ])
 
@@ -21,6 +22,7 @@ const professionalMobilePriority = [
   'dashboard',
   'appointments',
   'clients',
+  'team',
   'catalog',
   'finance',
   'services',

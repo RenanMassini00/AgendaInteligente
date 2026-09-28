@@ -1,46 +1,71 @@
 import { FormEvent, useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { getCurrentUserId } from '../utils/auth'
+import { getProfessionalTeamEmployees } from '../utils/professionalTeam'
 import { api } from '../utils/api'
 import type { Service } from '../types/service.types'
+import type { ProfessionalTeamEmployee } from '../types/professional-team.types'
 
 export default function CreateServicePage() {
   const navigate = useNavigate()
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
 
   const isEditMode = Boolean(id)
+  const requestedUserId = Number(searchParams.get('userId'))
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [durationMinutes, setDurationMinutes] = useState('60')
   const [price, setPrice] = useState('0')
   const [colorHex, setColorHex] = useState('#1f3b7a')
+  const [teamEmployees, setTeamEmployees] = useState<ProfessionalTeamEmployee[]>([])
+  const [employeeUserId, setEmployeeUserId] = useState<number | null>(null)
+  const [teamLoadError, setTeamLoadError] = useState('')
 
   const [isLoading, setIsLoading] = useState(isEditMode)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
-    if (!isEditMode) return
-    loadService()
-  }, [id])
+    void loadFormData()
+  }, [id, requestedUserId])
 
-  async function loadService() {
+  async function loadFormData() {
     try {
       setIsLoading(true)
-      const response = await api.get<Service>(`/api/services/${id}`)
-      setName(response.name || '')
-      setDescription(response.description || '')
-      setDurationMinutes(String(response.durationMinutes || 60))
-      setPrice(String(response.price || 0))
-      setColorHex(response.colorHex || '#1f3b7a')
+      setTeamLoadError('')
+      const [employees, service] = await Promise.all([
+        getProfessionalTeamEmployees(getCurrentUserId()),
+        isEditMode ? api.get<Service>(`/api/services/${id}`) : Promise.resolve(null),
+      ])
+      const activeEmployees = employees.filter((employee) => employee.isActive)
+      setTeamEmployees(activeEmployees)
+      const requestedEmployee = activeEmployees.find(
+        (employee) => employee.userId === requestedUserId
+      )
+      setEmployeeUserId(
+        service?.userId ??
+          requestedEmployee?.userId ??
+          activeEmployees[0]?.userId ??
+          getCurrentUserId()
+      )
+
+      if (service) {
+        setName(service.name || '')
+        setDescription(service.description || '')
+        setDurationMinutes(String(service.durationMinutes || 60))
+        setPrice(String(service.price || 0))
+        setColorHex(service.colorHex || '#1f3b7a')
+      }
       setErrorMessage('')
     } catch (error) {
+      setTeamLoadError('Não foi possível carregar a equipe. Tente novamente antes de salvar.')
       setErrorMessage(
-        error instanceof Error ? error.message : 'Não foi possível carregar o serviço.'
+        error instanceof Error ? error.message : 'Não foi possível carregar os dados do serviço.'
       )
     } finally {
       setIsLoading(false)
@@ -50,12 +75,17 @@ export default function CreateServicePage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
+    if (teamLoadError || employeeUserId === null) {
+      setErrorMessage('Carregue a equipe e selecione um funcionário antes de salvar.')
+      return
+    }
+
     try {
       setIsSubmitting(true)
       setErrorMessage('')
 
       const payload = {
-        userId: getCurrentUserId(),
+        userId: employeeUserId,
         name,
         description: description || null,
         durationMinutes: Number(durationMinutes),
@@ -103,6 +133,24 @@ export default function CreateServicePage() {
 
       <PageCard>
         <form onSubmit={handleSubmit} className="form-grid">
+          {teamEmployees.length > 0 ? (
+            <div className="form-field">
+              <label htmlFor="service-employee">Profissional responsável</label>
+              <select
+                id="service-employee"
+                className="form-input"
+                value={employeeUserId ?? ''}
+                onChange={(event) => setEmployeeUserId(Number(event.target.value))}
+                required
+              >
+                {teamEmployees.map((employee) => (
+                  <option key={employee.id} value={employee.userId}>
+                    {employee.fullName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
           <div className="form-field">
             <label htmlFor="name">Nome do serviço</label>
             <input

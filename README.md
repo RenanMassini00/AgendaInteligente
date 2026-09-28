@@ -11,8 +11,10 @@ Front-end React + TypeScript integrado com a API .NET do projeto.
 - Clientes consumindo `/api/clients`
 - Serviços consumindo `/api/services`
 - Disponibilidade consumindo `/api/availability`
+- Equipe consumindo `/api/professional-team/employees`
 - Perfil consumindo `/api/profile`
 - Configurações consumindo `/api/settings`
+- Agendamento público com seleção de profissional da equipe
 
 ## Pré-requisitos
 
@@ -46,4 +48,8 @@ Use o usuário seedado no banco:
 
 - Este front usa a sessão salva no `localStorage`
 - O backend atual já aceita o usuário seedado do script SQL
-- Os botões de criação de cliente, serviço e edição de disponibilidade ainda estão visuais e prontos para a próxima etapa de CRUD
+- Serviços e disponibilidade são associados ao `userId` do funcionário selecionado.
+- O agendamento público usa os profissionais e serviços de `GET /api/public/professionals/{slug}` e envia o `professionalUserId` escolhido ao consultar horários e criar o agendamento.
+- A tela de equipe usa `GET` e `POST /api/professional-team/employees?ownerUserId={id}`, `PUT /api/professional-team/employees/{employeeId}?ownerUserId={id}` e `DELETE` nesse mesmo caminho para inativar.
+- O formulário da equipe está tipado com `id`, `userId`, `fullName`, `email`, `phone` e `isActive`; confirme esses campos com os DTOs da API antes de publicar, pois o README anterior não documentava o contrato de request/response.
+- **Não publique a gestão da equipe até a API validar a identidade autenticada e derivar o proprietário da sessão.** `ownerUserId` enviado pelo frontend não é autorização; o aviso da tela não substitui a proteção no backend.

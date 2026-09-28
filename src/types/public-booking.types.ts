@@ -2,6 +2,7 @@ import type { AccentColor, ThemeMode } from './settings.types'
 
 export type PublicBookingService = {
   id: number
+  professionalUserId: number
   name: string
   description?: string | null
   durationMinutes: number
@@ -19,7 +20,15 @@ export type PublicProfessional = {
   theme?: ThemeMode | null
   accentColor?: AccentColor | null
   companyLogoUrl?: string | null
+  professionals: PublicBookingTeamMember[]
   services: PublicBookingService[]
+}
+
+export type PublicBookingTeamMember = {
+  professionalUserId: number
+  name?: string | null
+  fullName?: string | null
+  displayName?: string | null
 }
 
 export type PublicAvailableSlots = {

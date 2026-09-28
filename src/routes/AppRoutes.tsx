@@ -19,6 +19,7 @@ import FinancePage from '../pages/FinancePage'
 import LoginPage from '../pages/LoginPage'
 import NotFoundPage from '../pages/NotFoundPage'
 import ProfilePage from '../pages/ProfilePage'
+import ProfessionalTeamPage from '../pages/ProfessionalTeamPage'
 import PublicBookingPage from '../pages/PublicBookingPage'
 import PublicCatalogPage from '../pages/PublicCatalogPage'
 import RegisterPage from '../pages/RegisterPage'
@@ -136,6 +137,7 @@ export default function AppRoutes() {
 
         <Route path={ROUTE_PATHS.clients} element={<ClientsPage />} />
         <Route path={ROUTE_PATHS.createClient} element={<CreateClientPage />} />
+        <Route path={ROUTE_PATHS.professionalTeam} element={<ProfessionalTeamPage />} />
 
         <Route path={ROUTE_PATHS.services} element={<ServicesPage />} />
         <Route path={ROUTE_PATHS.createService} element={<CreateServicePage />} />

@@ -94,6 +94,7 @@ export default function PublicBookingPage() {
   const navigate = useNavigate()
 
   const [professional, setProfessional] = useState<PublicProfessional | null>(null)
+  const [selectedProfessionalId, setSelectedProfessionalId] = useState<number | null>(null)
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null)
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
   const [bookingStep, setBookingStep] = useState<'schedule' | 'details'>('schedule')
@@ -115,6 +116,17 @@ export default function PublicBookingPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
+  const selectedService = useMemo(
+    () =>
+      professional?.services.find(
+        (item) =>
+          Number(item.id) === selectedServiceId &&
+          item.professionalUserId === selectedProfessionalId
+      ) ??
+      null,
+    [professional, selectedServiceId, selectedProfessionalId]
+  )
+
   useEffect(() => {
     let isMounted = true
 
@@ -131,6 +143,11 @@ export default function PublicBookingPage() {
         if (isMounted) {
           applyVisualSettings(response, { includeLogo: false })
           setProfessional(response)
+          setSelectedProfessionalId(
+            response.professionals.length === 1
+              ? response.professionals[0].professionalUserId
+              : null
+          )
           setSelectedServiceId(null)
           setErrorMessage('')
         }
@@ -176,8 +193,9 @@ export default function PublicBookingPage() {
     let isMounted = true
 
     async function loadSlots() {
-      if (!slug || !selectedServiceId || !selectedDate) {
+      if (!slug || !selectedServiceId || !selectedProfessionalId || !selectedService || !selectedDate) {
         setSlots([])
+        setIsLoadingSlots(false)
         return
       }
 
@@ -186,7 +204,7 @@ export default function PublicBookingPage() {
         setSelectedSlot('')
 
         const response = await api.get<PublicAvailableSlots>(
-          `/api/public/professionals/${slug}/available-slots?serviceId=${selectedServiceId}&date=${selectedDate}`
+          `/api/public/professionals/${slug}/available-slots?professionalUserId=${selectedService.professionalUserId}&serviceId=${selectedServiceId}&date=${selectedDate}`
         )
 
         if (isMounted) {
@@ -214,14 +232,7 @@ export default function PublicBookingPage() {
     return () => {
       isMounted = false
     }
-  }, [slug, selectedServiceId, selectedDate])
-
-  const selectedService = useMemo(
-    () =>
-      professional?.services.find((item) => Number(item.id) === selectedServiceId) ??
-      null,
-    [professional, selectedServiceId]
-  )
+  }, [slug, selectedServiceId, selectedProfessionalId, selectedService, selectedDate])
 
   const selectedTimeLabel = formatTimeRange(
     selectedSlot,
@@ -229,14 +240,23 @@ export default function PublicBookingPage() {
   )
 
   const startingPrice = useMemo(() => {
-    if (!professional?.services.length) return ''
+    const services = professional?.services.filter(
+      (service) =>
+        selectedProfessionalId === null ||
+        service.professionalUserId === selectedProfessionalId
+    )
+    if (!services?.length) return ''
 
-    const cheapestService = professional.services.reduce((current, service) =>
+    const cheapestService = services.reduce((current, service) =>
       service.price < current.price ? service : current
     )
 
     return cheapestService.priceFormatted
-  }, [professional])
+  }, [professional, selectedProfessionalId])
+
+  const selectedProfessional = professional?.professionals.find(
+    (item) => item.professionalUserId === selectedProfessionalId
+  )
 
   const profileInitials = professional ? getInitials(professional.displayName) : 'AI'
   const currentSession = getSession()
@@ -254,6 +274,10 @@ export default function PublicBookingPage() {
     !!email.trim()
 
   function handleServiceSelect(serviceId: number) {
+    const service = professional?.services.find((item) => item.id === serviceId)
+    if (!service) return
+
+    setSelectedProfessionalId(service.professionalUserId)
     setSelectedServiceId(serviceId)
     setSelectedSlot('')
     setBookingStep('schedule')
@@ -416,6 +440,7 @@ export default function PublicBookingPage() {
           phone: phone.trim(),
           email: email.trim(),
           serviceId: selectedServiceId,
+          professionalUserId: selectedService.professionalUserId,
           appointmentDate: selectedDate,
           startTime,
           endTime,
@@ -512,18 +537,50 @@ export default function PublicBookingPage() {
                   <Sparkles size={18} />
                 </span>
                 <div>
-                  <h2>Escolha um servico</h2>
-                  <p>Toque no servico desejado para ver os horarios disponiveis.</p>
+                  <h2>Escolha o profissional e o servico</h2>
+                  <p>Selecione quem vai atender e depois escolha o servico desejado.</p>
                 </div>
               </div>
 
+              {professional.professionals.length > 1 ? (
+                <div className="form-field">
+                  <label htmlFor="public-booking-professional">Profissional</label>
+                  <select
+                    id="public-booking-professional"
+                    className="form-input"
+                    value={selectedProfessionalId ?? ''}
+                    onChange={(event) => {
+                      setSelectedProfessionalId(
+                        event.target.value ? Number(event.target.value) : null
+                      )
+                      setSelectedServiceId(null)
+                      setSelectedSlot('')
+                    }}
+                  >
+                    <option value="">Escolha um profissional</option>
+                    {professional.professionals.map((item) => (
+                      <option
+                        key={item.professionalUserId}
+                        value={item.professionalUserId}
+                      >
+                        {item.displayName || item.fullName || item.name || 'Profissional'}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
+
               <div className="public-service-options public-service-options-showcase">
-                {professional.services.map((service) => {
+                {selectedProfessionalId === null ? (
+                  <div className="public-booking-empty">Selecione um profissional para ver os serviços.</div>
+                ) : professional.services
+                    .filter((service) => service.professionalUserId === selectedProfessionalId)
+                    .map((service) => {
                   const isSelected = Number(service.id) === selectedServiceId
 
                   return (
                     <button
-                      key={service.id}
+                      key={`${service.professionalUserId}-${service.id}`}
                       type="button"
                       className={`public-service-option public-service-choice-card ${isSelected ? 'selected' : ''}`.trim()}
                       onClick={() => handleServiceSelect(Number(service.id))}
@@ -535,7 +592,12 @@ export default function PublicBookingPage() {
 
                       <span className="public-service-copy">
                         <strong>{service.name}</strong>
-                        <small>{getServiceDescription(service.description)}</small>
+                        <small>
+                          {getServiceDescription(service.description)}
+                          {selectedProfessional
+                            ? ` · ${selectedProfessional.displayName || selectedProfessional.fullName || selectedProfessional.name || 'Profissional'}`
+                            : ''}
+                        </small>
                       </span>
 
                       <span className="public-service-meta">

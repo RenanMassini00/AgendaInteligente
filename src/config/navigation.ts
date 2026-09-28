@@ -27,6 +27,7 @@ export const professionalNavigationItems = [
     icon: CalendarDays,
   },
   { key: 'clients', label: 'Clientes', path: ROUTE_PATHS.clients, icon: Users },
+  { key: 'team', label: 'Equipe', path: ROUTE_PATHS.professionalTeam, icon: Users },
   { key: 'services', label: 'Serviços', path: ROUTE_PATHS.services, icon: Scissors },
   {
     key: 'availability',

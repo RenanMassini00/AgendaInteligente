@@ -9,6 +9,7 @@ export const ROUTE_PATHS = {
 
   clients: '/clients',
   createClient: '/clients/new',
+  professionalTeam: '/team',
 
   services: '/services',
   createService: '/services/new',
