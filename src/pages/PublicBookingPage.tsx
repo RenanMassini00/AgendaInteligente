@@ -15,7 +15,9 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import PageCard from '../components/ui/PageCard'
 import { api } from '../utils/api'
+import { getSession, signIn } from '../utils/auth'
 import { applyVisualSettings } from '../utils/visualSettings'
+import type { LoginResponse } from '../types/auth.types'
 import type {
   PublicAvailableSlots,
   PublicBookingResponse,
@@ -101,6 +103,11 @@ export default function PublicBookingPage() {
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [notes, setNotes] = useState('')
+  const [clientAuthMode, setClientAuthMode] = useState<'closed' | 'login' | 'register'>('closed')
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [accountPassword, setAccountPassword] = useState('')
+  const [isAuthenticatingClient, setIsAuthenticatingClient] = useState(false)
   const [slots, setSlots] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
@@ -148,6 +155,22 @@ export default function PublicBookingPage() {
       isMounted = false
     }
   }, [slug])
+
+  useEffect(() => {
+    if (!professional) return
+
+    const session = getSession()
+    if (
+      session?.role !== 'client' ||
+      session.professionalUserId !== professional.professionalUserId
+    ) {
+      return
+    }
+
+    setFullName(session.fullName)
+    setPhone(session.phone ?? '')
+    setEmail(session.email)
+  }, [professional])
 
   useEffect(() => {
     let isMounted = true
@@ -216,6 +239,11 @@ export default function PublicBookingPage() {
   }, [professional])
 
   const profileInitials = professional ? getInitials(professional.displayName) : 'AI'
+  const currentSession = getSession()
+  const isClientLoggedIn =
+    professional !== null &&
+    currentSession?.role === 'client' &&
+    currentSession.professionalUserId === professional.professionalUserId
 
   const canSubmit =
     !!selectedService &&
@@ -258,6 +286,84 @@ export default function PublicBookingPage() {
 
     setErrorMessage('')
     setBookingStep('details')
+  }
+
+  function applyClientLogin(response: LoginResponse) {
+    const user = response.user
+    if (
+      user.role !== 'client' ||
+      user.professionalUserId !== professional?.professionalUserId
+    ) {
+      throw new Error('Esta conta de cliente não está vinculada a esta agenda.')
+    }
+
+    signIn({
+      token: response.token,
+      userId: user.id,
+      role: 'client',
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      professionalUserId: user.professionalUserId,
+      clientId: user.clientId,
+      hasAppointmentsModule: user.hasAppointmentsModule,
+      hasCatalogModule: user.hasCatalogModule,
+    })
+    setFullName(user.fullName)
+    setPhone(user.phone ?? '')
+    setEmail(user.email)
+    setClientAuthMode('closed')
+    setLoginPassword('')
+    setAccountPassword('')
+  }
+
+  async function handleClientLogin() {
+    if (!loginEmail.trim() || !loginPassword) {
+      setErrorMessage('Informe o e-mail e a senha para entrar.')
+      return
+    }
+
+    try {
+      setIsAuthenticatingClient(true)
+      setErrorMessage('')
+      const response = await api.post<LoginResponse>('/api/auth/login', {
+        email: loginEmail.trim(),
+        password: loginPassword,
+      })
+      applyClientLogin(response)
+      setSuccessMessage('Login realizado. Seus dados foram preenchidos.')
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível realizar o login.')
+    } finally {
+      setIsAuthenticatingClient(false)
+    }
+  }
+
+  async function handleClientRegistration() {
+    if (!professional || !fullName.trim() || !phone.trim() || !email.trim() || !accountPassword) {
+      setErrorMessage('Preencha nome, telefone, e-mail e senha para criar sua conta.')
+      return
+    }
+
+    try {
+      setIsAuthenticatingClient(true)
+      setErrorMessage('')
+      const response = await api.post<LoginResponse>('/api/auth/register-client', {
+        professionalUserId: professional.professionalUserId,
+        fullName: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        password: accountPassword,
+        birthDate: null,
+        notes: null,
+      })
+      applyClientLogin(response)
+      setSuccessMessage('Conta criada e login realizado. Seus dados foram preenchidos.')
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível criar sua conta.')
+    } finally {
+      setIsAuthenticatingClient(false)
+    }
   }
 
   async function handleSubmit(event?: FormEvent<HTMLFormElement>) {
@@ -586,6 +692,92 @@ export default function PublicBookingPage() {
                     </>
                   ) : (
                     <div className="public-booking-form">
+                      <div className="public-client-auth">
+                        {isClientLoggedIn ? (
+                          <p>Você está conectado como {currentSession?.fullName}.</p>
+                        ) : (
+                          <>
+                            <p>Entre ou crie uma conta para preencher seus dados automaticamente.</p>
+                            <div className="booking-modal-actions">
+                              <button
+                                type="button"
+                                className="secondary-button"
+                                onClick={() => setClientAuthMode(clientAuthMode === 'login' ? 'closed' : 'login')}
+                              >
+                                Já tenho conta
+                              </button>
+                              <button
+                                type="button"
+                                className="secondary-button"
+                                onClick={() => setClientAuthMode(clientAuthMode === 'register' ? 'closed' : 'register')}
+                              >
+                                Criar conta
+                              </button>
+                            </div>
+                          </>
+                        )}
+
+                        {clientAuthMode === 'login' && !isClientLoggedIn ? (
+                          <>
+                            <label className="public-input-field" htmlFor="clientLoginEmail">
+                              <Mail size={18} />
+                              <input
+                                id="clientLoginEmail"
+                                type="email"
+                                autoComplete="email"
+                                value={loginEmail}
+                                onChange={(event) => setLoginEmail(event.target.value)}
+                                placeholder="E-mail da conta"
+                              />
+                            </label>
+                            <label className="public-input-field" htmlFor="clientLoginPassword">
+                              <input
+                                id="clientLoginPassword"
+                                type="password"
+                                autoComplete="current-password"
+                                value={loginPassword}
+                                onChange={(event) => setLoginPassword(event.target.value)}
+                                placeholder="Senha"
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              className="primary-button"
+                              onClick={handleClientLogin}
+                              disabled={isAuthenticatingClient}
+                            >
+                              {isAuthenticatingClient ? 'Entrando...' : 'Entrar e preencher dados'}
+                            </button>
+                          </>
+                        ) : null}
+
+                        {clientAuthMode === 'register' && !isClientLoggedIn ? (
+                          <>
+                            <p>Preencha nome, telefone e e-mail abaixo e escolha uma senha para criar sua conta.</p>
+                            <label className="public-input-field" htmlFor="clientAccountPassword">
+                              <input
+                                id="clientAccountPassword"
+                                type="password"
+                                autoComplete="new-password"
+                                value={accountPassword}
+                                onChange={(event) => setAccountPassword(event.target.value)}
+                                placeholder="Crie uma senha"
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              className="primary-button"
+                              onClick={handleClientRegistration}
+                              disabled={isAuthenticatingClient}
+                            >
+                              {isAuthenticatingClient ? 'Criando conta...' : 'Criar conta e preencher dados'}
+                            </button>
+                          </>
+                        ) : null}
+
+                        <p>Você também pode continuar sem login preenchendo os dados abaixo.</p>
+                      </div>
+
                       <label className="public-input-field" htmlFor="fullName">
                         <User size={18} />
                         <input

@@ -11,6 +11,7 @@ export type PublicBookingService = {
 }
 
 export type PublicProfessional = {
+  professionalUserId: number
   name?: string
   displayName: string
   subtitle: string
