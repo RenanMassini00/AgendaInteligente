@@ -2,7 +2,7 @@ const AUTH_STORAGE_KEY = 'scheduler_auth'
 const AUTH_CHANGED_EVENT = 'auth:changed'
 const SESSION_DURATION_MS = 60 * 60 * 1000
 
-export type SessionRole = 'master_admin' | 'professional' | 'client'
+export type SessionRole = 'master_admin' | 'professional' | 'employee' | 'client'
 
 export type Session = {
   token: string
@@ -19,6 +19,7 @@ export type Session = {
   companyId?: number | null
   clientId?: number | null
   professionalUserId?: number | null
+  teamOwnerUserId?: number | null
   hasAppointmentsModule: boolean
   hasCatalogModule: boolean
 }
@@ -39,6 +40,7 @@ type SignInInput = {
   companyId?: number | null
   clientId?: number | null
   professionalUserId?: number | null
+  teamOwnerUserId?: number | null
   hasAppointmentsModule?: boolean
   hasCatalogModule?: boolean
 }
@@ -76,6 +78,7 @@ export function saveSession(session: SaveSessionInput) {
     companyId: session.companyId ?? null,
     clientId: session.clientId ?? null,
     professionalUserId: session.professionalUserId ?? null,
+    teamOwnerUserId: session.teamOwnerUserId ?? null,
     hasAppointmentsModule: session.hasAppointmentsModule,
     hasCatalogModule: session.hasCatalogModule,
   }
@@ -99,6 +102,7 @@ export function signIn(data: SignInInput) {
     companyId: data.companyId ?? null,
     clientId: data.clientId ?? null,
     professionalUserId: data.professionalUserId ?? null,
+    teamOwnerUserId: data.teamOwnerUserId ?? null,
     hasAppointmentsModule: data.hasAppointmentsModule ?? data.role !== 'client',
     hasCatalogModule: data.hasCatalogModule ?? false,
   })
@@ -125,11 +129,11 @@ export function getSession(): Session | null {
     }
 
     const role: SessionRole =
-      parsed.role === 'master_admin'
-        ? 'master_admin'
-        : parsed.role === 'client'
-          ? 'client'
-          : 'professional'
+      parsed.role === 'master_admin' ||
+      parsed.role === 'client' ||
+      parsed.role === 'employee'
+        ? parsed.role
+        : 'professional'
 
     if (parsed.expiresAt <= Date.now()) {
       clearStoredSession()
@@ -152,6 +156,7 @@ export function getSession(): Session | null {
       companyId: parsed.companyId ?? null,
       clientId: parsed.clientId ?? null,
       professionalUserId: parsed.professionalUserId ?? null,
+      teamOwnerUserId: parsed.teamOwnerUserId ?? null,
       hasAppointmentsModule: parsed.hasAppointmentsModule ?? true,
       hasCatalogModule: parsed.hasCatalogModule ?? false,
     }

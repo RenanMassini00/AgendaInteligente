@@ -41,6 +41,25 @@ export const professionalNavigationItems = [
   { key: 'catalog', label: 'Catálogo', path: ROUTE_PATHS.catalog, icon: ShoppingBag },
 ]
 
+export const employeeNavigationItems = [
+  {
+    key: 'dashboard',
+    label: 'Dashboard',
+    path: ROUTE_PATHS.dashboard,
+    icon: LayoutDashboard,
+  },
+  {
+    key: 'appointments',
+    label: 'Agendamentos',
+    path: ROUTE_PATHS.appointments,
+    icon: CalendarDays,
+  },
+  { key: 'clients', label: 'Clientes', path: ROUTE_PATHS.clients, icon: Users },
+  { key: 'services', label: 'Serviços', path: ROUTE_PATHS.services, icon: Scissors },
+  { key: 'finance', label: 'Financeiro', path: ROUTE_PATHS.finance, icon: DollarSign },
+  { key: 'profile', label: 'Perfil', path: ROUTE_PATHS.profile, icon: UserCircle2 },
+]
+
 export const adminNavigationItems = [
   {
     key: 'admin-dashboard',

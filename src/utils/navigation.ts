@@ -1,4 +1,8 @@
-import { adminNavigationItems, professionalNavigationItems } from '../config/navigation'
+import {
+  adminNavigationItems,
+  employeeNavigationItems,
+  professionalNavigationItems,
+} from '../config/navigation'
 import type { LucideIcon } from 'lucide-react'
 import type { Session } from './auth'
 
@@ -35,9 +39,15 @@ const adminMobilePriority = [
   'admin-billing',
 ]
 
+const employeeMobilePriority = ['dashboard', 'appointments', 'clients', 'services']
+
 export function getNavigationItemsForUser(user: Session | null): NavigationItem[] {
   if (user?.role === 'master_admin') {
     return adminNavigationItems
+  }
+
+  if (user?.role === 'employee') {
+    return employeeNavigationItems
   }
 
   return professionalNavigationItems.filter((item) => {
@@ -67,7 +77,11 @@ export function getMobileNavigationItems(
   user: Session | null
 ) {
   const priority =
-    user?.role === 'master_admin' ? adminMobilePriority : professionalMobilePriority
+    user?.role === 'master_admin'
+      ? adminMobilePriority
+      : user?.role === 'employee'
+        ? employeeMobilePriority
+        : professionalMobilePriority
 
   const navigationByKey = new Map(navigationItems.map((item) => [item.key, item]))
   const prioritizedItems = priority
@@ -87,6 +101,14 @@ export function getWorkspaceModuleCopy(user: Session | null) {
       label: 'Área administrativa',
       summary: 'Operação SaaS',
       description: 'Empresas, usuários, cobrança e identidade visual.',
+    }
+  }
+
+  if (user?.role === 'employee') {
+    return {
+      label: 'Agenda da equipe',
+      summary: 'Área do funcionário',
+      description: 'Seus agendamentos, clientes e serviços.',
     }
   }
 

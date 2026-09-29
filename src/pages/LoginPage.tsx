@@ -13,32 +13,7 @@ import { useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import { api } from '../utils/api'
 import { signIn } from '../utils/auth'
-
-type LoginResponse = {
-  token: string
-  user: {
-    id: number
-    fullName: string
-    email: string
-    businessName?: string | null
-    specialty?: string | null
-    role: 'professional' | 'master_admin'
-    phone?: string | null
-    publicSlug?: string | null
-    timezone?: string | null
-    clientId?: number | null
-    professionalUserId?: number | null
-    hasAppointmentsModule: boolean
-    hasCatalogModule: boolean
-  }
-}
-
-function normalizeRole(role?: string | null) {
-  const normalized = (role ?? '').trim().toLowerCase()
-  return normalized === 'master_admin' || normalized === 'master admin'
-    ? 'master_admin'
-    : 'professional'
-}
+import type { LoginResponse } from '../types/auth.types'
 
 const systemCards = [
   {
@@ -104,28 +79,29 @@ export default function LoginPage() {
       setIsSubmitting(true)
       setErrorMessage('')
 
-      const response = await api.post<LoginResponse>('/api/auth/login', {
-        email,
-        password,
-        role: 'professional',
-      })
-
-      const normalizedRole = normalizeRole(response.user.role)
+      const response = await api.post<LoginResponse>('/api/auth/login', { email, password })
 
       signIn({
         token: response.token,
         userId: response.user.id,
-        role: normalizedRole,
+        role: response.user.role,
         fullName: response.user.fullName,
         email: response.user.email,
         businessName: response.user.businessName ?? undefined,
         specialty: response.user.specialty ?? undefined,
+        phone: response.user.phone,
+        timezone: response.user.timezone,
+        professionalUserId: response.user.professionalUserId,
+        teamOwnerUserId: response.user.teamOwnerUserId,
+        publicSlug: response.user.publicSlug,
         hasAppointmentsModule: response.user.hasAppointmentsModule,
         hasCatalogModule: response.user.hasCatalogModule,
       })
 
-      if (normalizedRole === 'master_admin') {
+      if (response.user.role === 'master_admin') {
         navigate(ROUTE_PATHS.adminDashboard, { replace: true })
+      } else if (response.user.role === 'employee') {
+        navigate(ROUTE_PATHS.dashboard, { replace: true })
       } else {
         navigate(ROUTE_PATHS.dashboard, { replace: true })
       }

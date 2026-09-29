@@ -6,7 +6,7 @@ import SectionHeader from '../components/ui/SectionHeader'
 import { ROUTE_PATHS } from '../routes/routePaths'
 import type { Client } from '../types/client.types'
 import { api } from '../utils/api'
-import { getCurrentUserId } from '../utils/auth'
+import { getCurrentRole, getCurrentUserId } from '../utils/auth'
 
 function getInitials(name?: string | null) {
   if (!name?.trim()) return 'C'
@@ -40,6 +40,7 @@ export default function ClientsPage() {
   const [errorMessage, setErrorMessage] = useState('')
 
   const userId = useMemo(() => getCurrentUserId(), [])
+  const isEmployee = getCurrentRole() === 'employee'
 
   useEffect(() => {
     loadClients()
@@ -50,7 +51,9 @@ export default function ClientsPage() {
       setIsLoading(true)
       setErrorMessage('')
 
-      const response = await api.get<Client[]>(`/api/clients?userId=${userId}`)
+      const response = await api.get<Client[]>(
+        isEmployee ? '/api/clients' : `/api/clients?userId=${userId}`
+      )
       setClients(response)
     } catch (error) {
       setErrorMessage(
@@ -92,12 +95,12 @@ export default function ClientsPage() {
       <SectionHeader
         title="Clientes"
         description="Gerencie contatos, telefones e informacoes rapidas dos seus clientes."
-        action={(
+        action={!isEmployee ? (
           <button type="button" className="primary-button small-button clients-add-button" onClick={handleCreate}>
             <Plus size={16} />
             Novo cliente
           </button>
-        )}
+        ) : undefined}
       />
 
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
@@ -132,25 +135,27 @@ export default function ClientsPage() {
                   </div>
                 </div>
 
-                <div className="entity-card-actions client-card-actions">
-                  <button
-                    type="button"
-                    className="secondary-button small-button"
-                    onClick={() => handleEdit(client.id)}
-                  >
-                    <Pencil size={15} />
-                    Editar
-                  </button>
+                {!isEmployee ? (
+                  <div className="entity-card-actions client-card-actions">
+                    <button
+                      type="button"
+                      className="secondary-button small-button"
+                      onClick={() => handleEdit(client.id)}
+                    >
+                      <Pencil size={15} />
+                      Editar
+                    </button>
 
-                  <button
-                    type="button"
-                    className="danger-button small-button"
-                    onClick={() => handleDelete(client.id)}
-                  >
-                    <Trash2 size={15} />
-                    Excluir
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      className="danger-button small-button"
+                      onClick={() => handleDelete(client.id)}
+                    >
+                      <Trash2 size={15} />
+                      Excluir
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </PageCard>
           ))}

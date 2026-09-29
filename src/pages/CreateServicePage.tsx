@@ -39,7 +39,7 @@ export default function CreateServicePage() {
       setIsLoading(true)
       setTeamLoadError('')
       const [employees, service] = await Promise.all([
-        getProfessionalTeamEmployees(getCurrentUserId()),
+        getProfessionalTeamEmployees(),
         isEditMode ? api.get<Service>(`/api/services/${id}`) : Promise.resolve(null),
       ])
       const activeEmployees = employees.filter((employee) => employee.isActive)

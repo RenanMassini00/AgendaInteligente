@@ -4,12 +4,16 @@ export type ProfessionalTeamEmployee = {
   fullName: string
   email?: string | null
   phone?: string | null
+  specialty?: string | null
+  timezone?: string | null
   isActive: boolean
 }
 
 export type ProfessionalTeamEmployeeInput = {
   fullName: string
   email: string
-  phone: string
-  isActive: boolean
+  password?: string
+  phone?: string | null
+  specialty?: string | null
+  timezone?: string | null
 }

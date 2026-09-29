@@ -6,6 +6,7 @@ export const ROUTE_PATHS = {
   dashboard: '/dashboard',
   appointments: '/appointments',
   createAppointment: '/appointments/new',
+  editAppointment: '/appointments/:id/edit',
 
   clients: '/clients',
   createClient: '/clients/new',

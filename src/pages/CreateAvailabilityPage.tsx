@@ -80,7 +80,7 @@ export default function CreateAvailabilityPage() {
 
     async function loadTeam() {
       try {
-        const response = await getProfessionalTeamEmployees(ownerUserId)
+        const response = await getProfessionalTeamEmployees()
         if (!isMounted) return
         const activeEmployees = response.filter((employee) => employee.isActive)
         setEmployees(activeEmployees)

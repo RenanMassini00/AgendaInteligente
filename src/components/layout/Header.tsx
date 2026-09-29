@@ -24,6 +24,7 @@ function getGreeting(isAdmin: boolean) {
 export default function Header({ title, onOpenSidebar }: HeaderProps) {
   const user = getCurrentUser()
   const isAdmin = user?.role === 'master_admin'
+  const isEmployee = user?.role === 'employee'
   const workspaceCopy = getWorkspaceModuleCopy(user)
 
   const displayName = isAdmin
@@ -99,7 +100,7 @@ export default function Header({ title, onOpenSidebar }: HeaderProps) {
           <span>{todayLabel}</span>
         </div>
 
-        <NotificationCenter />
+        {!isEmployee ? <NotificationCenter /> : null}
 
         <div className={`header-profile ${isAdmin ? 'header-profile--admin' : ''}`}>
           <div>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { api } from '../utils/api'
-import { getCurrentUserId } from '../utils/auth'
+import { getCurrentRole, getCurrentUserId } from '../utils/auth'
 import { filterVisibleAppointments, isCancelledAppointmentStatus } from '../utils/appointments'
 import type { FinanceSummary } from '../types/finance.types'
 
@@ -49,6 +49,7 @@ function canDelete(status: string) {
 
 export default function FinancePage() {
   const navigate = useNavigate()
+  const isEmployee = getCurrentRole() === 'employee'
 
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthValue())
   const [summary, setSummary] = useState<FinanceSummary | null>(null)
@@ -66,7 +67,9 @@ export default function FinancePage() {
       setErrorMessage('')
 
       const response = await api.get<FinanceSummary>(
-        `/api/finance/summary?userId=${getCurrentUserId()}&month=${selectedMonth}`
+        isEmployee
+          ? `/api/finance/summary?month=${selectedMonth}`
+          : `/api/finance/summary?userId=${getCurrentUserId()}&month=${selectedMonth}`
       )
 
       setSummary(response)
@@ -400,7 +403,7 @@ export default function FinancePage() {
                       <span className="soft-pill">{item.amountFormatted}</span>
                     </div>
 
-                    <div className="finance-appointment-actions">
+                    {!isEmployee ? <div className="finance-appointment-actions">
                       {canComplete(item.status) ? (
                         <button
                           type="button"
@@ -428,7 +431,7 @@ export default function FinancePage() {
                           Excluir
                         </button>
                       ) : null}
-                    </div>
+                    </div> : null}
                   </div>
                 ))
               )}

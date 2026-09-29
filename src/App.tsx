@@ -27,6 +27,13 @@ export default function App() {
         return
       }
 
+      if (session.role === 'employee') {
+        applyTheme(getStoredTheme())
+        applyAccentColor(getStoredAccentColor())
+        clearCompanyLogo()
+        return
+      }
+
       try {
         const settingsUserId =
           session.role === 'client'

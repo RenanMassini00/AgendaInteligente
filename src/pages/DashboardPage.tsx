@@ -155,6 +155,7 @@ export default function DashboardPage() {
   const [errorMessage, setErrorMessage] = useState('')
 
   const currentUser = getCurrentUser()
+  const isEmployee = currentUser?.role === 'employee'
   const isCatalogOnly =
     !!currentUser?.hasCatalogModule && !currentUser?.hasAppointmentsModule
 
@@ -167,11 +168,14 @@ export default function DashboardPage() {
       setIsLoading(true)
       setErrorMessage('')
 
-      const userId = getCurrentUserId()
+      const userQuery = isEmployee ? '' : `?userId=${getCurrentUserId()}`
+      const summaryPath = isEmployee
+        ? '/api/dashboard/summary?period=day'
+        : `/api/dashboard/summary?userId=${getCurrentUserId()}&period=day`
 
       const [summaryResponse, appointmentsResponse] = await Promise.all([
-        api.get<DashboardSummary>(`/api/dashboard/summary?userId=${userId}&period=day`),
-        api.get<AppointmentApiItem[]>(`/api/appointments?userId=${userId}`),
+        api.get<DashboardSummary>(summaryPath),
+        api.get<AppointmentApiItem[]>(`/api/appointments${userQuery}`),
       ])
 
       const upcomingAppointments = filterVisibleAppointments(
@@ -249,9 +253,11 @@ export default function DashboardPage() {
               Novo agendamento
             </Link>
 
-            <Link to={ROUTE_PATHS.createClient} className="secondary-button">
-              Novo cliente
-            </Link>
+            {!isEmployee ? (
+              <Link to={ROUTE_PATHS.createClient} className="secondary-button">
+                Novo cliente
+              </Link>
+            ) : null}
           </div>
         }
       />

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { getCurrentUser, getCurrentUserId } from '../utils/auth'
+import { getCurrentRole } from '../utils/auth'
 import { api } from '../utils/api'
 import type { AuthUser } from '../types/auth.types'
 
@@ -36,6 +37,7 @@ function getInitialProfile(): AuthUser | null {
 }
 
 export default function ProfilePage() {
+  const role = getCurrentRole()
   const [profile, setProfile] = useState<AuthUser | null>(getInitialProfile())
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
@@ -46,7 +48,9 @@ export default function ProfilePage() {
     async function loadProfile() {
       try {
         setIsLoading(true)
-        const response = await api.get<AuthUser>(`/api/profile?userId=${getCurrentUserId()}`)
+        const profilePath =
+          role === 'employee' ? '/api/profile' : `/api/profile?userId=${getCurrentUserId()}`
+        const response = await api.get<AuthUser>(profilePath)
         if (isMounted) {
           setProfile(response)
           setErrorMessage('')
@@ -66,7 +70,7 @@ export default function ProfilePage() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [role])
 
   if (isLoading && !profile) {
     return <div className="feedback-card">Carregando perfil...</div>
@@ -82,7 +86,7 @@ export default function ProfilePage() {
 
   return (
     <div className="page-stack">
-      <SectionHeader title="Perfil" description="Informações principais do profissional." />
+      <SectionHeader title="Perfil" description="Informações principais da sua conta." />
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
       <PageCard>
         <div className="cards-grid two-cols">

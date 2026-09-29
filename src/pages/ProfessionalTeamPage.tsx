@@ -3,7 +3,6 @@ import { Pencil, Plus, UserRound, UserRoundX } from 'lucide-react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { api } from '../utils/api'
-import { getCurrentUserId } from '../utils/auth'
 import type {
   ProfessionalTeamEmployee,
   ProfessionalTeamEmployeeInput,
@@ -13,11 +12,12 @@ const EMPTY_FORM: ProfessionalTeamEmployeeInput = {
   fullName: '',
   email: '',
   phone: '',
-  isActive: true,
+  password: '',
+  specialty: '',
+  timezone: 'America/Sao_Paulo',
 }
 
 export default function ProfessionalTeamPage() {
-  const ownerUserId = getCurrentUserId()
   const [employees, setEmployees] = useState<ProfessionalTeamEmployee[]>([])
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingEmployeeId, setEditingEmployeeId] = useState<number | null>(null)
@@ -33,9 +33,7 @@ export default function ProfessionalTeamPage() {
   async function loadEmployees() {
     try {
       setIsLoading(true)
-      const response = await api.get<ProfessionalTeamEmployee[]>(
-        `/api/professional-team/employees?ownerUserId=${ownerUserId}`
-      )
+      const response = await api.get<ProfessionalTeamEmployee[]>('/api/professional-team/employees')
       setEmployees(response)
       setErrorMessage('')
     } catch (error) {
@@ -57,7 +55,9 @@ export default function ProfessionalTeamPage() {
       fullName: employee.fullName,
       email: employee.email ?? '',
       phone: employee.phone ?? '',
-      isActive: employee.isActive,
+      password: '',
+      specialty: employee.specialty ?? '',
+      timezone: employee.timezone ?? 'America/Sao_Paulo',
     })
     setEditingEmployeeId(employee.id)
     setErrorMessage('')
@@ -69,8 +69,8 @@ export default function ProfessionalTeamPage() {
     setErrorMessage('')
     setSuccessMessage('')
 
-    if (!form.fullName.trim()) {
-      setErrorMessage('Informe o nome do funcionário.')
+    if (!form.fullName.trim() || !form.email.trim() || (editingEmployeeId === null && !form.password?.trim())) {
+      setErrorMessage('Informe nome, e-mail e senha para cadastrar o funcionário.')
       return
     }
 
@@ -79,21 +79,17 @@ export default function ProfessionalTeamPage() {
       const payload = {
         fullName: form.fullName.trim(),
         email: form.email.trim(),
-        phone: form.phone.trim(),
-        isActive: form.isActive,
+        ...(form.password?.trim() ? { password: form.password.trim() } : {}),
+        phone: form.phone?.trim() || null,
+        specialty: form.specialty?.trim() || null,
+        timezone: form.timezone?.trim() || null,
       }
 
       if (editingEmployeeId === null) {
-        await api.post(
-          `/api/professional-team/employees?ownerUserId=${ownerUserId}`,
-          payload
-        )
+        await api.post('/api/professional-team/employees', payload)
         setSuccessMessage('Funcionário adicionado à equipe.')
       } else {
-        await api.put(
-          `/api/professional-team/employees/${editingEmployeeId}?ownerUserId=${ownerUserId}`,
-          payload
-        )
+        await api.put(`/api/professional-team/employees/${editingEmployeeId}`, payload)
         setSuccessMessage('Funcionário atualizado.')
       }
 
@@ -114,9 +110,7 @@ export default function ProfessionalTeamPage() {
     try {
       setErrorMessage('')
       setSuccessMessage('')
-      await api.delete(
-        `/api/professional-team/employees/${employee.id}?ownerUserId=${ownerUserId}`
-      )
+      await api.delete(`/api/professional-team/employees/${employee.id}`)
       setSuccessMessage('Funcionário inativado.')
       await loadEmployees()
     } catch (error) {
@@ -133,10 +127,6 @@ export default function ProfessionalTeamPage() {
         description="Cadastre os profissionais da equipe para organizar serviços e horários por funcionário."
       />
 
-      <div className="feedback-card error-box" role="alert">
-        Atenção: os endpoints de equipe ainda precisam validar a identidade e a autorização no
-        backend. Não publique esta tela antes dessa proteção.
-      </div>
       {errorMessage ? <div className="feedback-card error-box">{errorMessage}</div> : null}
       {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
 
@@ -171,6 +161,23 @@ export default function ProfessionalTeamPage() {
           </div>
 
           <div className="form-field">
+            <label htmlFor="team-password">
+              {editingEmployeeId === null ? 'Senha inicial' : 'Nova senha (opcional)'}
+            </label>
+            <input
+              id="team-password"
+              className="form-input"
+              type="password"
+              value={form.password ?? ''}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, password: event.target.value }))
+              }
+              autoComplete="new-password"
+              required={editingEmployeeId === null}
+            />
+          </div>
+
+          <div className="form-field">
             <label htmlFor="team-phone">Telefone</label>
             <input
               id="team-phone"
@@ -184,20 +191,29 @@ export default function ProfessionalTeamPage() {
             />
           </div>
 
-          {editingEmployeeId !== null ? (
-            <div className="form-field checkbox-field">
-              <label className="checkbox-inline">
-                <input
-                  type="checkbox"
-                  checked={form.isActive}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, isActive: event.target.checked }))
-                  }
-                />
-                Funcionário ativo
-              </label>
-            </div>
-          ) : null}
+          <div className="form-field">
+            <label htmlFor="team-specialty">Especialidade</label>
+            <input
+              id="team-specialty"
+              className="form-input"
+              value={form.specialty ?? ''}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, specialty: event.target.value }))
+              }
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="team-timezone">Fuso horário</label>
+            <input
+              id="team-timezone"
+              className="form-input"
+              value={form.timezone ?? ''}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, timezone: event.target.value }))
+              }
+            />
+          </div>
 
           <div className="actions-row full-width">
             {editingEmployeeId !== null ? (
@@ -237,7 +253,7 @@ export default function ProfessionalTeamPage() {
                 </div>
                 <div className="entity-card-meta-list">
                   <span>Identificador do funcionário: {employee.userId}</span>
-                  <span>{employee.isActive ? 'Ativo' : 'Inativo'}</span>
+                  <span>{employee.specialty || 'Profissional da equipe'}</span>
                 </div>
                 <div className="entity-card-actions">
                   <button
@@ -248,16 +264,14 @@ export default function ProfessionalTeamPage() {
                     <Pencil size={16} />
                     Editar
                   </button>
-                  {employee.isActive ? (
-                    <button
-                      type="button"
-                      className="danger-button small-button"
-                      onClick={() => void handleDeactivate(employee)}
-                    >
-                      <UserRoundX size={16} />
-                      Inativar
-                    </button>
-                  ) : null}
+                  <button
+                    type="button"
+                    className="danger-button small-button"
+                    onClick={() => void handleDeactivate(employee)}
+                  >
+                    <UserRoundX size={16} />
+                    Inativar
+                  </button>
                 </div>
               </div>
             </PageCard>

@@ -1,12 +1,24 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api } from '../../utils/api'
-import { getCurrentUserId } from '../../utils/auth'
+import { getCurrentRole, getCurrentUserId } from '../../utils/auth'
 import type { AppointmentCreateRequest, AppointmentStatus } from '../../types/appointment.types'
 import type { Client } from '../../types/client.types'
 import type { ServiceItem } from '../../types/service.types'
 
 type AppointmentFormProps = {
   onSubmitSuccess: () => void
+  appointmentId?: number
+}
+
+type AppointmentDetails = {
+  clientId: number
+  serviceId: number
+  date?: string
+  appointmentDate?: string
+  time?: string
+  startTime?: string
+  status: AppointmentStatus
+  notes?: string | null
 }
 
 type FormState = {
@@ -18,7 +30,11 @@ type FormState = {
   notes: string
 }
 
-export default function AppointmentForm({ onSubmitSuccess }: AppointmentFormProps) {
+export default function AppointmentForm({
+  onSubmitSuccess,
+  appointmentId,
+}: AppointmentFormProps) {
+  const isEmployee = getCurrentRole() === 'employee'
   const [clients, setClients] = useState<Client[]>([])
   const [services, setServices] = useState<ServiceItem[]>([])
   const [form, setForm] = useState<FormState>({
@@ -39,15 +55,27 @@ export default function AppointmentForm({ onSubmitSuccess }: AppointmentFormProp
     async function loadDependencies() {
       try {
         setIsLoading(true)
-        const userId = getCurrentUserId()
-        const [clientsResponse, servicesResponse] = await Promise.all([
-          api.get<Client[]>(`/api/clients?userId=${userId}`),
-          api.get<ServiceItem[]>(`/api/services?userId=${userId}`),
+        const [clientsResponse, servicesResponse, appointmentResponse] = await Promise.all([
+          api.get<Client[]>(isEmployee ? '/api/clients' : `/api/clients?userId=${getCurrentUserId()}`),
+          api.get<ServiceItem[]>(isEmployee ? '/api/services' : `/api/services?userId=${getCurrentUserId()}`),
+          appointmentId
+            ? api.get<AppointmentDetails>(`/api/appointments/${appointmentId}`)
+            : Promise.resolve(null),
         ])
 
         if (isMounted) {
           setClients(clientsResponse)
           setServices(servicesResponse)
+          if (appointmentResponse) {
+            setForm({
+              clientId: String(appointmentResponse.clientId),
+              serviceId: String(appointmentResponse.serviceId),
+              date: (appointmentResponse.date || appointmentResponse.appointmentDate || '').slice(0, 10),
+              time: (appointmentResponse.time || appointmentResponse.startTime || '09:00').slice(0, 5),
+              status: appointmentResponse.status,
+              notes: appointmentResponse.notes ?? '',
+            })
+          }
           setErrorMessage('')
         }
       } catch (error) {
@@ -65,7 +93,7 @@ export default function AppointmentForm({ onSubmitSuccess }: AppointmentFormProp
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [appointmentId, isEmployee])
 
   const selectedService = useMemo(
     () => services.find((service) => service.id === Number(form.serviceId)),
@@ -100,7 +128,11 @@ export default function AppointmentForm({ onSubmitSuccess }: AppointmentFormProp
         notes: form.notes || undefined,
       }
 
-      await api.post('/api/appointments', payload)
+      if (appointmentId) {
+        await api.put(`/api/appointments/${appointmentId}`, payload)
+      } else {
+        await api.post('/api/appointments', payload)
+      }
       onSubmitSuccess()
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Não foi possível salvar o agendamento.')
@@ -174,7 +206,11 @@ export default function AppointmentForm({ onSubmitSuccess }: AppointmentFormProp
 
       <div className="section-actions appointment-form-actions">
         <button className="primary-button" type="submit" disabled={isSaving}>
-          {isSaving ? 'Salvando...' : 'Salvar agendamento'}
+          {isSaving
+            ? 'Salvando...'
+            : appointmentId
+              ? 'Atualizar agendamento'
+              : 'Salvar agendamento'}
         </button>
       </div>
     </form>

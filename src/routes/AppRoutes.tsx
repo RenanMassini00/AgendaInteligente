@@ -111,6 +111,25 @@ export default function AppRoutes() {
     )
   }
 
+  if (role === 'employee') {
+    return (
+      <AppLayout>
+        <Routes>
+          <Route path={ROUTE_PATHS.root} element={<Navigate to={ROUTE_PATHS.dashboard} replace />} />
+          <Route path={ROUTE_PATHS.dashboard} element={<DashboardPage />} />
+          <Route path={ROUTE_PATHS.appointments} element={<AppointmentsPage />} />
+          <Route path={ROUTE_PATHS.createAppointment} element={<CreateAppointmentPage />} />
+          <Route path={ROUTE_PATHS.editAppointment} element={<CreateAppointmentPage />} />
+          <Route path={ROUTE_PATHS.clients} element={<ClientsPage />} />
+          <Route path={ROUTE_PATHS.services} element={<ServicesPage />} />
+          <Route path={ROUTE_PATHS.finance} element={<FinancePage />} />
+          <Route path={ROUTE_PATHS.profile} element={<ProfilePage />} />
+          <Route path="*" element={<Navigate to={ROUTE_PATHS.dashboard} replace />} />
+        </Routes>
+      </AppLayout>
+    )
+  }
+
   if (role === 'master_admin') {
     return (
       <AppLayout>
@@ -134,6 +153,7 @@ export default function AppRoutes() {
 
         <Route path={ROUTE_PATHS.appointments} element={<AppointmentsPage />} />
         <Route path={ROUTE_PATHS.createAppointment} element={<CreateAppointmentPage />} />
+        <Route path={ROUTE_PATHS.editAppointment} element={<CreateAppointmentPage />} />
 
         <Route path={ROUTE_PATHS.clients} element={<ClientsPage />} />
         <Route path={ROUTE_PATHS.createClient} element={<CreateClientPage />} />

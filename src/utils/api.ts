@@ -43,7 +43,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (!response.ok) {
-    let message = 'Não foi possível concluir a operação.'
+    let message =
+      response.status === 403
+        ? 'Você não tem permissão para realizar esta operação.'
+        : 'Não foi possível concluir a operação.'
 
     try {
       const payload = (await response.json()) as ApiMessage
@@ -51,7 +54,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
         message = payload.message
       }
     } catch {
-      message = `${message} (${response.status})`
+      if (response.status !== 403) {
+        message = `${message} (${response.status})`
+      }
     }
 
     throw new Error(message)

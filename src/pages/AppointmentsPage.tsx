@@ -5,7 +5,7 @@ import SectionHeader from '../components/ui/SectionHeader'
 import StatusBadge from '../components/ui/StatusBadge'
 import WeeklyAgenda from '../components/appointments/WeeklyAgenda'
 import { ROUTE_PATHS } from '../routes/routePaths'
-import { getCurrentUserId } from '../utils/auth'
+import { getCurrentRole, getCurrentUserId } from '../utils/auth'
 import { api } from '../utils/api'
 import { filterVisibleAppointments, isCancelledAppointmentStatus } from '../utils/appointments'
 import type { Appointment } from '../types/appointment.types'
@@ -38,6 +38,7 @@ function getAppointmentTime(appointment: Appointment) {
 
 export default function AppointmentsPage() {
   const navigate = useNavigate()
+  const isEmployee = getCurrentRole() === 'employee'
 
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -54,7 +55,7 @@ export default function AppointmentsPage() {
       setErrorMessage('')
 
       const response = await api.get<Appointment[]>(
-        `/api/appointments?userId=${getCurrentUserId()}`
+        isEmployee ? '/api/appointments' : `/api/appointments?userId=${getCurrentUserId()}`
       )
 
       setAppointments(filterVisibleAppointments(response))
@@ -121,7 +122,11 @@ export default function AppointmentsPage() {
     <div className="page-stack appointments-management-page">
       <SectionHeader
         title="Agendamentos"
-        description="Visualize e gerencie os compromissos do profissional."
+        description={
+          isEmployee
+            ? 'Consulte e gerencie os agendamentos da sua agenda.'
+            : 'Visualize e gerencie os compromissos do profissional.'
+        }
         action={
           <Link to={ROUTE_PATHS.createAppointment} className="primary-button">
             Novo

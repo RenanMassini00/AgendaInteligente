@@ -4,7 +4,7 @@ import { Clock3, Plus, Pencil, Scissors, Tag, Trash2 } from 'lucide-react'
 import PageCard from '../components/ui/PageCard'
 import SectionHeader from '../components/ui/SectionHeader'
 import { ROUTE_PATHS } from '../routes/routePaths'
-import { getCurrentUserId } from '../utils/auth'
+import { getCurrentRole, getCurrentUserId } from '../utils/auth'
 import { getProfessionalTeamEmployees } from '../utils/professionalTeam'
 import { api } from '../utils/api'
 import type { Service } from '../types/service.types'
@@ -13,6 +13,7 @@ import type { ProfessionalTeamEmployee } from '../types/professional-team.types'
 export default function ServicesPage() {
   const navigate = useNavigate()
   const ownerUserId = getCurrentUserId()
+  const isEmployee = getCurrentRole() === 'employee'
 
   const [services, setServices] = useState<Service[]>([])
   const [employees, setEmployees] = useState<ProfessionalTeamEmployee[]>([])
@@ -26,8 +27,14 @@ export default function ServicesPage() {
   useEffect(() => {
     let isMounted = true
     async function loadTeam() {
+      if (isEmployee) {
+        setSelectedUserId(ownerUserId)
+        setIsTeamLoaded(true)
+        return
+      }
+
       try {
-        const response = await getProfessionalTeamEmployees(ownerUserId)
+        const response = await getProfessionalTeamEmployees()
         if (!isMounted) return
         const activeEmployees = response.filter((employee) => employee.isActive)
         setEmployees(activeEmployees)
@@ -46,7 +53,7 @@ export default function ServicesPage() {
     return () => {
       isMounted = false
     }
-  }, [ownerUserId])
+  }, [isEmployee, ownerUserId])
 
   useEffect(() => {
     if (isTeamLoaded) void loadServices(selectedUserId)
@@ -55,7 +62,9 @@ export default function ServicesPage() {
   async function loadServices(userId = selectedUserId) {
     try {
       setIsLoading(true)
-      const response = await api.get<Service[]>(`/api/services?userId=${userId}`)
+      const response = await api.get<Service[]>(
+        isEmployee ? '/api/services' : `/api/services?userId=${userId}`
+      )
       setServices(response)
       setErrorMessage('')
     } catch (error) {
@@ -95,10 +104,12 @@ export default function ServicesPage() {
         title="Serviços"
         description="Organize os serviços de cada profissional, com preços e duração para agendamento."
         action={
-          <Link to={`${ROUTE_PATHS.createService}?userId=${selectedUserId}`} className="primary-button">
-            <Plus size={18} />
-            Novo serviço
-          </Link>
+          !isEmployee ? (
+            <Link to={`${ROUTE_PATHS.createService}?userId=${selectedUserId}`} className="primary-button">
+              <Plus size={18} />
+              Novo serviço
+            </Link>
+          ) : undefined
         }
       />
 
@@ -106,7 +117,7 @@ export default function ServicesPage() {
       {teamError ? <div className="feedback-card error-box">{teamError}</div> : null}
       {successMessage ? <div className="feedback-card success-box">{successMessage}</div> : null}
 
-      {employees.length > 0 ? (
+      {!isEmployee && employees.length > 0 ? (
         <div className="form-field">
           <label htmlFor="services-employee">Profissional</label>
           <select
@@ -156,7 +167,7 @@ export default function ServicesPage() {
                   </div>
                 </div>
 
-                <div className="entity-card-actions">
+                {!isEmployee ? <div className="entity-card-actions">
                   <button
                     type="button"
                     className="secondary-button small-button"
@@ -174,7 +185,7 @@ export default function ServicesPage() {
                     <Trash2 size={16} />
                     Excluir
                   </button>
-                </div>
+                </div> : null}
               </div>
             </PageCard>
           ))
