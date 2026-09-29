@@ -183,7 +183,7 @@ export default function ProfessionalTeamPage() {
               id="team-phone"
               className="form-input"
               type="tel"
-              value={form.phone}
+              value={form.phone ?? ''}
               onChange={(event) =>
                 setForm((current) => ({ ...current, phone: event.target.value }))
               }

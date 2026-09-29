@@ -15,8 +15,8 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import PageCard from '../components/ui/PageCard'
 import { api } from '../utils/api'
-import { getSession, signIn } from '../utils/auth'
 import { applyVisualSettings } from '../utils/visualSettings'
+import { getSession, signIn } from '../utils/auth'
 import type { LoginResponse } from '../types/auth.types'
 import type {
   PublicAvailableSlots,
