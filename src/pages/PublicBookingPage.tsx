@@ -144,9 +144,11 @@ export default function PublicBookingPage() {
           applyVisualSettings(response, { includeLogo: false })
           setProfessional(response)
           setSelectedProfessionalId(
-            response.professionals.length === 1
-              ? response.professionals[0].professionalUserId
-              : null
+            response.professionals.length === 0
+              ? response.professionalUserId
+              : response.professionals.length === 1
+                ? response.professionals[0].professionalUserId
+                : null
           )
           setSelectedServiceId(null)
           setErrorMessage('')
@@ -257,6 +259,13 @@ export default function PublicBookingPage() {
   const selectedProfessional = professional?.professionals.find(
     (item) => item.professionalUserId === selectedProfessionalId
   )
+  const selectedProfessionalName =
+    selectedProfessional?.displayName ||
+    selectedProfessional?.fullName ||
+    selectedProfessional?.name ||
+    (selectedProfessionalId === professional?.professionalUserId
+      ? professional.displayName
+      : null)
 
   const profileInitials = professional ? getInitials(professional.displayName) : 'AI'
   const currentSession = getSession()
@@ -537,8 +546,16 @@ export default function PublicBookingPage() {
                   <Sparkles size={18} />
                 </span>
                 <div>
-                  <h2>Escolha o profissional e o servico</h2>
-                  <p>Selecione quem vai atender e depois escolha o servico desejado.</p>
+                  <h2>
+                    {professional.professionals.length === 0
+                      ? `Serviços de ${professional.displayName}`
+                      : 'Escolha o profissional e o servico'}
+                  </h2>
+                  <p>
+                    {professional.professionals.length === 0
+                      ? 'Selecione um servico para ver a agenda do profissional.'
+                      : 'Selecione quem vai atender e depois escolha o servico desejado.'}
+                  </p>
                 </div>
               </div>
 
@@ -594,9 +611,7 @@ export default function PublicBookingPage() {
                         <strong>{service.name}</strong>
                         <small>
                           {getServiceDescription(service.description)}
-                          {selectedProfessional
-                            ? ` · ${selectedProfessional.displayName || selectedProfessional.fullName || selectedProfessional.name || 'Profissional'}`
-                            : ''}
+                          {selectedProfessionalName ? ` · ${selectedProfessionalName}` : ''}
                         </small>
                       </span>
 
