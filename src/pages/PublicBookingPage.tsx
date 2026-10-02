@@ -263,7 +263,8 @@ export default function PublicBookingPage() {
     selectedProfessional?.displayName ||
     selectedProfessional?.fullName ||
     selectedProfessional?.name ||
-    (selectedProfessionalId === professional?.professionalUserId
+    (professional?.professionals.length === 0 ||
+    selectedProfessionalId === professional?.professionalUserId
       ? professional.displayName
       : null)
 
@@ -588,10 +589,15 @@ export default function PublicBookingPage() {
               ) : null}
 
               <div className="public-service-options public-service-options-showcase">
-                {selectedProfessionalId === null ? (
+                {professional.professionals.length > 0 &&
+                selectedProfessionalId === null ? (
                   <div className="public-booking-empty">Selecione um profissional para ver os serviços.</div>
                 ) : professional.services
-                    .filter((service) => service.professionalUserId === selectedProfessionalId)
+                    .filter(
+                      (service) =>
+                        professional.professionals.length === 0 ||
+                        service.professionalUserId === selectedProfessionalId
+                    )
                     .map((service) => {
                   const isSelected = Number(service.id) === selectedServiceId
 
