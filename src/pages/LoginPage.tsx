@@ -41,7 +41,7 @@ const systemCards = [
 const flowItems = ['Clientes', 'Agenda', 'Catálogo', 'Resultados']
 const contactWhatsAppUrl =
   'https://wa.me/5511988010228?text=' +
-  encodeURIComponent('Olá! Tenho interesse em conhecer o sistema Agenda Inteligente.')
+  encodeURIComponent('Olá! Tenho interesse em conhecer o sistema Orbe.')
 
 export default function LoginPage() {
   const navigate = useNavigate()

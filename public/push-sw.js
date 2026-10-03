@@ -19,7 +19,7 @@ self.addEventListener('push', (event) => {
         }
       }
 
-      await self.registration.showNotification(data.title || 'Agenda Inteligente', {
+      await self.registration.showNotification(data.title || 'Orbe', {
         body: data.body || data.message || '',
         icon: data.icon || '/favicon.svg',
         badge: data.badge || '/favicon.svg',

@@ -27,14 +27,14 @@ export default function Sidebar({ onNavigate, onClose, mobile = false }: Sidebar
   const title =
     role === 'master_admin'
       ? MASSINI_BRANDING.name
-      : user?.businessName || user?.fullName || 'Agenda Pro'
+      : user?.businessName || user?.fullName || 'Orbe'
 
   const subtitle =
     role === 'master_admin'
       ? MASSINI_BRANDING.adminSubtitle
       : user?.specialty || 'Painel profissional'
 
-  const caption = isAdmin ? MASSINI_BRANDING.name : 'Agenda Pro'
+  const caption = isAdmin ? MASSINI_BRANDING.name : 'Orbe'
   const initial = title.charAt(0).toUpperCase()
   const [logoUrl, setLogoUrl] = useState(
     isAdmin ? MASSINI_BRANDING.logo : getCompanyLogo()
