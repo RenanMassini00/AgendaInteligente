@@ -1,4 +1,5 @@
 import { Link, useLocation, useParams } from 'react-router-dom'
+import PixPaymentPanel from '../components/ui/PixPaymentPanel'
 import type { PublicBookingResponse } from '../types/public-booking.types'
 
 export default function PublicBookingSuccessPage() {
@@ -25,17 +26,39 @@ export default function PublicBookingSuccessPage() {
     )
   }
 
+  const paymentReference = bookingData.paymentReference
+  const hasPixPayment = Boolean(paymentReference)
+
   return (
     <div className="public-success-shell">
       <div className="public-success-card">
-        <div className="public-success-badge">Tudo certo</div>
+        <div className="public-success-badge">
+          {hasPixPayment ? 'Pagamento Pix' : 'Tudo certo'}
+        </div>
 
-        <h1>Agendamento realizado com sucesso</h1>
+        <h1>
+          {hasPixPayment
+            ? 'Acompanhe seu agendamento'
+            : 'Agendamento realizado com sucesso'}
+        </h1>
 
         <p className="public-success-description">
-          Seu horário foi reservado. Abaixo estão os detalhes do agendamento e o
-          status das confirmações automáticas.
+          {hasPixPayment
+            ? 'Acompanhe abaixo o pagamento Pix e a confirmação automática do seu agendamento.'
+            : 'Seu horário foi reservado. Abaixo estão os detalhes do agendamento e o status das confirmações automáticas.'}
         </p>
+
+        {paymentReference ? (
+          <PixPaymentPanel
+            paymentReference={paymentReference}
+            pixQrCode={bookingData.pixQrCode}
+            pixQrCodeBase64={bookingData.pixQrCodeBase64}
+            depositAmount={bookingData.depositAmount}
+            paymentExpiresAt={bookingData.paymentExpiresAt}
+            initialPaymentStatus={bookingData.paymentStatus}
+            initialAppointmentStatus={bookingData.appointmentStatus ?? bookingData.status}
+          />
+        ) : null}
 
         <div className="public-success-summary">
           <div className="public-success-summary-item">
@@ -68,46 +91,48 @@ export default function PublicBookingSuccessPage() {
           </div>
         </div>
 
-        <div className="public-success-status-list">
-          <div
-            className={`public-success-status-card ${
-              bookingData.clientEmailSent ? 'success' : 'neutral'
-            }`}
-          >
-            <strong>E-mail do cliente</strong>
-            <span>
-              {bookingData.clientEmailSent
-                ? 'Confirmação enviada com sucesso.'
-                : 'Não foi possível enviar o e-mail para o cliente.'}
-            </span>
-          </div>
+        {!hasPixPayment ? (
+          <div className="public-success-status-list">
+            <div
+              className={`public-success-status-card ${
+                bookingData.clientEmailSent ? 'success' : 'neutral'
+              }`}
+            >
+              <strong>E-mail do cliente</strong>
+              <span>
+                {bookingData.clientEmailSent
+                  ? 'Confirmação enviada com sucesso.'
+                  : 'Não foi possível enviar o e-mail para o cliente.'}
+              </span>
+            </div>
 
-          <div
-            className={`public-success-status-card ${
-              bookingData.professionalEmailSent ? 'success' : 'neutral'
-            }`}
-          >
-            <strong>E-mail do profissional</strong>
-            <span>
-              {bookingData.professionalEmailSent
-                ? 'Notificação enviada com sucesso.'
-                : 'Não foi possível enviar o e-mail para o profissional.'}
-            </span>
-          </div>
+            <div
+              className={`public-success-status-card ${
+                bookingData.professionalEmailSent ? 'success' : 'neutral'
+              }`}
+            >
+              <strong>E-mail do profissional</strong>
+              <span>
+                {bookingData.professionalEmailSent
+                  ? 'Notificação enviada com sucesso.'
+                  : 'Não foi possível enviar o e-mail para o profissional.'}
+              </span>
+            </div>
 
-          <div
-            className={`public-success-status-card ${
-              bookingData.calendarCreated ? 'success' : 'neutral'
-            }`}
-          >
-            <strong>Google Agenda</strong>
-            <span>
-              {bookingData.calendarCreated
-                ? 'Evento criado com sucesso.'
-                : 'Não foi possível criar o evento na agenda.'}
-            </span>
+            <div
+              className={`public-success-status-card ${
+                bookingData.calendarCreated ? 'success' : 'neutral'
+              }`}
+            >
+              <strong>Google Agenda</strong>
+              <span>
+                {bookingData.calendarCreated
+                  ? 'Evento criado com sucesso.'
+                  : 'Não foi possível criar o evento na agenda.'}
+              </span>
+            </div>
           </div>
-        </div>
+        ) : null}
 
         <div className="public-success-actions">
           <Link to={`/agendar/${slug}`} className="secondary-button">

@@ -498,6 +498,68 @@ function ProfessionalSettingsPage() {
   const [isSavingPassword, setIsSavingPassword] = useState(false)
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('')
   const [passwordSuccessMessage, setPasswordSuccessMessage] = useState('')
+  const [isLoadingMercadoPago, setIsLoadingMercadoPago] = useState(true)
+  const [isConnectingMercadoPago, setIsConnectingMercadoPago] = useState(false)
+  const [isMercadoPagoConnected, setIsMercadoPagoConnected] = useState(false)
+  const [mercadoPagoError, setMercadoPagoError] = useState('')
+  const [mercadoPagoAuthorizationUrl, setMercadoPagoAuthorizationUrl] = useState('')
+
+  async function loadMercadoPagoConnection() {
+    try {
+      setIsLoadingMercadoPago(true)
+      setMercadoPagoError('')
+      const response = await api.get<{ connected: boolean }>('/api/mercadopago/connection')
+      setIsMercadoPagoConnected(response.connected)
+      if (response.connected) setMercadoPagoAuthorizationUrl('')
+    } catch (error) {
+      setMercadoPagoError(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível consultar a conexão do Mercado Pago.'
+      )
+    } finally {
+      setIsLoadingMercadoPago(false)
+    }
+  }
+
+  useEffect(() => {
+    void loadMercadoPagoConnection()
+
+    function refreshConnectionOnFocus() {
+      void loadMercadoPagoConnection()
+    }
+
+    window.addEventListener('focus', refreshConnectionOnFocus)
+    return () => window.removeEventListener('focus', refreshConnectionOnFocus)
+  }, [])
+
+  async function handleConnectMercadoPago() {
+    const authorizationWindow = window.open('about:blank', '_blank')
+    if (authorizationWindow) authorizationWindow.opener = null
+
+    try {
+      setIsConnectingMercadoPago(true)
+      setMercadoPagoError('')
+      setMercadoPagoAuthorizationUrl('')
+      const response = await api.post<{ authorizationUrl: string }>('/api/mercadopago/connect')
+
+      if (authorizationWindow) {
+        authorizationWindow.location.href = response.authorizationUrl
+        authorizationWindow.focus()
+      } else {
+        setMercadoPagoAuthorizationUrl(response.authorizationUrl)
+      }
+    } catch (error) {
+      authorizationWindow?.close()
+      setMercadoPagoError(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível iniciar a conexão com o Mercado Pago.'
+      )
+    } finally {
+      setIsConnectingMercadoPago(false)
+    }
+  }
 
   function updatePasswordField<K extends keyof PasswordForm>(
     field: K,
@@ -639,6 +701,58 @@ function ProfessionalSettingsPage() {
             </button>
           </div>
         </form>
+      </PageCard>
+
+      {mercadoPagoError ? (
+        <div className="feedback-card error-box">{mercadoPagoError}</div>
+      ) : null}
+
+      <PageCard className="professional-settings-card mercado-pago-settings-card">
+        <div className="professional-settings-header">
+          <div>
+            <h3>Receber pagamentos via Pix</h3>
+            <p>Conecte sua conta Mercado Pago para receber os sinais dos agendamentos.</p>
+          </div>
+          <div className={`mercado-pago-connection-state ${isMercadoPagoConnected ? 'connected' : ''}`}>
+            {isLoadingMercadoPago
+              ? 'Verificando conexão...'
+              : isMercadoPagoConnected
+                ? 'Conta conectada'
+                : 'Conta não conectada'}
+          </div>
+        </div>
+
+        <div className="mercado-pago-actions">
+          <button
+            type="button"
+            className="primary-button"
+            onClick={handleConnectMercadoPago}
+            disabled={isConnectingMercadoPago || isLoadingMercadoPago || isMercadoPagoConnected}
+          >
+            {isConnectingMercadoPago
+              ? 'Abrindo autorização...'
+              : isMercadoPagoConnected
+                ? 'Mercado Pago conectado'
+                : 'Conectar Mercado Pago'}
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => void loadMercadoPagoConnection()}
+            disabled={isLoadingMercadoPago}
+          >
+            Atualizar status
+          </button>
+        </div>
+
+        {mercadoPagoAuthorizationUrl ? (
+          <p className="mercado-pago-fallback-link">
+            A janela de autorização foi bloqueada pelo navegador.{' '}
+            <a href={mercadoPagoAuthorizationUrl} target="_blank" rel="noreferrer">
+              Abrir autorização do Mercado Pago
+            </a>
+          </p>
+        ) : null}
       </PageCard>
     </div>
   )

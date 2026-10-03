@@ -50,4 +50,19 @@ export type PublicBookingResponse = {
   professionalEmailSent: boolean
   calendarCreated: boolean
   message: string
+  status?: string | null
+  paymentStatus?: string | null
+  depositAmount?: number | null
+  pixQrCode?: string | null
+  pixQrCodeBase64?: string | null
+  paymentReference?: string | null
+  paymentExpiresAt?: string | null
+  appointmentStatus?: string | null
+}
+
+export type PublicPaymentStatusResponse = {
+  status: string
+  appointmentStatus: string
+  depositAmount: number
+  expiresAt: string
 }

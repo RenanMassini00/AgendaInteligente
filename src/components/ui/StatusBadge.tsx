@@ -6,6 +6,7 @@ type StatusBadgeProps = {
 
 const labels: Record<AppointmentStatus, string> = {
   scheduled: 'Agendado',
+  pending_payment: 'Aguardando pagamento',
   confirmed: 'Confirmado',
   completed: 'Concluído',
   cancelled: 'Cancelado',

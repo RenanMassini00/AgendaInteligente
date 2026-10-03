@@ -5,6 +5,7 @@ import SectionHeader from '../components/ui/SectionHeader'
 import { api } from '../utils/api'
 import { getCurrentProfessionalUserId, getCurrentUserId } from '../utils/auth'
 import { ROUTE_PATHS } from '../routes/routePaths'
+import PixPaymentPanel from '../components/ui/PixPaymentPanel'
 import type { ServiceItem } from '../types/service.types'
 import type { AvailableSlot } from '../types/public.types'
 import type { Appointment } from '../types/appointment.types'
@@ -27,6 +28,7 @@ export default function ClientBookAppointmentPage() {
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [createdBooking, setCreatedBooking] = useState<Appointment | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -105,13 +107,17 @@ export default function ClientBookAppointmentPage() {
 
     try {
       setIsSubmitting(true)
-      await api.post<Appointment>(`/api/client/appointments?userId=${getCurrentUserId()}`, {
+      const response = await api.post<Appointment>(`/api/client/appointments?userId=${getCurrentUserId()}`, {
         professionalUserId,
         serviceId: Number(serviceId),
         date,
         time: selectedTime,
         notes: notes || null,
       })
+      if (response.paymentReference) {
+        setCreatedBooking(response)
+        return
+      }
       navigate(ROUTE_PATHS.clientAppointments)
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Não foi possível criar o agendamento.')
@@ -126,6 +132,26 @@ export default function ClientBookAppointmentPage() {
     <div className="page-stack client-booking-page">
       <SectionHeader title="Agendar horário" description="Escolha o serviço, a data e um horário disponível." />
 
+      {createdBooking?.paymentReference ? (
+        <PageCard className="client-booking-card">
+          <PixPaymentPanel
+            paymentReference={createdBooking.paymentReference}
+            pixQrCode={createdBooking.pixQrCode}
+            pixQrCodeBase64={createdBooking.pixQrCodeBase64}
+            depositAmount={createdBooking.depositAmount}
+            paymentExpiresAt={createdBooking.paymentExpiresAt}
+            initialPaymentStatus={createdBooking.paymentStatus}
+            initialAppointmentStatus={createdBooking.status}
+          />
+          <button
+            type="button"
+            className="secondary-button top-gap"
+            onClick={() => navigate(ROUTE_PATHS.clientAppointments)}
+          >
+            Ir para meus agendamentos
+          </button>
+        </PageCard>
+      ) : (
       <PageCard className="client-booking-card">
         <form className="page-stack client-booking-form" onSubmit={handleSubmit}>
           <div className="two-column-grid client-booking-controls">
@@ -179,6 +205,7 @@ export default function ClientBookAppointmentPage() {
           </button>
         </form>
       </PageCard>
+      )}
     </div>
   )
 }

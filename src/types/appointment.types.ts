@@ -1,5 +1,6 @@
 export type AppointmentStatus =
   | 'scheduled'
+  | 'pending_payment'
   | 'confirmed'
   | 'completed'
   | 'cancelled'
@@ -19,6 +20,12 @@ export type Appointment = {
   priceAtBooking: number
   priceFormatted: string
   notes?: string | null
+  paymentStatus?: string | null
+  depositAmount?: number | null
+  pixQrCode?: string | null
+  pixQrCodeBase64?: string | null
+  paymentReference?: string | null
+  paymentExpiresAt?: string | null
 }
 
 export type AppointmentCreateRequest = {

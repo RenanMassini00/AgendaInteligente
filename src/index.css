@@ -960,6 +960,11 @@ textarea:focus {
   color: #92400e;
 }
 
+.status-badge.pending_payment {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+}
+
 .status-badge.confirmed {
   background: rgba(56, 189, 248, 0.16);
   color: #075985;
@@ -2781,6 +2786,124 @@ input[type='checkbox'] {
   margin: 0.45rem 0 0;
   max-width: 720px;
   color: var(--text-soft, #94a3b8);
+}
+
+.pix-payment-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  margin: 1.25rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-soft);
+}
+
+.pix-payment-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.pix-payment-status.pending {
+  color: var(--warning-text);
+}
+
+.pix-payment-status.confirmed {
+  color: var(--success-text);
+}
+
+.pix-payment-status.expired,
+.pix-payment-error {
+  color: var(--danger-text);
+}
+
+.pix-payment-status div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.pix-payment-status span,
+.pix-payment-expiration,
+.pix-payment-code small {
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.pix-payment-amount {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.pix-payment-expiration {
+  margin: -0.5rem 0 0;
+}
+
+.pix-payment-qr {
+  width: min(100%, 260px);
+  height: auto;
+  align-self: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+}
+
+.pix-payment-code {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.pix-payment-code textarea {
+  width: 100%;
+  min-height: 6rem;
+  padding: 0.75rem;
+  resize: vertical;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  color: var(--input-text);
+  overflow-wrap: anywhere;
+}
+
+.pix-payment-code .secondary-button {
+  justify-self: start;
+}
+
+.pix-payment-error {
+  margin: 0;
+}
+
+.mercado-pago-connection-state {
+  align-self: flex-start;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-soft);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.mercado-pago-connection-state.connected {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.mercado-pago-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.mercado-pago-fallback-link {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.mercado-pago-fallback-link a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 .finance-hero-pill-group {

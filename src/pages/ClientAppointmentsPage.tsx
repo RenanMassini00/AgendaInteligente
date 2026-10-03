@@ -7,6 +7,7 @@ import { api } from '../utils/api'
 import { getCurrentUserId } from '../utils/auth'
 import { filterVisibleAppointments } from '../utils/appointments'
 import type { Appointment } from '../types/appointment.types'
+import PixPaymentPanel from '../components/ui/PixPaymentPanel'
 
 function getAppointmentTime(appointment: Appointment) {
   if (appointment.startTime && appointment.endTime) {
@@ -107,6 +108,19 @@ export default function ClientAppointmentsPage() {
                     <strong>{appointment.priceFormatted}</strong>
                   </span>
                 </div>
+
+                {appointment.paymentReference &&
+                appointment.status === 'pending_payment' ? (
+                  <PixPaymentPanel
+                    paymentReference={appointment.paymentReference}
+                    pixQrCode={appointment.pixQrCode}
+                    pixQrCodeBase64={appointment.pixQrCodeBase64}
+                    depositAmount={appointment.depositAmount}
+                    paymentExpiresAt={appointment.paymentExpiresAt}
+                    initialPaymentStatus={appointment.paymentStatus}
+                    initialAppointmentStatus={appointment.status}
+                  />
+                ) : null}
 
                 {appointment.status === 'scheduled' ? (
                   <div className="client-appointment-response-actions">
